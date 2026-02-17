@@ -44,6 +44,19 @@ impl From<serde_json::Error> for DomainError {
     }
 }
 
+impl From<modkit::plugins::ChoosePluginError> for DomainError {
+    fn from(e: modkit::plugins::ChoosePluginError) -> Self {
+        match e {
+            modkit::plugins::ChoosePluginError::InvalidPluginInstance { gts_id, reason } => {
+                Self::InvalidPluginInstance { gts_id, reason }
+            }
+            modkit::plugins::ChoosePluginError::PluginNotFound { vendor } => {
+                Self::PluginNotFound { vendor }
+            }
+        }
+    }
+}
+
 impl From<AuthNResolverError> for DomainError {
     fn from(e: AuthNResolverError) -> Self {
         match e {

@@ -1,4 +1,3 @@
-#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 //! `AuthZ` Resolver SDK
 //!
 //! This crate provides the public API for the `authz_resolver` module:
@@ -41,6 +40,7 @@
 //!         .resource_property("owner_tenant_id", target_tenant_id),
 //! ).await?;
 //! ```
+#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
 pub mod api;
 pub mod constraints;

@@ -1,4 +1,3 @@
-#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 //! Static `AuthZ` Resolver Plugin
 //!
 //! This plugin provides a static allow-all authorization policy for development and testing.
@@ -19,6 +18,7 @@
 //!       priority: 100
 //!       mode: allow_all
 //! ```
+#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
 pub mod config;
 pub mod domain;

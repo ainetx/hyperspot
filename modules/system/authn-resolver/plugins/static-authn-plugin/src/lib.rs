@@ -1,4 +1,3 @@
-#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 //! Static `AuthN` Resolver Plugin
 //!
 //! This plugin provides static token-to-identity mapping for development and testing.
@@ -26,6 +25,7 @@
 //!         token_scopes: ["*"]
 //!       tokens: []
 //! ```
+#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
 pub mod config;
 pub mod domain;

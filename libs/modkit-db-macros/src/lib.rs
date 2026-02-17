@@ -1,4 +1,3 @@
-#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 //! # modkit-db-macros
 //!
 //! Procedural macros for the `modkit-db` secure ORM layer.
@@ -45,6 +44,7 @@
 //!
 //! OData-related derives like `ODataFilterable` have been moved to `modkit-odata-macros`.
 //! Use that crate for `OData` protocol macros.
+#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
 use proc_macro::TokenStream;
 use proc_macro_error2::proc_macro_error;

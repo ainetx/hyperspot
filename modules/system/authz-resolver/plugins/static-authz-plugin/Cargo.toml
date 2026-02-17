@@ -8,7 +8,7 @@ description = "AuthZ resolver plugin with static allow-all policy for developmen
 repository.workspace = true
 readme = "README.md"
 keywords = ["cyberfabric", "cyberfabric-system"]
-categories = ["authentication"]
+categories = ["authorization"]
 
 [lib]
 name = "static_authz_plugin"
