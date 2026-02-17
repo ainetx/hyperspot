@@ -18,7 +18,7 @@ Provides a simple, config-driven authentication mechanism so that the platform c
 
 | Mode | Description |
 |------|-------------|
-| `accept_all` (default) | Accepts any non-empty `Bearer` token and returns a configured default identity. Replaces the legacy `auth_disabled` flag. |
+| `accept_all` (default) | Accepts any non-empty `Bearer` token and returns a configured default identity. |
 | `static_tokens` | Maps specific tokens to specific identities. Useful for E2E tests with multiple distinct users. |
 
 ## Configuration
