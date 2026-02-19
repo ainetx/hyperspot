@@ -209,7 +209,6 @@ pub struct SectionFile {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Section {
-    pub console_level: Option<Level>,
     #[serde(default)]
     pub console_format: ConsoleFormat,
     #[serde(
