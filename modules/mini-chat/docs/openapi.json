@@ -282,7 +282,7 @@
             "$ref": "#/components/responses/NotFound"
           },
           "409": {
-            "description": "A generation is already running for this `(chat_id, request_id)`.",
+            "description": "Conflict: either (a) a generation is already running for this chat (one running turn per chat policy), or (b) the same `(chat_id, request_id)` is already in a non-replayable state (`running`, `failed`, or `cancelled`). Code: `generation_in_progress` or `request_id_conflict`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1137,7 +1137,7 @@
           "request_id": {
             "type": "string",
             "format": "uuid",
-            "description": "Client-generated idempotency key. If a running turn exists for this (chat_id, request_id), the server returns 409. If a completed turn exists, the server replays the durably stored response without any quota reserve or billing side effects."
+            "description": "Client-generated idempotency key. The server returns 409 Conflict if (a) any turn in this chat is already running (one running turn per chat), or (b) the same (chat_id, request_id) is in a non-replayable state (running, failed, or cancelled). If a completed turn exists for the same (chat_id, request_id), the server replays the durably stored response without any quota reserve or billing side effects."
           },
           "attachment_ids": {
             "type": "array",

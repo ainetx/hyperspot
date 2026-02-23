@@ -449,9 +449,11 @@ Request body:
 |-------|----------------|
 | Active generation exists for key | Return `409 Conflict` (JSON error response; no SSE stream is opened). (P2+: attach to existing stream.) |
 | Completed generation exists for key | Return a fast replay SSE stream without triggering a new provider request: one `delta` event containing the full persisted assistant text, then `citations` if available, then `done`. |
-| No record for key | Start a new generation normally. |
+| No record for key | Start a new generation normally (subject to the Parallel Turn Policy below). |
 
 If `request_id` is omitted, the server treats the request as non-idempotent (no replay semantics).
+
+**Parallel turn guard**: independently of idempotency, the server MUST reject with `409 Conflict` any request to a chat that already has a `running` turn — even if the new request carries a different (or no) `request_id`. P1 enforces at most one running turn per chat. See **Parallel Turn Policy (P1)** (section 3.7).
 
 **Replay is side-effect-free invariant**: when a completed turn is replayed for the same `(chat_id, request_id)`, the server:
 1. Fetches the stored assistant message content from the database.
@@ -1020,7 +1022,7 @@ State machine:
 - Allowed transitions: `running` -> `completed` \| `failed` \| `cancelled`
 - Terminal states: `completed`, `failed`, `cancelled`
 - Terminal states MUST be immutable
-- At most one `running` turn per `(chat_id, request_id)`
+- At most one `running` turn per chat (any `request_id`). See **Parallel Turn Policy (P1)**.
 
 Soft-delete rules:
 - Turns with `deleted_at IS NOT NULL` are excluded from active conversation history and context assembly.
