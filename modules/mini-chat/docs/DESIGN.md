@@ -1579,6 +1579,10 @@ A turn is a user-message + assistant-response pair identified by `request_id` in
 
 **Errors**: same as retry.
 
+PATCH turn mutation MUST reuse the exact same streaming pipeline and SSE contract as `POST /messages:stream`. The ordering rules, terminal semantics, error mapping, downgrade metadata, and billing finalization invariants MUST be identical.
+
+PATCH MUST NOT introduce a separate execution path for settlement or outbox emission.
+
 ##### Delete Last Turn
 
 **Endpoint**: `DELETE /v1/chats/{id}/turns/{request_id}`

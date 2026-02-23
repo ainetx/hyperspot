@@ -547,6 +547,46 @@
                 }
               }
             }
+          },
+          "413": {
+            "description": "Image bytes exceeded per-turn limit. Code: `image_bytes_exceeded`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Effective model does not support multimodal input. Code: `unsupported_media`. Same semantics as sendMessage.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "LLM provider error. Code: `provider_error`. Same semantics as sendMessage.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "LLM provider timeout. Code: `provider_timeout`. Same semantics as sendMessage.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
