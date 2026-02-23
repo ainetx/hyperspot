@@ -668,6 +668,21 @@ Provider-specific streaming events are internal to `llm_provider` and the domain
 
 This mapping is intentionally provider-agnostic in the stable contract. If the provider changes its event format or a new provider is added, only the translation layer in `llm_provider` is updated. The client contract remains unchanged.
 
+**Provider Error Normative Mapping**:
+
+The following table is the normative mapping from provider failure modes to the public error codes returned in JSON error responses and SSE `event: error` payloads:
+
+| Error Code | HTTP Status | Trigger |
+|------------|-------------|--------|
+| `quota_exceeded` | 429 | User/tier quota exhaustion (preflight rejection). Always includes `quota_scope`. |
+| `rate_limited` | 429 | Provider 429 (upstream throttling) after OAGW retry exhaustion. |
+| `provider_error` | 502 | LLM provider returned a non-429 error or connection failure. |
+| `provider_timeout` | 504 | LLM provider request exceeded the configured timeout. |
+
+`rate_limited` is distinct from `quota_exceeded` and MUST be machine-detectable by clients. Clients distinguish the two by the `code` field: `quota_exceeded` always carries `quota_scope`; `rate_limited` never carries `quota_scope`.
+
+`rate_limited` may appear as either a pre-stream JSON error (if the provider rejects before any SSE bytes are sent) or a terminal SSE `event: error` (if the provider returns 429 mid-stream after OAGW retries are exhausted).
+
 **Error Codes**:
 
 For streaming endpoints, failures before any streaming begins MUST be returned as normal JSON HTTP error responses. Once the stream has started, failures MUST be reported via a terminal `event: error`.
@@ -681,7 +696,7 @@ For streaming endpoints, failures before any streaming begins MUST be returned a
 | `chat_not_found` | 404 | Chat does not exist or not accessible under current authorization constraints |
 | `quota_exceeded` | 429 | Quota exhaustion. Always accompanied by a `quota_scope` field: `"tokens"` (token rate limits across all tiers exhausted, emergency flags, or all models disabled), `"uploads"` (daily upload quota exceeded for the attachment endpoint), or `"web_search"` (per-user daily web search call quota exhausted). |
 | `web_search_disabled` | 400 | Request includes `web_search.enabled=true` but the global `disable_web_search` kill switch is active |
-| `rate_limited` | 429 | Too many requests in time window |
+| `rate_limited` | 429 | Provider upstream throttling (provider 429 after OAGW retry exhaustion) |
 | `file_too_large` | 413 | Uploaded file exceeds size limit |
 | `unsupported_file_type` | 415 | File type not supported for upload |
 | `too_many_images` | 400 | Request includes more than the configured maximum images for a single turn |

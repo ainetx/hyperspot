@@ -312,7 +312,7 @@
             }
           },
           "429": {
-            "description": "Quota exceeded. Code: `quota_exceeded`. Returned with `quota_scope`: `tokens` (all tier quotas exhausted, emergency flags, or all models disabled) or `web_search` (per-user daily web search call quota exhausted).",
+            "description": "Quota or rate limit exceeded. Code: `quota_exceeded` (with `quota_scope`: `tokens` or `web_search`) for user quota exhaustion, or `rate_limited` for upstream provider throttling after OAGW retry exhaustion. Clients MUST use the `code` field to distinguish the two.",
             "content": {
               "application/json": {
                 "schema": {
@@ -539,7 +539,7 @@
             }
           },
           "429": {
-            "description": "Token quota exceeded for regeneration. Code: `quota_exceeded`, `quota_scope`: `tokens`.",
+            "description": "Quota or rate limit exceeded for regeneration. Code: `quota_exceeded` (`quota_scope`: `tokens`) for user quota exhaustion, or `rate_limited` for upstream provider throttling.",
             "content": {
               "application/json": {
                 "schema": {
@@ -653,7 +653,7 @@
             }
           },
           "429": {
-            "description": "Token quota exceeded for regeneration. Code: `quota_exceeded`, `quota_scope`: `tokens`.",
+            "description": "Quota or rate limit exceeded for regeneration. Code: `quota_exceeded` (`quota_scope`: `tokens`) for user quota exhaustion, or `rate_limited` for upstream provider throttling.",
             "content": {
               "application/json": {
                 "schema": {

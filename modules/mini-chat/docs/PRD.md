@@ -762,7 +762,7 @@ Support and UX recovery flows MUST be able to query authoritative turn state bac
 | `insufficient_permissions` | 403 | Subject lacks permission for the requested action (AuthZ Resolver denied) |
 | `chat_not_found` | 404 | Chat does not exist or not accessible under current authorization constraints |
 | `quota_exceeded` | 429 | Quota exhaustion. Always accompanied by `quota_scope`: `"tokens"` (token rate limits across all tiers exhausted, emergency flags, or all models disabled), `"uploads"` (daily upload quota exceeded), or `"web_search"` (per-user daily web search call quota exhausted) |
-| `rate_limited` | 429 | Too many requests in time window |
+| `rate_limited` | 429 | Provider upstream throttling (provider 429 after OAGW retry exhaustion) |
 | `file_too_large` | 413 | Uploaded file exceeds size limit |
 | `unsupported_file_type` | 415 | File type not supported for upload |
 | `web_search_disabled` | 400 | Request includes `web_search.enabled=true` but the global `disable_web_search` kill switch is active |
@@ -771,6 +771,8 @@ Support and UX recovery flows MUST be able to query authoritative turn state bac
 | `unsupported_media` | 415 | Request includes image input but the effective model does not support multimodal input. Defensive under P1 catalog invariant (all enabled models include `VISION_INPUT`); expected only on catalog misconfiguration or future non-vision models. |
 | `provider_error` | 502 | LLM provider returned an error |
 | `provider_timeout` | 504 | LLM provider request timed out |
+
+HTTP 429 responses may carry either `quota_exceeded` (with `quota_scope`) for user quota exhaustion or `rate_limited` for upstream provider throttling; clients MUST use the `code` field to distinguish between the two.
 
 Provider identifiers (`provider_file_id`, `provider_response_id`, `vector_store_id`, and any other provider-issued ID) are internal-only and MUST NOT be exposed in any API response, SSE event payload, or error message. Error `message` fields MUST be sanitized to remove any provider-issued identifiers before being returned to clients. All client-visible identifiers are internal UUIDs only (`chat_id`, `turn_id`, `request_id`, `attachment_id`, `message_id`).
 
