@@ -226,12 +226,39 @@ def cmd_quickstart(_args):
     )
 
 
-def wait_for_health(base_url, timeout_secs=30):
+def _print_log_file(path, label):
+    if not path or not os.path.isfile(path):
+        return
+    print(f"\n--- {label}: {path} ---")
+    try:
+        with open(path) as f:
+            content = f.read()
+            if content:
+                print(content, end="" if content.endswith("\n") else "\n")
+            else:
+                print("(empty)")
+    except OSError as e:
+        print(f"(failed to read log: {e})")
+    print(f"--- end of {label} ---\n")
+
+
+def wait_for_health(base_url, timeout_secs=30, server_process=None, error_log=None):
     url = f"{base_url.rstrip('/')}/healthz"
     step(f"Waiting for API to be ready at {url}")
     start = time.time()
     attempt = 0
     while True:
+        # Check if the server process crashed before we even connect
+        if server_process is not None:
+            ret = server_process.poll()
+            if ret is not None:
+                print(f"\nERROR: Server process exited with code {ret}")
+                _print_log_file(error_log, "server stderr")
+                print("Fix the error above, rebuild with:")
+                print("  make build")
+                print("Then re-run: make e2e-local")
+                sys.exit(1)
+
         try:
             attempt += 1
             with urlopen(url, timeout=1) as resp:
@@ -245,6 +272,7 @@ def wait_for_health(base_url, timeout_secs=30):
 
         if time.time() - start > timeout_secs:
             print(f"ERROR: The API readiness check timed out after {attempt} attempts")
+            _print_log_file(error_log, "server stderr")
             sys.exit(1)
         time.sleep(1)
 
@@ -348,58 +376,74 @@ def cmd_e2e(args):
         wait_for_health(base_url)
     else:
         step("Running E2E tests in local mode")
-        # Start local server automatically
         server_process = None
-        try:
-            wait_for_health(base_url, timeout_secs=5)
-        except SystemExit:
-            print("Server not running, starting hyperspot-server...")
-            # Create logs directory if it doesn't exist
-            logs_dir = os.path.join(PROJECT_ROOT, "logs")
-            os.makedirs(logs_dir, exist_ok=True)
+        print("Starting hyperspot-server for local E2E...")
 
-            # Start server in background with logs redirected to files
-            # Use the pre-built release binary to avoid cargo compilation overhead
-            release_bin = os.path.join(PROJECT_ROOT, "target", "release", "hyperspot-server")
-            server_cmd = [
-                release_bin,
-                "--config",
-                "config/e2e-local.yaml",
-            ]
+        # Build all required modules and binaries using project build orchestration
+        step("Building release artifacts for local E2E")
+        run_cmd(["make", "build"])
 
-            # Redirect stdout and stderr to log files
-            server_log_file = os.path.join(
-                logs_dir, "hyperspot-e2e.log"
-            )
-            server_error_file = os.path.join(
-                logs_dir, "hyperspot-e2e-error.log"
-            )
+        # Use the release binary produced by build
+        release_bin = os.path.join(PROJECT_ROOT, "target", "release", "hyperspot-server")
 
-            with open(server_log_file, "w") as out_file, open(
-                server_error_file, "w"
-            ) as err_file:
-                # Set RUST_LOG to enable debug logging for types_registry module
-                server_env = os.environ.copy()
-                server_env["RUST_LOG"] = "types_registry=debug,info"
+        if not os.path.isfile(release_bin):
+            print(f"\nERROR: Release binary not found at: {release_bin}")
+            print("Build it first with:")
+            print("  make build")
+            sys.exit(1)
+
+        # Create logs directory if it doesn't exist
+        logs_dir = os.path.join(PROJECT_ROOT, "logs")
+        os.makedirs(logs_dir, exist_ok=True)
+
+        # Start server in background with logs redirected to files
+        server_cmd = [
+            release_bin,
+            "--config",
+            "config/e2e-local.yaml",
+        ]
+
+        server_log_file = os.path.join(logs_dir, "hyperspot-e2e.log")
+        server_error_file = os.path.join(logs_dir, "hyperspot-e2e-error.log")
+
+        with open(server_log_file, "w") as out_file, open(
+            server_error_file, "w"
+        ) as err_file:
+            # Set RUST_LOG to enable debug logging for types_registry module
+            server_env = os.environ.copy()
+            server_env["RUST_LOG"] = "types_registry=debug,info"
+            try:
                 server_process = subprocess.Popen(
                     server_cmd,
                     stdout=out_file,
                     stderr=err_file,
                     env=server_env,
                 )
+            except OSError as e:
+                print(f"ERROR: Failed to start hyperspot-server: {e}")
+                _print_log_file(server_error_file, "server stderr")
+                sys.exit(1)
 
-            print("Server logs redirected to:")
-            print(f"  - stdout: {server_log_file}")
-            print(f"  - stderr: {server_error_file}")
-            print(
-                "  - application logs: "
-                f"{os.path.join(logs_dir, 'hyperspot-e2e.log')}"
-            )
-            print(f"  - SQL logs: {os.path.join(logs_dir, 'sql.log')}")
-            print(f"  - API logs: {os.path.join(logs_dir, 'api.log')}")
+        print(f"Started hyperspot-server (pid={server_process.pid})")
 
-            # Wait for server to be ready
-            wait_for_health(base_url, timeout_secs=60)
+        print("Server logs redirected to:")
+        print(f"  - stdout: {server_log_file}")
+        print(f"  - stderr: {server_error_file}")
+        print(
+            "  - application logs: "
+            f"{os.path.join(logs_dir, 'hyperspot-e2e.log')}"
+        )
+        print(f"  - SQL logs: {os.path.join(logs_dir, 'sql.log')}")
+        print(f"  - API logs: {os.path.join(logs_dir, 'api.log')}")
+
+        # Wait for server to be ready, checking for early crash
+        wait_for_health(
+            base_url,
+            timeout_secs=60,
+            server_process=server_process,
+            error_log=server_error_file,
+        )
+        print("Server started successfully and passed health check")
 
     # Run pytest
     step("Running pytest")
