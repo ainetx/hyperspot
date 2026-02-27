@@ -1039,7 +1039,6 @@ dependencies = [
  "cf-modkit",
  "cf-modkit-macros",
  "cf-modkit-security",
- "cf-tenant-resolver-sdk",
  "cf-types-registry-sdk",
  "inventory",
  "serde",
@@ -1513,6 +1512,7 @@ dependencies = [
  "axum",
  "bytes",
  "cf-authz-resolver-sdk",
+ "cf-credstore-sdk",
  "cf-modkit",
  "cf-modkit-macros",
  "cf-modkit-security",
@@ -1652,6 +1652,26 @@ dependencies = [
  "cf-types-registry-sdk",
  "inventory",
  "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "cf-static-credstore-plugin"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "cf-credstore-sdk",
+ "cf-modkit",
+ "cf-modkit-macros",
+ "cf-modkit-security",
+ "cf-types-registry-sdk",
+ "inventory",
+ "serde",
+ "serde-saphyr 0.0.16",
  "serde_json",
  "tokio",
  "tracing",
@@ -3524,6 +3544,7 @@ dependencies = [
  "cf-single-tenant-tr-plugin",
  "cf-static-authn-plugin",
  "cf-static-authz-plugin",
+ "cf-static-credstore-plugin",
  "cf-static-tr-plugin",
  "cf-tenant-resolver",
  "cf-types-registry",
