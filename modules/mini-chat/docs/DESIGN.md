@@ -37,6 +37,7 @@ Long conversations are managed via thread summaries - a Level 1 compression stra
 | `cpt-cf-mini-chat-fr-ux-recovery` | `p1` | See **Streaming Contract** (Idempotency + reconnect rule) and **Turn Status API** |
 | `cpt-cf-mini-chat-fr-turn-mutations` | `p1` | Retry / edit / delete last turn via Turn Mutation API; see **Turn Mutation Rules (P1)** and turn mutation endpoints |
 | `cpt-cf-mini-chat-fr-model-selection` | `p1` | User selects model per chat at creation; model locked for conversation lifetime; see constraint `cpt-cf-mini-chat-constraint-model-locked-per-chat` and Model Catalog Configuration |
+| `cpt-cf-mini-chat-fr-models-api` | `p1` | Public read-only Models API (`GET /v1/models`, `GET /v1/models/{model_id}`). Returns only models visible to the authenticated user (globally enabled AND user-enabled). Per-user model enable/disable via `user_model_prefs`. Catalog sourced from `minichat-policy-plugin`. See Models API (section 3.3). |
 | `cpt-cf-mini-chat-fr-message-reactions` | `p1` | Binary like/dislike on assistant messages; see `message_reactions` table |
 | `cpt-cf-mini-chat-fr-group-chats` | `p2+` | Deferred — see `cpt-cf-mini-chat-adr-group-chat-usage-attribution` |
 
@@ -435,6 +436,8 @@ Covers public API from PRD: `cpt-cf-mini-chat-interface-public-api`
 | `POST` | `/v1/chats/{id}/turns/{request_id}:retry` | Retry last turn (new generation) | stable |
 | `PATCH` | `/v1/chats/{id}/turns/{request_id}` | Edit last turn (replace content + regenerate) | stable |
 | `DELETE` | `/v1/chats/{id}/turns/{request_id}` | Delete last turn (soft-delete) | stable |
+| `GET` | `/v1/models` | List models visible to the current user | stable |
+| `GET` | `/v1/models/{model_id}` | Get a single model by ID (if visible) | stable |
 | `PUT` | `/v1/chats/{id}/messages/{msg_id}/reaction` | Set like/dislike reaction on an assistant message | stable |
 | `DELETE` | `/v1/chats/{id}/messages/{msg_id}/reaction` | Remove reaction from an assistant message | stable |
 **Create Chat** (`POST /v1/chats`):
@@ -832,10 +835,87 @@ For streaming endpoints, failures before any streaming begins MUST be returned a
 | `too_many_images` | 400 | Request includes more than the configured maximum images for a single turn |
 | `image_bytes_exceeded` | 413 | Request includes images whose total configured per-turn byte limit is exceeded |
 | `unsupported_media` | 415 | Request includes image input but the effective model does not support multimodal input. Defensive under P1 catalog invariant (all enabled models include `VISION_INPUT`); expected only on catalog misconfiguration or future non-vision models. |
+| `model_not_found` | 404 | Model does not exist in the catalog or is not visible to the user (globally disabled or user-disabled). Used by `GET /v1/models/{model_id}`. |
 | `provider_error` | 502 | LLM provider returned an error |
 | `provider_timeout` | 504 | LLM provider request timed out |
 
 **Quota error disambiguation invariant**: token quota exhaustion, upload quota exhaustion, and web search quota exhaustion MUST be distinguishable to clients via the stable, machine-readable `quota_scope` field on every `quota_exceeded` error response. Clients MUST NOT parse the `message` string to determine quota scope. The `quota_scope` field is REQUIRED when `code` is `quota_exceeded` and MUST be one of: `"tokens"` (token-based rate limit exhaustion), `"uploads"` (per-user daily upload limit exhaustion), or `"web_search"` (per-user daily web search call limit exhaustion).
+
+#### Models API — **ID**: `cpt-cf-mini-chat-interface-models-api`
+
+- [ ] `p1` - **ID**: `cpt-cf-mini-chat-interface-models-api`
+
+Read-only endpoints for the model catalog visible to the authenticated user. The canonical model catalog is provided by `minichat-policy-plugin` (section 5.2); Mini Chat caches it in memory and merges per-user preferences stored in `user_model_prefs` (section 3.7) to compute visibility.
+
+##### List Models
+
+**Endpoint**: `GET /v1/models`
+
+Returns all models that are (a) globally enabled in the policy catalog AND (b) user-enabled for this user (allow-by-default semantics — see Visibility Algorithm below).
+
+**Response** (success): `200 OK`
+```json
+{
+  "items": [
+    {
+      "model_id": "gpt-5.2",
+      "display_name": "GPT-5.2",
+      "provider": "OpenAI",
+      "tier": "premium",
+      "multiplier_display": "1x",
+      "description": "Best for complex reasoning tasks",
+      "multimodal_capabilities": ["VISION_INPUT", "RAG"],
+      "context_window": 128000
+    }
+  ]
+}
+```
+
+Response fields per item:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `model_id` | string | Stable internal model identifier (e.g., `"gpt-5.2"`). Same value used in `POST /v1/chats` and `chats.model`. |
+| `display_name` | string | User-facing name for the model selector UI. |
+| `provider` | string | User-facing display name of the provider (e.g., `"OpenAI"`, `"Azure OpenAI"`). MUST NOT be a deployment handle, routing identifier, or internal provider key. |
+| `tier` | `"standard"` \| `"premium"` | Rate-limit tier. |
+| `multiplier_display` | string | Human-readable credit multiplier (e.g., `"1x"`, `"2x"`). Informational only — MUST NOT expose `credits_micro` or numeric multiplier internals. |
+| `description` | string (optional) | User-facing help text. May be absent if no description is configured for the model. |
+| `multimodal_capabilities` | array of strings | Capability flags. P1 known values: `VISION_INPUT`, `RAG`. Future values may be added without a version bump; clients MUST ignore unknown values. |
+| `context_window` | integer | Maximum context window in tokens. |
+
+Standard errors: `401` (unauthenticated), `403` (license / permissions).
+
+##### Get Model
+
+**Endpoint**: `GET /v1/models/{model_id}`
+
+Returns the same model projection as the list endpoint, but for a single model. The model MUST pass the same visibility rule (globally enabled AND user-enabled). If the model is globally disabled, user-disabled, or does not exist, the server MUST return `404` with error code `model_not_found` to avoid leaking catalog details.
+
+**Response** (success): `200 OK` — single model object (same shape as an item in the list response).
+
+Standard errors: `401` (unauthenticated), `403` (license / permissions), `404` (`model_not_found`).
+
+##### Visibility Algorithm (Normative)
+
+The domain service computes model visibility for `(tenant_id, user_id)` as follows:
+
+1. Read the cached policy catalog (source: `minichat-policy-plugin`).
+2. Filter to models where `global_enabled = true`.
+3. Load all `user_model_prefs` rows for this `(tenant_id, user_id)` in a single query.
+4. For each globally enabled model:
+   - If a `user_model_prefs` row exists with `is_enabled = false` → **exclude**.
+   - Otherwise (no row, or row with `is_enabled = true`) → **include** (allow-by-default).
+5. `GET /v1/models` returns all included models.
+6. `GET /v1/models/{model_id}` applies the same rule; returns `404` if excluded or not in the catalog.
+
+**Invariant**: disabled models (globally or per-user) MUST NOT appear in `GET /v1/models` and MUST NOT be retrievable via `GET /v1/models/{model_id}`.
+
+##### Non-Exposure Rules (Models API)
+
+- Response MUST NOT include: provider deployment IDs, routing metadata, credit multipliers (`input_tokens_credit_multiplier`, `output_tokens_credit_multiplier`, `credits_micro`), `policy_version`, `max_output`, or `is_default`.
+- `provider` MUST be the user-facing display name (e.g., `"OpenAI"`, `"Azure OpenAI"`), not a deployment handle, OAGW routing identifier, or internal provider key.
+- `model_id` is the stable internal identifier used by the API (e.g., `"gpt-5.2"`), never a provider deployment handle.
 
 #### Message Reaction API
 
@@ -1470,6 +1550,33 @@ Both operations MUST target the correct `(tenant_id, user_id, period_type, perio
 
 **Secure ORM**: No independent `#[secure]` — accessed through parent chat. The reaction endpoints require the message's parent chat to be loaded via a scoped query first (same pattern as messages, attachments, and chat_turns).
 
+#### Table: user_model_prefs
+
+- [ ] `p1` - **ID**: `cpt-cf-mini-chat-dbtable-user-model-prefs`
+
+Per-user model enable/disable preferences. Used by the Models API visibility algorithm (section 3.3) to filter the policy catalog per user.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| tenant_id | UUID | Owning tenant |
+| user_id | UUID | Owning user |
+| model_id | VARCHAR(64) | References a `model_id` in the policy catalog |
+| is_enabled | BOOLEAN | `false` hides the model from this user. Default semantics: if no row exists, the model is considered enabled (allow-by-default). |
+| overrides | JSONB | Reserved for P2+ per-user model overrides (e.g., custom system prompts, temperature). MUST default to `'{}'` and MUST NOT affect billing, capability enforcement, or quota in P1. |
+| updated_at | TIMESTAMPTZ | Last update time |
+
+**PK**: `(tenant_id, user_id, model_id)` (composite primary key — no surrogate `id` column needed).
+
+**Constraints**: NOT NULL on `tenant_id`, `user_id`, `model_id`, `is_enabled`, `overrides`, `updated_at`.
+
+**Indexes**: `(tenant_id, user_id)` for loading all preferences for a user in one query (used by the visibility algorithm).
+
+**Secure ORM**: `#[secure(tenant_col = "tenant_id", owner_col = "user_id", no_type)]`
+
+**Allow-by-default semantics (P1)**: if no row exists for `(tenant_id, user_id, model_id)`, the model is treated as enabled. A row is only written when a user explicitly disables (or re-enables) a model. This keeps the table sparse and avoids a migration step when new models are added to the catalog.
+
+**P2+ extensibility**: the `overrides` JSONB column is reserved for future per-user model configuration (e.g., custom system prompts, preferred temperature). In P1, this column MUST be ignored by all enforcement and billing paths. No schema migration will be needed to start using it.
+
 #### Projection Table: tenant_closure
 
 - [ ] `p1` - **ID**: `cpt-cf-mini-chat-dbtable-tenant-closure-ref`
@@ -1863,6 +1970,7 @@ These events are emitted to platform `audit_service` following the same emission
 - Quota enforcement: daily + monthly per user; credit-based rate limits per tier tracked in real-time; credits are computed from provider-reported token usage using model credit multipliers; premium models have stricter limits, standard models have separate, higher limits; when all tiers are exhausted, reject with `quota_exceeded`; image counters enforced separately
 - File Search per-message call limit is configurable per deployment (default: 2 tool calls per message)
 - Web search via provider tooling (Azure Foundry), explicitly enabled per request via `web_search.enabled` parameter; per-message call limit (default: 2) and per-user daily quota (default: 75); global `disable_web_search` kill switch
+- Public Models API (`GET /v1/models`, `GET /v1/models/{model_id}`): read-only; returns only models visible to the authenticated user (globally enabled in the policy catalog AND user-enabled). Per-user model enable/disable via `user_model_prefs` table (allow-by-default semantics). Catalog sourced from `minichat-policy-plugin`.
 
 **Deferred to P2+**:
 - Temporary chats with 24h scheduled cleanup
@@ -1873,6 +1981,7 @@ These events are emitted to platform `audit_service` following the same emission
 - Per-workspace vector store aggregation
 - Full conversation history editing (editing/deleting arbitrary historical messages)
 - Thread branching or multi-version conversations
+- Per-user model overrides via `user_model_prefs.overrides` JSONB column (reserved in P1; enforcement deferred)
 
 ### Data Classification and Retention (P1)
 
@@ -2111,9 +2220,11 @@ Since each chat has a dedicated vector store, these limits directly bound the si
 
 - [ ] `p1` - **ID**: `cpt-cf-mini-chat-design-model-catalog`
 
-The model catalog is an ordered list of available models defined in deployment configuration (file or ConfigMap in k8s). Each entry specifies the model identifier, provider, tier, capability flags, and UI metadata. The domain service uses the catalog to resolve model selection, validate user requests, and execute the downgrade cascade.
+The canonical model catalog is provided by `minichat-policy-plugin` (section 5.2) as part of the policy snapshot. Mini Chat fetches the catalog at startup and caches it in memory. The catalog is refreshed via the existing policy snapshot delivery mechanism (section 5.2.3: CCM push-notify + pull, with a periodic reconciliation fallback). No new subsystem or refresh mechanism is introduced.
 
-**Catalog structure** (deployment config):
+Each entry specifies the model identifier, provider, tier, capability flags, and UI metadata. The domain service uses the catalog to resolve model selection, validate user requests, execute the downgrade cascade, and serve the Models API (section 3.3).
+
+**Catalog structure** (as delivered by `minichat-policy-plugin` in the policy snapshot; shown in YAML for readability):
 
 ```yaml
 model_catalog:
@@ -2163,7 +2274,7 @@ model_catalog:
 - When a user selects a model at chat creation, the domain service MUST validate: (a) the `model_id` exists in the catalog, and (b) its `status` is `enabled`. Unknown or disabled models MUST be rejected with HTTP 400.
 - Image capability is resolved from `capabilities`: a model supports image input if `"VISION_INPUT"` is in its capabilities array. P1 invariant: all catalog models MUST include `VISION_INPUT`, so image-bearing turns are never rejected due to a downgrade to a non-vision model in P1. If a future catalog entry lacks `VISION_INPUT`, the existing 415 `unsupported_media` rejection logic applies.
 - `context_window` replaces the previous `context_limit` field in credit budget computation.
-- The catalog is read at startup and reloaded on configuration change. Runtime model resolution uses the in-memory catalog (only enabled models).
+- The catalog is fetched from `minichat-policy-plugin` at startup and refreshed via the existing snapshot delivery mechanism (section 5.2.3). Runtime model resolution and the Models API both use the in-memory cached catalog (only globally enabled models are candidates for visibility).
 
 Operational configuration of rate limits, quota allocations, and model catalog is managed by Product Operations. Configuration management processes are external to this design document; the configuration owner and change management workflow are defined by the platform operations team.
 
@@ -2807,10 +2918,16 @@ Contents (logically):
 - `model_catalog`:
 
   - `model_id`
+  - `display_name` (user-facing name; used by Models API)
+  - `provider_display_name` (user-facing display name, e.g. `"OpenAI"`, `"Azure OpenAI"`; used by Models API — MUST NOT be a deployment handle, routing identifier, or internal provider key)
   - `tier` (premium/standard)
+  - `global_enabled` (boolean; `false` → model excluded from runtime catalog and Models API)
+  - `description` (user-facing help text; used by Models API)
+  - `multimodal_capabilities` (array of capability flags, e.g. `["VISION_INPUT", "RAG"]`; used by Models API)
+  - `context_window` (integer; max context tokens; used by Models API and token budget computation)
   - `input_tokens_credit_multiplier` (micro-credits per 1K tokens; > 0 always)
   - `output_tokens_credit_multiplier` (micro-credits per 1K tokens; > 0 always)
-  - `multiplier_display`
+  - `multiplier_display` (human-readable, e.g. `"1x"`, `"2x"`; used by Models API)
 
 - `estimation_budgets` (fixed surcharge token budgets for preflight reserve estimation):
 

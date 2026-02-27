@@ -32,6 +32,10 @@
     {
       "name": "reactions",
       "description": "Binary like/dislike reactions on assistant messages."
+    },
+    {
+      "name": "models",
+      "description": "Read-only model catalog visible to the authenticated user."
     }
   ],
   "paths": {
@@ -1004,6 +1008,66 @@
           }
         }
       }
+    },
+    "/v1/models": {
+      "get": {
+        "operationId": "listModels",
+        "tags": ["models"],
+        "summary": "List models visible to the current user",
+        "description": "Returns all models that are globally enabled in the policy catalog AND user-enabled for this user (allow-by-default semantics). Disabled models are never returned. The catalog is sourced from `minichat-policy-plugin` and cached in memory.",
+        "responses": {
+          "200": {
+            "description": "List of visible models.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelList"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/models/{model_id}": {
+      "get": {
+        "operationId": "getModel",
+        "tags": ["models"],
+        "summary": "Get a single model by ID",
+        "description": "Returns the model only if it is visible to the current user (globally enabled AND user-enabled). Returns 404 if the model is globally disabled, user-disabled, or does not exist — to avoid leaking catalog details.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ModelId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Model details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Model"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/ModelNotFound"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1054,6 +1118,15 @@
         "schema": {
           "type": "string",
           "format": "uuid"
+        }
+      },
+      "ModelId": {
+        "name": "model_id",
+        "in": "path",
+        "required": true,
+        "description": "Stable internal model identifier (e.g., \"gpt-5.2\").",
+        "schema": {
+          "type": "string"
         }
       },
       "PaginationLimit": {
@@ -1125,6 +1198,26 @@
             }
           }
         }
+      },
+      "Unauthorized": {
+        "description": "Authentication required. The request lacks valid credentials or the bearer token is expired/invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "ModelNotFound": {
+        "description": "Model does not exist in the catalog or is not visible to the user (globally disabled or user-disabled). Code: `model_not_found`.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
       }
     },
     "schemas": {
@@ -1149,6 +1242,7 @@
               "insufficient_permissions",
               "chat_not_found",
               "message_not_found",
+              "model_not_found",
               "generation_in_progress",
               "request_id_conflict",
               "rate_limited",
@@ -1742,6 +1836,66 @@
         "type": "string",
         "enum": ["allow", "downgrade"],
         "description": "Deprecated as standalone schema — fields are now inlined on SseDoneEvent. Retained for backward reference only."
+      },
+      "MultimodalCapability": {
+        "type": "string",
+        "description": "Model capability flag. P1 known values: VISION_INPUT (supports image inputs), RAG (supports file_search tool / retrieval grounding). Future values may be added without a version bump. Clients MUST ignore unknown values."
+      },
+      "Model": {
+        "type": "object",
+        "required": ["model_id", "display_name", "provider", "tier", "multiplier_display", "multimodal_capabilities", "context_window"],
+        "description": "A model visible to the current user. Does NOT expose provider deployment IDs, credit multipliers, policy_version, max_output, or is_default.",
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "description": "Stable internal model identifier (e.g., \"gpt-5.2\"). Same value used in POST /v1/chats and chats.model."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User-facing name for the model selector UI."
+          },
+          "provider": {
+            "type": "string",
+            "description": "User-facing display name of the provider (e.g., \"OpenAI\", \"Azure OpenAI\"). MUST NOT be a deployment handle, routing identifier, or internal provider key."
+          },
+          "tier": {
+            "type": "string",
+            "enum": ["standard", "premium"],
+            "description": "Rate-limit tier."
+          },
+          "multiplier_display": {
+            "type": "string",
+            "description": "Human-readable credit multiplier (e.g., \"1x\", \"2x\"). Informational only — does not expose credits_micro or numeric multiplier internals."
+          },
+          "description": {
+            "type": "string",
+            "description": "User-facing help text."
+          },
+          "multimodal_capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MultimodalCapability"
+            },
+            "description": "Capability flags supported by this model."
+          },
+          "context_window": {
+            "type": "integer",
+            "description": "Maximum context window in tokens."
+          }
+        }
+      },
+      "ModelList": {
+        "type": "object",
+        "required": ["items"],
+        "description": "List of models visible to the current user.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Model"
+            }
+          }
+        }
       }
     }
   }
