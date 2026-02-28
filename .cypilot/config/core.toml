@@ -1,0 +1,14 @@
+# Cypilot project configuration (migrated from v2)
+
+version = "1.0"
+project_root = ".."
+
+[system]
+name = "cyberfabric"
+slug = "cf"
+kit = "cf-sdlc"
+
+[kits]
+[kits.cf-sdlc]
+format = "Cypilot"
+path = "config/kits/cf-sdlc"
