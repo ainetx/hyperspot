@@ -1,7 +1,7 @@
 ---
 name: cypilot
-description: "Artifacts (PRD/DESIGN/ADR/DECOMPOSITION/SPEC) + checklists; deterministic validation & consistency analysis (structure, cross-refs, cross-artifact consistency, tasks, covered-by, ID/CDSL extraction from artifact text); code↔artifact traceability with `@cpt-*`; ID search/navigation (list-ids, where-defined/used, get-content); coding support via generate workflow; reverse-engineering guidance for brownfield codebases; prompt-engineering methodology for improving agent instructions; adapter + registry discovery (adapter-info, artifacts.json, kits/rules); init/bootstrap; workflow router (analyze/generate); agent integrations (agents: workflow proxies + SKILL outputs for windsurf/cursor/claude/copilot/openai)."
+description: "Invoke when user asks to do something with Cypilot, or wants to analyze/validate artifacts, or create/generate/implement anything using Cypilot workflows. Core capabilities: workflow routing (analyze/generate/auto-config); deterministic validation (structure, cross-refs, traceability); code\\u2194artifact traceability with @cpt-* markers; ID search/navigation; init/bootstrap; adapter + registry discovery; auto-configuration of brownfield projects (scan conventions, generate rules); agent integrations."
 ---
 
 
-ALWAYS open and follow `../../.cypilot/skills/cypilot/SKILL.md`
+ALWAYS open and follow `@/.cypilot/.core/skills/cypilot/SKILL.md`

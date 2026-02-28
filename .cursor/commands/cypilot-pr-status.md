@@ -1,4 +1,4 @@
 # /cypilot-pr-status
 
 
-ALWAYS open and follow `../../.cypilot/workflows/pr-status.md`
+ALWAYS open and follow `@/.cypilot/.gen/kits/sdlc/workflows/pr-status.md`
