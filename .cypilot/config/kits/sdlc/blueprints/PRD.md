@@ -2348,12 +2348,8 @@ id = "prd-h1-title"
 level = 1
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
-# Regex the heading text must match (omit or null = any text)
-pattern = "PRD\\s*[—–-]\\s*.+"
 # Suggested heading text template for authors
 template = "PRD — {Module/Feature Name}"
 # Brief writing instruction for content under this heading
@@ -2361,7 +2357,7 @@ prompt = "Title of product"
 # Human description of this heading's purpose
 description = "PRD document title (H1)."
 # Example heading texts showing correct usage
-examples = ["# PRD — TaskFlow"]
+examples = ["# PRD - Todo App"]
 ```
 `@/cpt:heading`
 
@@ -2416,12 +2412,12 @@ id = "prd-overview"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
 pattern = "Overview"
+# Suggested heading text template for authors
+template = "1. Overview"
 # Human description of this heading's purpose
 description = "High-level overview of the product and problem."
 # Example heading texts showing correct usage
@@ -2439,8 +2435,6 @@ id = "prd-overview-purpose"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2448,6 +2442,7 @@ pattern = "Purpose"
 # Human description of this heading's purpose
 description = "Purpose of the PRD and the product."
 # Example heading texts showing correct usage
+template = "1.1 Purpose"
 examples = ["### 1.1 Purpose"]
 ```
 `@/cpt:heading`
@@ -2482,7 +2477,7 @@ section = "semantic"
 
 `@cpt:example`
 ```markdown
-TaskFlow is a lightweight task management system for small teams, enabling task creation, assignment, and progress tracking with real-time notifications.
+A web application for managing personal tasks with support for categories, priorities, and filtering.
 ```
 `@/cpt:example`
 
@@ -2496,8 +2491,6 @@ id = "prd-overview-background"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2505,6 +2498,7 @@ pattern = "Background / Problem Statement"
 # Human description of this heading's purpose
 description = "Background and problem statement."
 # Example heading texts showing correct usage
+template = "1.2 Background / Problem Statement"
 examples = ["### 1.2 Background / Problem Statement"]
 ```
 `@/cpt:heading`
@@ -2536,19 +2530,9 @@ section = "semantic"
 
 `@cpt:example`
 ```markdown
-The system focuses on simplicity and speed, allowing teams to manage their daily work without the overhead of complex project management tools. TaskFlow bridges the gap between simple to-do lists and enterprise-grade solutions.
+Todo App is a simple and intuitive task management application. Users can create, edit, and delete tasks, mark them as completed, and organize them by categories and priorities.
 
-**Target Users**:
-
-- Team leads managing sprints
-- Developers tracking daily work
-- Project managers monitoring progress
-
-**Key Problems Solved**:
-
-- Scattered task tracking across multiple tools
-- Lack of visibility into team workload
-- Missing deadline notifications
+The application is designed for individual use with cross-device synchronization. The main focus is on minimalist interface and fast performance.
 ```
 `@/cpt:example`
 
@@ -2562,8 +2546,6 @@ id = "prd-overview-goals"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2571,6 +2553,7 @@ pattern = "Goals (Business Outcomes)"
 # Human description of this heading's purpose
 description = "Business outcomes and goals."
 # Example heading texts showing correct usage
+template = "1.3 Goals (Business Outcomes)"
 examples = ["### 1.3 Goals (Business Outcomes)"]
 ```
 `@/cpt:heading`
@@ -2605,17 +2588,9 @@ section = "semantic"
 
 `@cpt:example`
 ```markdown
-**Success Criteria**:
-
-- Tasks created and assigned in under 30 seconds (Baseline: not measured; Target: v1.0)
-- Real-time status updates visible to all team members within 2 seconds (Baseline: N/A; Target: v1.0)
-- Overdue task alerts delivered within 1 minute of deadline (Baseline: N/A; Target: v1.0)
-
-**Capabilities**:
-
-- Manage team tasks and assignments
-- Track task status and progress in real time
-- Send notifications for deadlines and status changes
+- Task creation time < 3 seconds
+- 95% of users successfully complete onboarding
+- NPS > 40
 ```
 `@/cpt:example`
 
@@ -2629,8 +2604,6 @@ id = "prd-overview-glossary"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2638,6 +2611,7 @@ pattern = "Glossary"
 # Human description of this heading's purpose
 description = "Definitions of key terms."
 # Example heading texts showing correct usage
+template = "1.4 Glossary"
 examples = ["### 1.4 Glossary"]
 ```
 `@/cpt:heading`
@@ -2658,9 +2632,8 @@ examples = ["### 1.4 Glossary"]
 ```markdown
 | Term | Definition |
 |------|------------|
-| Task | A tracked work item owned by a team member with status and due date |
-| Assignment | Mapping a task to an assignee (team member) |
-| Notification | An alert emitted when tasks change or become overdue |
+| Task | A single actionable item with title, optional description, due date, priority, and category |
+| Category | A user-defined grouping for tasks |
 ```
 `@/cpt:example`
 
@@ -2678,8 +2651,6 @@ id = "prd-actors"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2687,6 +2658,7 @@ pattern = "Actors"
 # Human description of this heading's purpose
 description = "Actors (human and system) that interact with the product."
 # Example heading texts showing correct usage
+template = "2. Actors"
 examples = ["## 2. Actors"]
 ```
 `@/cpt:heading`
@@ -2716,6 +2688,14 @@ headings = ["prd-actors"]  # heading constraint IDs where this identifier must b
 ```
 `@/cpt:prompt`
 
+> **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/PRD/examples/example.md`.
+
+`@cpt:example`
+```markdown
+> **Note**: Stakeholder needs are managed at the project/task level by the steering committee and are not duplicated in module specs. Focus on **actors** (users, systems) that directly interact with this module.
+```
+`@/cpt:example`
+
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/PRD/rules.md`.
 
 `@cpt:rule`
@@ -2744,8 +2724,6 @@ id = "prd-actors-human"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2753,6 +2731,7 @@ pattern = "Human Actors"
 # Human description of this heading's purpose
 description = "Human actors."
 # Example heading texts showing correct usage
+template = "2.1 Human Actors"
 examples = ["### 2.1 Human Actors"]
 ```
 `@/cpt:heading`
@@ -2763,12 +2742,11 @@ examples = ["### 2.1 Human Actors"]
 ```toml
 id = "prd-actor-entry"
 level = 4
-required = true
-numbered = false
+required = false
 # multiple: omitted = allowed (can repeat)
 template = "{Actor Name}"
 description = "Individual human actor entry."
-examples = ["#### Team Member", "#### Team Lead"]
+examples = ["#### User"]
 ```
 `@/cpt:heading`
 
@@ -2787,15 +2765,9 @@ examples = ["#### Team Member", "#### Team Lead"]
 
 `@cpt:example`
 ```markdown
-**ID**: `cpt-ex-task-flow-actor-member`
-
-**Role**: Creates tasks, updates progress, and collaborates on assignments.
-
-#### Team Lead
-
-**ID**: `cpt-ex-task-flow-actor-lead`
-
-**Role**: Assigns tasks, sets priorities, and monitors team workload.
+**ID**: `cpt-examples-todo-app-actor-user`
+**Role**: Primary user who creates, manages, and completes tasks in the application.
+**Needs**: Simple task management, cross-device access, quick task entry.
 ```
 `@/cpt:example`
 
@@ -2809,8 +2781,6 @@ id = "prd-actors-system"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2818,6 +2788,7 @@ pattern = "System Actors"
 # Human description of this heading's purpose
 description = "System and external actors."
 # Example heading texts showing correct usage
+template = "2.2 System Actors"
 examples = ["### 2.2 System Actors"]
 ```
 `@/cpt:heading`
@@ -2828,12 +2799,11 @@ examples = ["### 2.2 System Actors"]
 ```toml
 id = "prd-actor-system-entry"
 level = 4
-required = true
-numbered = false
+required = false
 # multiple: omitted = allowed (can repeat)
 template = "{System Actor Name}"
 description = "Individual system actor entry."
-examples = ["#### Notification Service", "#### External Auth Provider"]
+examples = ["#### Sync Service"]
 ```
 `@/cpt:heading`
 
@@ -2851,9 +2821,13 @@ examples = ["#### Notification Service", "#### External Auth Provider"]
 
 `@cpt:example`
 ```markdown
-**ID**: `cpt-ex-task-flow-actor-notifier`
+**ID**: `cpt-examples-todo-app-actor-sync-service`
+**Role**: Background service that synchronizes tasks across user devices in real-time.
 
-**Role**: Sends alerts for due dates, assignments, and status changes.
+#### Notification Service
+
+**ID**: `cpt-examples-todo-app-actor-notification-service`
+**Role**: Sends reminders and notifications to users about upcoming or overdue tasks.
 ```
 `@/cpt:example`
 
@@ -2869,8 +2843,6 @@ id = "prd-operational-concept"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2878,6 +2850,7 @@ pattern = "Operational Concept & Environment"
 # Human description of this heading's purpose
 description = "Operational concept and environment constraints."
 # Example heading texts showing correct usage
+template = "3. Operational Concept & Environment"
 examples = ["## 3. Operational Concept & Environment"]
 ```
 `@/cpt:heading`
@@ -2890,6 +2863,14 @@ examples = ["## 3. Operational Concept & Environment"]
 ```
 `@/cpt:prompt`
 
+> **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/PRD/examples/example.md`.
+
+`@cpt:example`
+```markdown
+> **Note**: Project-wide runtime, OS, architecture, lifecycle policy, and module integration patterns (Rust native + auto-generated gRPC/REST) are defined in root [PRD.md](../../PRD.md). Only document module-specific deviations or additional constraints here. **If this module has no special environment constraints, delete this entire section.**
+```
+`@/cpt:example`
+
 > **`@cpt:heading`** — Heading constraint. Defines required/optional heading in the artifact structure. Output: `constraints.toml` + `{cypilot_path}/.gen/kits/sdlc/artifacts/PRD/template.md`.
 
 `@cpt:heading`
@@ -2899,9 +2880,7 @@ id = "prd-operational-concept-constraints"
 # Markdown heading level (1=H1 … 6=H6)
 level = 3
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2909,6 +2888,7 @@ pattern = "Module-Specific Environment Constraints"
 # Human description of this heading's purpose
 description = "Module-specific environment constraints beyond project defaults."
 # Example heading texts showing correct usage
+template = "3.1 Module-Specific Environment Constraints"
 examples = ["### 3.1 Module-Specific Environment Constraints"]
 ```
 `@/cpt:heading`
@@ -2929,7 +2909,8 @@ examples = ["### 3.1 Module-Specific Environment Constraints"]
 
 `@cpt:example`
 ```markdown
-None.
+- Requires IndexedDB support for offline functionality (browser-only constraint)
+- WebSocket support required for real-time sync (fallback to polling if unavailable)
 ```
 `@/cpt:example`
 
@@ -2947,8 +2928,6 @@ id = "prd-scope"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2956,6 +2935,7 @@ pattern = "Scope"
 # Human description of this heading's purpose
 description = "Scope of the product and release."
 # Example heading texts showing correct usage
+template = "4. Scope"
 examples = ["## 4. Scope"]
 ```
 `@/cpt:heading`
@@ -2970,8 +2950,6 @@ id = "prd-scope-in"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2979,6 +2957,7 @@ pattern = "In Scope"
 # Human description of this heading's purpose
 description = "In-scope items."
 # Example heading texts showing correct usage
+template = "4.1 In Scope"
 examples = ["### 4.1 In Scope"]
 ```
 `@/cpt:heading`
@@ -2996,9 +2975,11 @@ examples = ["### 4.1 In Scope"]
 
 `@cpt:example`
 ```markdown
-- Task creation, assignment, and lifecycle tracking
-- Real-time updates for task status changes
-- Deadline notifications
+- CRUD operations for tasks
+- Categorization and prioritization
+- Filtering and search
+- Cross-device synchronization
+- Offline support
 ```
 `@/cpt:example`
 
@@ -3012,8 +2993,6 @@ id = "prd-scope-out"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3021,6 +3000,7 @@ pattern = "Out of Scope"
 # Human description of this heading's purpose
 description = "Out-of-scope items."
 # Example heading texts showing correct usage
+template = "4.2 Out of Scope"
 examples = ["### 4.2 Out of Scope"]
 ```
 `@/cpt:heading`
@@ -3052,8 +3032,9 @@ section = "semantic"
 
 `@cpt:example`
 ```markdown
-- Time tracking, billing, or invoicing
-- Cross-organization collaboration
+- Team collaboration features (future phase)
+- Calendar integration
+- File attachments
 ```
 `@/cpt:example`
 
@@ -3069,8 +3050,6 @@ id = "prd-fr"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3078,6 +3057,7 @@ pattern = "Functional Requirements"
 # Human description of this heading's purpose
 description = "Functional requirements section."
 # Example heading texts showing correct usage
+template = "5. Functional Requirements"
 examples = ["## 5. Functional Requirements"]
 ```
 `@/cpt:heading`
@@ -3125,6 +3105,14 @@ Functional requirements define WHAT the system must do. Group by feature area or
 ```
 `@/cpt:prompt`
 
+> **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/PRD/examples/example.md`.
+
+`@cpt:example`
+```markdown
+> **Testing strategy**: Unless otherwise specified, all requirements are verified via automated tests (unit, integration, e2e) targeting 95% code coverage. Only document verification method explicitly for non-test approaches (analysis, inspection, demonstration) or special testing needs.
+```
+`@/cpt:example`
+
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/PRD/rules.md`.
 
 `@cpt:rule`
@@ -3154,12 +3142,11 @@ section = "semantic"
 ```toml
 id = "prd-fr-group"
 level = 3
-required = true
-numbered = true
+required = false
 # multiple: omitted = allowed (can repeat)
-template = "{Feature Area / Priority Tier}"
+template = "5.1 {Feature Area / Priority Tier}"
 description = "Feature area or priority tier grouping."
-examples = []
+examples = ["### 5.1 Core Task Management"]
 ```
 `@/cpt:heading`
 
@@ -3169,8 +3156,7 @@ examples = []
 ```toml
 id = "prd-fr-entry"
 level = 4
-required = true
-numbered = false
+required = false
 # multiple: omitted = allowed (can repeat)
 template = "{Requirement Name}"
 description = "Individual functional requirement entry."
@@ -3197,25 +3183,45 @@ The system **MUST** {do something specific and verifiable}.
 
 `@cpt:example`
 ```markdown
-### FR-001 Task Management
+### 5.1 Core Task Management
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-fr-task-management`
+#### Create Task
 
-The system MUST allow creating, editing, and deleting tasks. The system MUST allow assigning tasks to team members. The system MUST allow setting due dates and priorities. Tasks should support rich text descriptions and file attachments.
+- [x] `p1` - **ID**: `cpt-examples-todo-app-fr-create-task`
 
-**Actors**:
+The system **MUST** allow users to create a new task with a title, optional description, due date, priority level, and category.
 
-`cpt-ex-task-flow-actor-member`, `cpt-ex-task-flow-actor-lead`
+**Rationale**: Core functionality — users need to capture tasks quickly.
+**Actors**: `cpt-examples-todo-app-actor-user`
 
-### FR-002 Notifications
+#### Complete Task
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-fr-notifications`
+- [x] `p1` - **ID**: `cpt-examples-todo-app-fr-complete-task`
 
-The system MUST send push notifications for task assignments. The system MUST send alerts for overdue tasks. Notifications should be configurable per user to allow opting out of certain notification types.
+The system **MUST** allow users to mark a task as completed or revert it to incomplete status.
 
-**Actors**:
+**Rationale**: Essential for task lifecycle management.
+**Actors**: `cpt-examples-todo-app-actor-user`
 
-`cpt-ex-task-flow-actor-notifier`, `cpt-ex-task-flow-actor-member`
+#### Delete Task
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-fr-delete-task`
+
+The system **MUST** allow users to delete a task permanently.
+
+**Rationale**: Users need to remove irrelevant or mistaken tasks.
+**Actors**: `cpt-examples-todo-app-actor-user`
+
+### 5.2 Organization
+
+#### Filter Tasks
+
+- [x] `p2` - **ID**: `cpt-examples-todo-app-fr-filter-tasks`
+
+The system **MUST** allow users to filter tasks by status (all, active, completed), category, and priority.
+
+**Rationale**: Helps users focus on relevant tasks.
+**Actors**: `cpt-examples-todo-app-actor-user`
 ```
 `@/cpt:example`
 
@@ -3231,8 +3237,6 @@ id = "prd-nfr"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3240,6 +3244,7 @@ pattern = "Non-Functional Requirements"
 # Human description of this heading's purpose
 description = "Non-functional requirements section."
 # Example heading texts showing correct usage
+template = "6. Non-Functional Requirements"
 examples = ["## 6. Non-Functional Requirements"]
 ```
 `@/cpt:heading`
@@ -3253,6 +3258,16 @@ examples = ["## 6. Non-Functional Requirements"]
 > **Testing strategy**: NFRs verified via automated benchmarks, security scans, and monitoring unless otherwise specified.
 ```
 `@/cpt:prompt`
+
+> **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/PRD/examples/example.md`.
+
+`@cpt:example`
+```markdown
+> **Default guidelines**: Project-wide NFR baselines (performance, security, reliability, scalability) are defined in root [PRD.md](../../PRD.md) and [docs/guidelines/](../../guidelines/). Only document module-specific NFRs here — either **exclusions** from defaults or **standalone** requirements unique to this module.
+>
+> **Testing strategy**: NFRs are verified via automated benchmarks, security scans, and monitoring unless otherwise specified.
+```
+`@/cpt:example`
 
 > **`@cpt:id`** — Identifier constraint. Defines an ID kind (template, references, task/priority rules). Output: `constraints.toml`.
 
@@ -3312,8 +3327,6 @@ id = "prd-nfr-inclusions"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = false
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3321,6 +3334,7 @@ pattern = "Module-Specific NFRs"
 # Human description of this heading's purpose
 description = "Non-functional requirements that deviate from or extend project defaults."
 # Example heading texts showing correct usage
+template = "6.1 Module-Specific NFRs"
 examples = ["### 6.1 Module-Specific NFRs"]
 ```
 `@/cpt:heading`
@@ -3340,11 +3354,10 @@ examples = ["### 6.1 Module-Specific NFRs"]
 id = "prd-nfr-entry"
 level = 4
 required = false
-numbered = false
 # multiple: omitted = allowed (can repeat)
 template = "{NFR Name}"
 description = "Individual non-functional requirement entry."
-examples = ["#### Security", "#### Performance"]
+examples = ["#### Response Time"]
 ```
 `@/cpt:heading`
 
@@ -3367,18 +3380,33 @@ The system **MUST** {measurable NFR with specific thresholds, e.g., "respond wit
 
 `@cpt:example`
 ```markdown
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-nfr-security`
+- [x] `p1` - **ID**: `cpt-examples-todo-app-nfr-response-time`
 
-- Authentication MUST be required for all user actions
-- Authorization MUST enforce team role permissions
-- Passwords MUST be stored using secure hashing algorithms
+All user interactions **MUST** complete within 200ms at p95 under normal load (stricter than project default of 500ms).
 
-#### Performance
+**Threshold**: 200ms p95 latency for UI interactions
+**Rationale**: Todo app is a productivity tool where perceived speed directly impacts user satisfaction; willing to accept increased complexity (local-first architecture) to achieve this
+**Architecture Allocation**: See DESIGN.md § NFR Allocation for how this is realized
 
-- [ ] `p2` - **ID**: `cpt-ex-task-flow-nfr-performance`
+#### Data Persistence
 
-- Task list SHOULD load within 500ms for teams under 100 tasks
-- Real-time updates SHOULD propagate within 2 seconds
+- [x] `p1` - **ID**: `cpt-examples-todo-app-nfr-data-persistence`
+
+User data **MUST** be persisted locally immediately and synced to cloud storage within 5 seconds of any change when online.
+
+**Threshold**: Local persistence: <50ms; cloud sync: <5s when online
+**Rationale**: Module-specific requirement (project default doesn't cover offline-first + sync pattern)
+**Architecture Allocation**: See DESIGN.md § NFR Allocation for how this is realized
+
+#### Offline Support
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-nfr-offline-support`
+
+The system **MUST** support offline mode where task creation, completion, filtering, and deletion operate without network connectivity.
+
+**Threshold**: Offline operations succeed with no errors; synchronization begins automatically when connectivity resumes
+**Rationale**: Offline-first is a core product requirement for intermittent connectivity scenarios
+**Architecture Allocation**: See DESIGN.md § Architecture Drivers and § NFR Allocation for how this is realized
 ```
 `@/cpt:example`
 
@@ -3391,13 +3419,12 @@ id = "prd-nfr-exclusions"
 # Markdown heading level (1=H1 … 6=H6)
 level = 3
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
 pattern = "NFR Exclusions"
+template = "6.2 NFR Exclusions"
 # Human description of this heading's purpose
 description = "Explicit non-functional requirement exclusions."
 # Example heading texts showing correct usage
@@ -3429,16 +3456,6 @@ section = "semantic"
 ```
 `@/cpt:rule`
 
-> **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/PRD/examples/example.md`.
-
-`@cpt:example`
-```markdown
-- **Accessibility** (UX-PRD-002): Not applicable — MVP targets internal teams with standard desktop browsers
-- **Internationalization** (UX-PRD-003): Not applicable — English-only for initial release
-- **Regulatory Compliance** (COMPL-PRD-001/002/003): Not applicable — No PII or regulated data in MVP scope
-```
-`@/cpt:example`
-
 ### Public Interfaces
 
 API surface and external integration contracts.
@@ -3453,8 +3470,6 @@ id = "prd-public-interfaces"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3462,6 +3477,7 @@ pattern = "Public Library Interfaces"
 # Human description of this heading's purpose
 description = "Public library interfaces and integration contracts."
 # Example heading texts showing correct usage
+template = "7. Public Library Interfaces"
 examples = ["## 7. Public Library Interfaces"]
 ```
 `@/cpt:heading`
@@ -3482,7 +3498,7 @@ to_code = false              # true = ID is expected to appear in code via @cpt-
 headings = ["prd-public-interfaces"]  # heading constraint IDs where this identifier must be placed
 
 [references.DESIGN]  # how this ID is referenced in DESIGN artifacts
-coverage = true            # true = must reference | false = referencing prohibited | omit = optional
+# coverage: omitted (optional)
 # task: omitted (optional) # true = ref must carry task | false = prohibited | omit = optional
 # priority: omitted (optional) # true = ref must carry priority | false = prohibited | omit = optional
 headings = ["design-tech-arch-api-contracts"]  # target heading constraint in DESIGN
@@ -3529,9 +3545,7 @@ id = "prd-public-interfaces-api"
 # Markdown heading level (1=H1 … 6=H6)
 level = 3
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3539,6 +3553,7 @@ pattern = "Public API Surface"
 # Human description of this heading's purpose
 description = "Public API surface."
 # Example heading texts showing correct usage
+template = "7.1 Public API Surface"
 examples = ["### 7.1 Public API Surface"]
 ```
 `@/cpt:heading`
@@ -3550,7 +3565,6 @@ examples = ["### 7.1 Public API Surface"]
 id = "prd-interface-entry"
 level = 4
 required = false
-numbered = false
 # multiple: omitted = allowed (can repeat)
 template = "{Interface Name}"
 description = "Individual public interface entry."
@@ -3575,7 +3589,23 @@ examples = []
 
 `@cpt:example`
 ```markdown
-None.
+#### REST API
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-interface-rest-api`
+
+**Type**: REST API (OpenAPI 3.0)
+**Stability**: stable
+**Description**: HTTP REST API for task management (CRUD operations, filtering, search)
+**Breaking Change Policy**: Major version bump required for endpoint removal or request/response schema incompatible changes
+
+#### Task Data Model
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-interface-task-model`
+
+**Type**: JSON Schema
+**Stability**: stable
+**Description**: Task entity structure exposed via API and stored in IndexedDB
+**Breaking Change Policy**: Field removals require major version; new optional fields are minor changes
 ```
 `@/cpt:example`
 
@@ -3588,9 +3618,7 @@ id = "prd-public-interfaces-external-contracts"
 # Markdown heading level (1=H1 … 6=H6)
 level = 3
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3598,6 +3626,7 @@ pattern = "External Integration Contracts"
 # Human description of this heading's purpose
 description = "External integration contracts."
 # Example heading texts showing correct usage
+template = "7.2 External Integration Contracts"
 examples = ["### 7.2 External Integration Contracts"]
 ```
 `@/cpt:heading`
@@ -3617,7 +3646,6 @@ Contracts this library expects from external systems or provides to downstream c
 id = "prd-contract-entry"
 level = 4
 required = false
-numbered = false
 # multiple: omitted = allowed (can repeat)
 template = "{Contract Name}"
 description = "Individual external integration contract entry."
@@ -3641,7 +3669,13 @@ examples = []
 
 `@cpt:example`
 ```markdown
-None.
+#### Sync Service Contract
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-contract-sync`
+
+**Direction**: required from client (external sync backend)
+**Protocol/Format**: WebSocket + JSON for real-time task updates
+**Compatibility**: Protocol versioned independently; supports graceful degradation to polling
 ```
 `@/cpt:example`
 
@@ -3657,8 +3691,6 @@ id = "prd-use-cases"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3666,6 +3698,7 @@ pattern = "Use Cases"
 # Human description of this heading's purpose
 description = "Use cases section."
 # Example heading texts showing correct usage
+template = "8. Use Cases"
 examples = ["## 8. Use Cases"]
 ```
 `@/cpt:heading`
@@ -3713,7 +3746,6 @@ Optional: Include when interaction flows add clarity beyond requirement statemen
 id = "prd-usecase-entry"
 level = 4
 required = false
-numbered = false
 # multiple: omitted = allowed (can repeat)
 template = "{Use Case Name}"
 description = "Individual use case entry."
@@ -3764,29 +3796,28 @@ section = "semantic"
 
 `@cpt:example`
 ```markdown
-### UC-001 Create and Assign Task
+#### Create a New Task
 
-**ID**: `cpt-ex-task-flow-usecase-create-task`
+- [ ] `p1` - **ID**: `cpt-examples-todo-app-usecase-create-task`
 
-**Actors**:
+**Actor**: `cpt-examples-todo-app-actor-user`
 
-`cpt-ex-task-flow-actor-lead`
-
-**Preconditions**: User is authenticated and has team lead permissions.
+**Preconditions**:
+- User is authenticated and on the main task list view
 
 **Main Flow**:
+1. User clicks the "Add Task" button
+2. System displays the task creation form
+3. User enters task title (required), description, due date, priority, and category
+4. User clicks "Save"
+5. System validates input and creates the task
+6. System displays the updated task list with the new task
 
-1. Lead creates a new task with title and description
-2. Lead assigns task to a team member
-3. Lead sets due date and priority
-4. System validates task data
-5. System sends notification to assignee
-
-**Postconditions**: Task appears in assignee's task list; notification sent.
+**Postconditions**:
+- New task is persisted and visible in the task list
 
 **Alternative Flows**:
-
-- **Validation fails**: If step 4 fails validation (e.g., no assignee selected), system displays error and returns to step 2
+- **Validation fails**: System displays error messages, user corrects input
 ```
 `@/cpt:example`
 
@@ -3802,8 +3833,6 @@ id = "prd-acceptance-criteria"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3811,6 +3840,7 @@ pattern = "Acceptance Criteria"
 # Human description of this heading's purpose
 description = "Acceptance criteria for delivery."
 # Example heading texts showing correct usage
+template = "9. Acceptance Criteria"
 examples = ["## 9. Acceptance Criteria"]
 ```
 `@/cpt:heading`
@@ -3830,9 +3860,12 @@ Business-level acceptance criteria for the PRD as a whole.
 
 `@cpt:example`
 ```markdown
-- [ ] Tasks can be created/assigned in under 30 seconds
-- [ ] Task updates propagate to all clients within 2 seconds
-- [ ] Overdue alerts are delivered within 1 minute
+- [x] User can create tasks with all required fields
+- [x] User can mark tasks as complete/incomplete
+- [x] User can delete tasks
+- [x] User can filter tasks by status, category, priority
+- [ ] Offline mode works without errors
+- [ ] Sync completes within 5 seconds
 ```
 `@/cpt:example`
 
@@ -3846,8 +3879,6 @@ id = "prd-dependencies"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3855,6 +3886,7 @@ pattern = "Dependencies"
 # Human description of this heading's purpose
 description = "Dependencies required to deliver the PRD."
 # Example heading texts showing correct usage
+template = "10. Dependencies"
 examples = ["## 10. Dependencies"]
 ```
 `@/cpt:heading`
@@ -3875,7 +3907,8 @@ examples = ["## 10. Dependencies"]
 ```markdown
 | Dependency | Description | Criticality |
 |------------|-------------|-------------|
-| Notification delivery | Push notification channel for deadlines/status changes | p2 |
+| Auth Service | User authentication | p1 |
+| Cloud Storage | Task persistence | p1 |
 ```
 `@/cpt:example`
 
@@ -3889,8 +3922,6 @@ id = "prd-assumptions"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3898,6 +3929,7 @@ pattern = "Assumptions"
 # Human description of this heading's purpose
 description = "Assumptions that must hold."
 # Example heading texts showing correct usage
+template = "11. Assumptions"
 examples = ["## 11. Assumptions"]
 ```
 `@/cpt:heading`
@@ -3929,8 +3961,8 @@ section = "semantic"
 
 `@cpt:example`
 ```markdown
-- Users have modern browsers and reliable connectivity for real-time updates
-- The initial deployment is cloud-hosted
+- Users have modern browsers (Chrome, Firefox, Safari, Edge — latest 2 versions)
+- Users have intermittent internet connectivity
 ```
 `@/cpt:example`
 
@@ -3944,8 +3976,6 @@ id = "prd-risks"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3953,6 +3983,7 @@ pattern = "Risks"
 # Human description of this heading's purpose
 description = "Risks and mitigations."
 # Example heading texts showing correct usage
+template = "12. Risks"
 examples = ["## 12. Risks"]
 ```
 `@/cpt:heading`
@@ -3987,8 +4018,8 @@ section = "semantic"
 ```markdown
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| Adoption risk | Teams may resist switching tools | Focus on migration path and quick wins |
-| Scale risk | Real-time may not scale beyond 50 concurrent users | Load testing before launch |
+| Sync conflicts | Data loss | Implement conflict resolution with last-write-wins + user notification |
+| Offline storage limits | Cannot add tasks | Implement storage quota warnings |
 ```
 `@/cpt:example`
 
@@ -4001,10 +4032,10 @@ section = "semantic"
 id = "prd-open-questions"
 level = 2
 required = false
-numbered = true
 multiple = false
 pattern = "Open Questions"
 description = "Unresolved questions that need answers before or during implementation."
+template = "13. Open Questions"
 examples = ["## 13. Open Questions"]
 ```
 `@/cpt:heading`
@@ -4023,8 +4054,9 @@ Unresolved questions that need answers before or during implementation.
 
 `@cpt:example`
 ```markdown
-- How should we handle migration from existing tools?
-- What is the maximum team size we should optimize for?
+- How long should completed tasks be retained before archival?
+- Should we support task sharing between users in future phases?
+- What is the maximum number of categories per user?
 ```
 `@/cpt:example`
 
@@ -4037,9 +4069,9 @@ Unresolved questions that need answers before or during implementation.
 id = "prd-traceability"
 level = 2
 required = false
-numbered = true
 multiple = false
 pattern = "Traceability"
+template = "14. Traceability"
 description = "Links to related specification artifacts."
 examples = ["## 14. Traceability"]
 ```
@@ -4056,13 +4088,3 @@ Links to related specification artifacts.
 - **Features**: [features/](./features/)
 ```
 `@/cpt:prompt`
-
-> **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/PRD/examples/example.md`.
-
-`@cpt:example`
-```markdown
-- **Design**: [DESIGN.md](./DESIGN.md)
-- **ADRs**: [ADR/](./ADR/)
-- **Features**: [features/](./features/)
-```
-`@/cpt:example`

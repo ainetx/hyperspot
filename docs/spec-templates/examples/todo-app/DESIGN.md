@@ -201,6 +201,13 @@ Persistent data storage. Interface: SQL via backend.
 **Protocol**: Messages follow format: `{ type: "sync" | "update" | "delete", payload: Task }`
 **References**: PRD `cpt-examples-todo-app-contract-sync`
 
+#### Task Data Model
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-interface-task-model`
+
+**Technology**: JSON Schema
+**Data Format**: Shared Task object used across REST API, WebSocket sync, and local storage
+
 #### IndexedDB Local Storage Interface
 
 - [x] `p1` - **ID**: `cpt-examples-todo-app-interface-indexeddb`
@@ -223,7 +230,7 @@ No internal module dependencies — Todo App is a standalone module with no plat
 **Type**: External API
 **Direction**: bidirectional
 **Protocol / Driver**: WebSocket + JSON; messages follow format: `{ type: "sync" | "update" | "delete", payload: Task }`
-**Data Format**: JSON (follows Task model from `cpt-examples-todo-app-interface-task-model`)
+**Data Format**: JSON (follows Task model interface)
 **Compatibility**: Protocol version negotiated on connection; supports fallback to HTTP polling
 **References**: PRD `cpt-examples-todo-app-contract-sync`
 

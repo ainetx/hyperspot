@@ -1,207 +1,255 @@
-# PRD — TaskFlow
+# PRD - Todo App
 
 ## 1. Overview
 
 ### 1.1 Purpose
 
-TaskFlow is a lightweight task management system for small teams, enabling task creation, assignment, and progress tracking with real-time notifications.
+A web application for managing personal tasks with support for categories, priorities, and filtering.
 
 ### 1.2 Background / Problem Statement
 
-The system focuses on simplicity and speed, allowing teams to manage their daily work without the overhead of complex project management tools. TaskFlow bridges the gap between simple to-do lists and enterprise-grade solutions.
+Todo App is a simple and intuitive task management application. Users can create, edit, and delete tasks, mark them as completed, and organize them by categories and priorities.
 
-**Target Users**:
-
-- Team leads managing sprints
-- Developers tracking daily work
-- Project managers monitoring progress
-
-**Key Problems Solved**:
-
-- Scattered task tracking across multiple tools
-- Lack of visibility into team workload
-- Missing deadline notifications
+The application is designed for individual use with cross-device synchronization. The main focus is on minimalist interface and fast performance.
 
 ### 1.3 Goals (Business Outcomes)
 
-**Success Criteria**:
-
-- Tasks created and assigned in under 30 seconds (Baseline: not measured; Target: v1.0)
-- Real-time status updates visible to all team members within 2 seconds (Baseline: N/A; Target: v1.0)
-- Overdue task alerts delivered within 1 minute of deadline (Baseline: N/A; Target: v1.0)
-
-**Capabilities**:
-
-- Manage team tasks and assignments
-- Track task status and progress in real time
-- Send notifications for deadlines and status changes
+- Task creation time < 3 seconds
+- 95% of users successfully complete onboarding
+- NPS > 40
 
 ### 1.4 Glossary
 
 | Term | Definition |
 |------|------------|
-| Task | A tracked work item owned by a team member with status and due date |
-| Assignment | Mapping a task to an assignee (team member) |
-| Notification | An alert emitted when tasks change or become overdue |
+| Task | A single actionable item with title, optional description, due date, priority, and category |
+| Category | A user-defined grouping for tasks |
 
 ## 2. Actors
 
+> **Note**: Stakeholder needs are managed at the project/task level by the steering committee and are not duplicated in module specs. Focus on **actors** (users, systems) that directly interact with this module.
+
 ### 2.1 Human Actors
 
-#### Team Member
+#### User
 
-**ID**: `cpt-ex-task-flow-actor-member`
-
-**Role**: Creates tasks, updates progress, and collaborates on assignments.
-
-#### Team Lead
-
-**ID**: `cpt-ex-task-flow-actor-lead`
-
-**Role**: Assigns tasks, sets priorities, and monitors team workload.
+**ID**: `cpt-examples-todo-app-actor-user`
+**Role**: Primary user who creates, manages, and completes tasks in the application.
+**Needs**: Simple task management, cross-device access, quick task entry.
 
 ### 2.2 System Actors
 
+#### Sync Service
+
+**ID**: `cpt-examples-todo-app-actor-sync-service`
+**Role**: Background service that synchronizes tasks across user devices in real-time.
+
 #### Notification Service
 
-**ID**: `cpt-ex-task-flow-actor-notifier`
-
-**Role**: Sends alerts for due dates, assignments, and status changes.
+**ID**: `cpt-examples-todo-app-actor-notification-service`
+**Role**: Sends reminders and notifications to users about upcoming or overdue tasks.
 
 ## 3. Operational Concept & Environment
 
+> **Note**: Project-wide runtime, OS, architecture, lifecycle policy, and module integration patterns (Rust native + auto-generated gRPC/REST) are defined in root [PRD.md](../../PRD.md). Only document module-specific deviations or additional constraints here. **If this module has no special environment constraints, delete this entire section.**
+
 ### 3.1 Module-Specific Environment Constraints
 
-None.
+- Requires IndexedDB support for offline functionality (browser-only constraint)
+- WebSocket support required for real-time sync (fallback to polling if unavailable)
 
 ## 4. Scope
 
 ### 4.1 In Scope
 
-- Task creation, assignment, and lifecycle tracking
-- Real-time updates for task status changes
-- Deadline notifications
+- CRUD operations for tasks
+- Categorization and prioritization
+- Filtering and search
+- Cross-device synchronization
+- Offline support
 
 ### 4.2 Out of Scope
 
-- Time tracking, billing, or invoicing
-- Cross-organization collaboration
+- Team collaboration features (future phase)
+- Calendar integration
+- File attachments
 
 ## 5. Functional Requirements
 
-### FR-001 Task Management
+> **Testing strategy**: Unless otherwise specified, all requirements are verified via automated tests (unit, integration, e2e) targeting 95% code coverage. Only document verification method explicitly for non-test approaches (analysis, inspection, demonstration) or special testing needs.
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-fr-task-management`
+### 5.1 Core Task Management
 
-The system MUST allow creating, editing, and deleting tasks. The system MUST allow assigning tasks to team members. The system MUST allow setting due dates and priorities. Tasks should support rich text descriptions and file attachments.
+### 5.1 Core Task Management
 
-**Actors**:
+#### Create Task
 
-`cpt-ex-task-flow-actor-member`, `cpt-ex-task-flow-actor-lead`
+- [x] `p1` - **ID**: `cpt-examples-todo-app-fr-create-task`
 
-### FR-002 Notifications
+The system **MUST** allow users to create a new task with a title, optional description, due date, priority level, and category.
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-fr-notifications`
+**Rationale**: Core functionality — users need to capture tasks quickly.
+**Actors**: `cpt-examples-todo-app-actor-user`
 
-The system MUST send push notifications for task assignments. The system MUST send alerts for overdue tasks. Notifications should be configurable per user to allow opting out of certain notification types.
+#### Complete Task
 
-**Actors**:
+- [x] `p1` - **ID**: `cpt-examples-todo-app-fr-complete-task`
 
-`cpt-ex-task-flow-actor-notifier`, `cpt-ex-task-flow-actor-member`
+The system **MUST** allow users to mark a task as completed or revert it to incomplete status.
+
+**Rationale**: Essential for task lifecycle management.
+**Actors**: `cpt-examples-todo-app-actor-user`
+
+#### Delete Task
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-fr-delete-task`
+
+The system **MUST** allow users to delete a task permanently.
+
+**Rationale**: Users need to remove irrelevant or mistaken tasks.
+**Actors**: `cpt-examples-todo-app-actor-user`
+
+### 5.2 Organization
+
+#### Filter Tasks
+
+- [x] `p2` - **ID**: `cpt-examples-todo-app-fr-filter-tasks`
+
+The system **MUST** allow users to filter tasks by status (all, active, completed), category, and priority.
+
+**Rationale**: Helps users focus on relevant tasks.
+**Actors**: `cpt-examples-todo-app-actor-user`
 
 ## 6. Non-Functional Requirements
 
+> **Default guidelines**: Project-wide NFR baselines (performance, security, reliability, scalability) are defined in root [PRD.md](../../PRD.md) and [docs/guidelines/](../../guidelines/). Only document module-specific NFRs here — either **exclusions** from defaults or **standalone** requirements unique to this module.
+>
+> **Testing strategy**: NFRs are verified via automated benchmarks, security scans, and monitoring unless otherwise specified.
+
 ### 6.1 Module-Specific NFRs
 
-#### Security
+#### Response Time
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-nfr-security`
+- [x] `p1` - **ID**: `cpt-examples-todo-app-nfr-response-time`
 
-- Authentication MUST be required for all user actions
-- Authorization MUST enforce team role permissions
-- Passwords MUST be stored using secure hashing algorithms
+All user interactions **MUST** complete within 200ms at p95 under normal load (stricter than project default of 500ms).
 
-#### Performance
+**Threshold**: 200ms p95 latency for UI interactions
+**Rationale**: Todo app is a productivity tool where perceived speed directly impacts user satisfaction; willing to accept increased complexity (local-first architecture) to achieve this
+**Architecture Allocation**: See DESIGN.md § NFR Allocation for how this is realized
 
-- [ ] `p2` - **ID**: `cpt-ex-task-flow-nfr-performance`
+#### Data Persistence
 
-- Task list SHOULD load within 500ms for teams under 100 tasks
-- Real-time updates SHOULD propagate within 2 seconds
+- [x] `p1` - **ID**: `cpt-examples-todo-app-nfr-data-persistence`
+
+User data **MUST** be persisted locally immediately and synced to cloud storage within 5 seconds of any change when online.
+
+**Threshold**: Local persistence: <50ms; cloud sync: <5s when online
+**Rationale**: Module-specific requirement (project default doesn't cover offline-first + sync pattern)
+**Architecture Allocation**: See DESIGN.md § NFR Allocation for how this is realized
+
+#### Offline Support
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-nfr-offline-support`
+
+The system **MUST** support offline mode where task creation, completion, filtering, and deletion operate without network connectivity.
+
+**Threshold**: Offline operations succeed with no errors; synchronization begins automatically when connectivity resumes
+**Rationale**: Offline-first is a core product requirement for intermittent connectivity scenarios
+**Architecture Allocation**: See DESIGN.md § Architecture Drivers and § NFR Allocation for how this is realized
 
 ### 6.2 NFR Exclusions
-
-- **Accessibility** (UX-PRD-002): Not applicable — MVP targets internal teams with standard desktop browsers
-- **Internationalization** (UX-PRD-003): Not applicable — English-only for initial release
-- **Regulatory Compliance** (COMPL-PRD-001/002/003): Not applicable — No PII or regulated data in MVP scope
 
 ## 7. Public Library Interfaces
 
 ### 7.1 Public API Surface
 
-None.
+#### REST API
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-interface-rest-api`
+
+**Type**: REST API (OpenAPI 3.0)
+**Stability**: stable
+**Description**: HTTP REST API for task management (CRUD operations, filtering, search)
+**Breaking Change Policy**: Major version bump required for endpoint removal or request/response schema incompatible changes
+
+#### Task Data Model
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-interface-task-model`
+
+**Type**: JSON Schema
+**Stability**: stable
+**Description**: Task entity structure exposed via API and stored in IndexedDB
+**Breaking Change Policy**: Field removals require major version; new optional fields are minor changes
 
 ### 7.2 External Integration Contracts
 
-None.
+#### Sync Service Contract
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-contract-sync`
+
+**Direction**: required from client (external sync backend)
+**Protocol/Format**: WebSocket + JSON for real-time task updates
+**Compatibility**: Protocol versioned independently; supports graceful degradation to polling
 
 ## 8. Use Cases
 
-### UC-001 Create and Assign Task
+#### Create a New Task
 
-**ID**: `cpt-ex-task-flow-usecase-create-task`
+- [ ] `p1` - **ID**: `cpt-examples-todo-app-usecase-create-task`
 
-**Actors**:
+**Actor**: `cpt-examples-todo-app-actor-user`
 
-`cpt-ex-task-flow-actor-lead`
-
-**Preconditions**: User is authenticated and has team lead permissions.
+**Preconditions**:
+- User is authenticated and on the main task list view
 
 **Main Flow**:
+1. User clicks the "Add Task" button
+2. System displays the task creation form
+3. User enters task title (required), description, due date, priority, and category
+4. User clicks "Save"
+5. System validates input and creates the task
+6. System displays the updated task list with the new task
 
-1. Lead creates a new task with title and description
-2. Lead assigns task to a team member
-3. Lead sets due date and priority
-4. System validates task data
-5. System sends notification to assignee
-
-**Postconditions**: Task appears in assignee's task list; notification sent.
+**Postconditions**:
+- New task is persisted and visible in the task list
 
 **Alternative Flows**:
-
-- **Validation fails**: If step 4 fails validation (e.g., no assignee selected), system displays error and returns to step 2
+- **Validation fails**: System displays error messages, user corrects input
 
 ## 9. Acceptance Criteria
 
-- [ ] Tasks can be created/assigned in under 30 seconds
-- [ ] Task updates propagate to all clients within 2 seconds
-- [ ] Overdue alerts are delivered within 1 minute
+- [x] User can create tasks with all required fields
+- [x] User can mark tasks as complete/incomplete
+- [x] User can delete tasks
+- [x] User can filter tasks by status, category, priority
+- [ ] Offline mode works without errors
+- [ ] Sync completes within 5 seconds
 
 ## 10. Dependencies
 
 | Dependency | Description | Criticality |
 |------------|-------------|-------------|
-| Notification delivery | Push notification channel for deadlines/status changes | p2 |
+| Auth Service | User authentication | p1 |
+| Cloud Storage | Task persistence | p1 |
 
 ## 11. Assumptions
 
-- Users have modern browsers and reliable connectivity for real-time updates
-- The initial deployment is cloud-hosted
+- Users have modern browsers (Chrome, Firefox, Safari, Edge — latest 2 versions)
+- Users have intermittent internet connectivity
 
 ## 12. Risks
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| Adoption risk | Teams may resist switching tools | Focus on migration path and quick wins |
-| Scale risk | Real-time may not scale beyond 50 concurrent users | Load testing before launch |
+| Sync conflicts | Data loss | Implement conflict resolution with last-write-wins + user notification |
+| Offline storage limits | Cannot add tasks | Implement storage quota warnings |
 
 ## 13. Open Questions
 
-- How should we handle migration from existing tools?
-- What is the maximum team size we should optimize for?
+- How long should completed tasks be retained before archival?
+- Should we support task sharing between users in future phases?
+- What is the maximum number of categories per user?
 
 ## 14. Traceability
-
-- **Design**: [DESIGN.md](./DESIGN.md)
-- **ADRs**: [ADR/](./ADR/)
-- **Features**: [features/](./features/)
 

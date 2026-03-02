@@ -6,9 +6,9 @@ project_root = ".."
 [system]
 name = "cyberfabric"
 slug = "cf"
-kit = "cf-sdlc"
+kit = "sdlc"
 
 [kits]
-[kits.cf-sdlc]
+[kits.sdlc]
 format = "Cypilot"
-path = "config/kits/cf-sdlc"
+path = ".gen/kits/sdlc"

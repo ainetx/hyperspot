@@ -1,114 +1,154 @@
-# Feature: Task CRUD
+# Feature Context: Task Management Core
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-featstatus-task-crud`
+- [ ] `p2` - **ID**: `cpt-examples-todo-app-featstatus-core`
 
-- [ ] `p2` - `cpt-ex-task-flow-feature-task-crud`
+- [x] `p1` - `cpt-examples-todo-app-feature-core`
 
-## Feature Context
+## 1. Feature Context
 
-### 1. Overview
+### 1.1 Overview
 
-Core task management functionality for creating, viewing, updating, and deleting tasks. This feature provides the foundation for team collaboration by enabling users to track work items through their lifecycle.
+Core CRUD operations for tasks including creation, reading, updating, and deletion of tasks.
 
-Problem: Teams need a central place to track tasks with status, priority, and assignments.
-Primary value: Enables organized task tracking with clear ownership.
-Key assumptions: Users have accounts and belong to at least one team.
+### 1.2 Purpose
 
-### 2. Purpose
+Provides the fundamental task management capabilities that all other features depend on.
 
-Enable team members to manage their work items with full lifecycle tracking from creation through completion.
+### 1.3 Actors
 
-Success criteria: Users can create, view, update, and delete tasks within 500ms response time.
+- `cpt-examples-todo-app-actor-user` - Creates and manages tasks
+- `cpt-examples-todo-app-actor-sync-service` - Synchronizes task changes
+- `cpt-examples-todo-app-actor-notification-service` - Sends reminders based on task state changes
 
-### 3. Actors
+### 1.4 References
 
-- `cpt-ex-task-flow-actor-member`
-- `cpt-ex-task-flow-actor-lead`
+- Overall Design: [DESIGN.md](../DESIGN.md)
+- PRD: [PRD.md](../PRD.md)
+- Requirements: `cpt-examples-todo-app-fr-create-task`, `cpt-examples-todo-app-fr-complete-task`, `cpt-examples-todo-app-fr-delete-task`, `cpt-examples-todo-app-nfr-offline-support`, `cpt-examples-todo-app-nfr-data-persistence`, `cpt-examples-todo-app-interface-rest-api`, `cpt-examples-todo-app-interface-task-model`
+- Design elements: `cpt-examples-todo-app-interface-websocket`, `cpt-examples-todo-app-design-db-tasks`, `cpt-examples-todo-app-design-context-decisions`
+- Dependencies: None
 
-### 4. References
+## 2. Actor Flows (CDSL)
 
-- Overall Design: [DESIGN.md](../../DESIGN.md)
-- ADRs: `cpt-ex-task-flow-adr-postgres-storage`
-- Related feature: [Notifications](../notifications.md)
+### Create Task Flow
 
-## Actor Flows
+- [ ] `p1` - **ID**: `cpt-examples-todo-app-flow-core-create-task`
 
-### Create Task
+**Actor**: `cpt-examples-todo-app-actor-user`
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-flow-create-task`
+**Success Scenarios**:
+- Task is created with all provided fields
+- Task appears in the task list immediately
 
-**Actors**:
-- `cpt-ex-task-flow-actor-member`
-- `cpt-ex-task-flow-actor-lead`
+**Error Scenarios**:
+- Validation fails for required fields
+- Storage quota exceeded
 
-1. [x] - `p1` - User fills task form (title, description, priority) - `inst-fill-form`
-2. [x] - `p1` - API: POST /api/tasks (body: title, description, priority, due_date) - `inst-api-create`
-3. [x] - `p1` - Algorithm: validate task input using `cpt-ex-task-flow-algo-validate-task` - `inst-run-validate`
-4. [x] - `p1` - DB: INSERT tasks(title, description, priority, due_date, status=BACKLOG) - `inst-db-insert`
-5. [ ] - `p2` - User optionally assigns task to team member - `inst-assign`
-6. [ ] - `p2` - API: POST /api/tasks/{task_id}/assignees (body: assignee_id) - `inst-api-assign`
-7. [ ] - `p2` - DB: INSERT task_assignees(task_id, assignee_id) - `inst-db-assign-insert`
-8. [x] - `p1` - API: RETURN 201 Created (task_id, status=BACKLOG) - `inst-return-created`
+**Steps**:
+1. [ ] - `p1` - User clicks "Add Task" button - `inst-create-1`
+2. [ ] - `p1` - UI: Display task creation form - `inst-create-2`
+3. [ ] - `p1` - User enters task title (required) - `inst-create-3`
+4. [ ] - `p1` - User optionally sets description, due date, priority, category - `inst-create-4`
+5. [ ] - `p1` - User clicks "Save" - `inst-create-5`
+6. [ ] - `p1` - API: POST /tasks ({ title, description, dueDate, priority, categoryId }) - `inst-create-6`
+7. [ ] - `p1` - DB: INSERT tasks (id, user_id, title, description, status, priority, category_id, due_date) - `inst-create-7`
+8. [ ] - `p1` - **IF** validation passes - `inst-create-8`
+   1. [ ] - `p1` - DB: COMMIT transaction - `inst-create-8a`
+   2. [ ] - `p1` - **RETURN** created task with generated ID - `inst-create-8b`
+9. [ ] - `p1` - **ELSE** - `inst-create-9`
+   1. [ ] - `p1` - **RETURN** validation error response - `inst-create-9a`
 
-## Processes / Business Logic
+### Delete Task Flow
 
-### Validate Task
+- [ ] `p1` - **ID**: `cpt-examples-todo-app-flow-core-delete-task`
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-algo-validate-task`
+**Actor**: `cpt-examples-todo-app-actor-user`
 
-1. [x] - `p1` - **IF** title is empty **RETURN** error "Title required" - `inst-check-title`
-2. [x] - `p1` - **IF** priority not in [LOW, MEDIUM, HIGH] **RETURN** error - `inst-check-priority`
-3. [x] - `p1` - **IF** due_date is present AND due_date is in the past **RETURN** error - `inst-check-due-date`
-4. [x] - `p1` - DB: SELECT tasks WHERE title=? AND status!=DONE (dedupe check) - `inst-db-dedupe-check`
-5. [ ] - `p2` - **IF** duplicate exists **RETURN** error - `inst-return-duplicate`
-6. [x] - `p1` - **RETURN** valid - `inst-return-valid`
+**Success Scenarios**:
+- Task is permanently removed from storage
+- Task disappears from the list
 
-## States
+**Error Scenarios**:
+- Task not found
+- Concurrent deletion conflict
 
-### Task Status
+**Steps**:
+1. [ ] - `p1` - User clicks delete icon on a task - `inst-delete-1`
+2. [ ] - `p1` - UI: Display confirmation dialog - `inst-delete-2`
+3. [ ] - `p1` - User confirms deletion - `inst-delete-3`
+4. [ ] - `p1` - API: DELETE /tasks/:id - `inst-delete-4`
+5. [ ] - `p1` - DB: DELETE FROM tasks WHERE id = :id AND user_id = :userId - `inst-delete-5`
+6. [ ] - `p1` - **IF** task exists - `inst-delete-6`
+   1. [ ] - `p1` - **RETURN** success (204 No Content) - `inst-delete-6a`
+7. [ ] - `p1` - **ELSE** - `inst-delete-7`
+   1. [ ] - `p1` - **RETURN** not found error (404) - `inst-delete-7a`
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-state-task-status`
+## 3. Processes / Business Logic (CDSL)
 
-1. [x] - `p1` - **FROM** BACKLOG **TO** IN_PROGRESS **WHEN** user starts work - `inst-start`
-2. [ ] - `p2` - **FROM** IN_PROGRESS **TO** DONE **WHEN** user completes - `inst-complete`
-3. [ ] - `p2` - **FROM** DONE **TO** BACKLOG **WHEN** user reopens - `inst-reopen`
+### Task Validation Algorithm
 
-## Definitions of Done
+- [ ] `p2` - **ID**: `cpt-examples-todo-app-algo-core-validate-task`
 
-### Task Creation
+**Input**: Task creation/update payload
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-dod-task-create`
+**Output**: Validation result with errors array
 
-Users can create tasks with title, description, priority, and due date. The system validates input and stores the task with BACKLOG status.
+**Steps**:
+1. [ ] - `p1` - Parse and normalize input fields - `inst-val-1`
+2. [ ] - `p1` - **IF** title is empty or > 255 chars - `inst-val-2`
+   1. [ ] - `p1` - Add error: "Title is required and must be under 255 characters" - `inst-val-2a`
+3. [ ] - `p1` - **IF** description > 5000 chars - `inst-val-3`
+   1. [ ] - `p1` - Add error: "Description must be under 5000 characters" - `inst-val-3a`
+4. [ ] - `p1` - **IF** dueDate is in the past - `inst-val-4`
+   1. [ ] - `p1` - Add warning: "Due date is in the past" - `inst-val-4a`
+5. [ ] - `p1` - **IF** priority not in ['low', 'medium', 'high'] - `inst-val-5`
+   1. [ ] - `p1` - Add error: "Invalid priority value" - `inst-val-5a`
+6. [ ] - `p1` - **IF** categoryId provided - `inst-val-6`
+   1. [ ] - `p1` - DB: SELECT id FROM categories WHERE id = :categoryId AND user_id = :userId - `inst-val-6a`
+   2. [ ] - `p1` - **IF** category not found, add error - `inst-val-6b`
+7. [ ] - `p1` - **RETURN** { valid: errors.length === 0, errors, warnings } - `inst-val-7`
 
-**Implementation details**:
-- API: `POST /api/tasks` with JSON body `{title, description, priority, due_date}`
-- DB: insert into `tasks` table (columns: title, description, priority, due_date, status)
-- Domain: `Task` entity (id, title, description, priority, due_date, status)
+## 4. States (CDSL)
+
+### Task State Machine
+
+- [ ] `p2` - **ID**: `cpt-examples-todo-app-state-core-task`
+
+**States**: draft, active, completed, deleted
+
+**Initial State**: active
+
+**Transitions**:
+1. [ ] - `p1` - **FROM** active **TO** completed **WHEN** user marks task as done - `inst-state-1`
+2. [ ] - `p1` - **FROM** completed **TO** active **WHEN** user unchecks completed task - `inst-state-2`
+3. [ ] - `p1` - **FROM** active **TO** deleted **WHEN** user deletes task - `inst-state-3`
+4. [ ] - `p1` - **FROM** completed **TO** deleted **WHEN** user deletes completed task - `inst-state-4`
+
+## 5. Definitions of Done
+
+### Implement Task CRUD Operations
+
+- [ ] `p1` - **ID**: `cpt-examples-todo-app-dod-core-crud`
+
+The system **MUST** provide full Create, Read, Update, Delete operations for tasks. All operations **MUST** validate input and return appropriate error responses.
 
 **Implements**:
-- `cpt-ex-task-flow-flow-create-task`
-- `cpt-ex-task-flow-algo-validate-task`
+- `cpt-examples-todo-app-flow-core-create-task`
+- `cpt-examples-todo-app-flow-core-delete-task`
+- `cpt-examples-todo-app-algo-core-validate-task`
+- `cpt-examples-todo-app-state-core-task`
 
-**Covers (PRD)**:
-- `cpt-ex-task-flow-fr-task-management`
-- `cpt-ex-task-flow-nfr-performance`
+## 6. Acceptance Criteria
 
-**Covers (DESIGN)**:
-- `cpt-ex-task-flow-principle-realtime-first`
-- `cpt-ex-task-flow-constraint-supported-platforms`
-- `cpt-ex-task-flow-component-api-server`
-- `cpt-ex-task-flow-component-postgresql`
-- `cpt-ex-task-flow-seq-task-creation`
-- `cpt-ex-task-flow-dbtable-tasks`
+- [ ] Tasks can be created with title, description, due date, priority, and category
+- [ ] Tasks can be read, updated, and deleted
+- [ ] Task validation rejects invalid input with clear error messages
+- [ ] Task state transitions follow the defined state machine
+- [ ] Concurrent operations are handled safely
 
-## Acceptance Criteria
+## 7. Additional Context (optional)
 
-- [ ] The feature supports task creation and assignment flow end-to-end
-- [ ] Validation rules reject invalid titles, priorities, and past due dates
-- [ ] State transitions follow the Task Status state machine
+### Performance Considerations
 
-## Additional Context (optional)
-
-The feature must keep task status transitions consistent with the Task Status state machine in Section D. All state changes should emit events for the notification system.
+Task list queries should use cursor-based pagination for lists > 100 items. Consider implementing virtual scrolling on the frontend for smooth UX with large datasets.
 

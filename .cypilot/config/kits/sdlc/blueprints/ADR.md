@@ -33,7 +33,7 @@ date: {YYYY-MM-DD}
 decision-makers: {optionally fill decision makers names, accounts or remove that field}"""
 example_frontmatter = """
 status: accepted
-date: 2026-02-16"""
+date: 2024-01-15"""
 ```
 `@/cpt:blueprint`
 
@@ -2291,8 +2291,6 @@ id = "adr-h1-title"
 level = 1
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Suggested heading text template for authors
@@ -2302,7 +2300,7 @@ prompt = "Describe the problem and chosen solution in the title"
 # Human description of this heading's purpose
 description = "ADR document title (H1)."
 # Example heading texts showing correct usage
-examples = ["# ADR-0001: Use PostgreSQL for Task Storage"]
+examples = ["# ADR-0001: Use IndexedDB for Offline Storage"]
 ```
 `@/cpt:heading`
 
@@ -2376,7 +2374,7 @@ coverage = false           # true = must reference | false = referencing prohibi
 
 `@cpt:example`
 ```markdown
-**ID**: `cpt-ex-task-flow-adr-postgres-storage`
+**ID**: `cpt-examples-todo-app-adr-local-storage`
 ```
 `@/cpt:example`
 
@@ -2392,8 +2390,6 @@ id = "adr-context"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2417,14 +2413,7 @@ examples = ["## Context and Problem Statement"]
 
 `@cpt:example`
 ```markdown
-TaskFlow needs persistent storage for tasks, users, and audit history. We need to choose between SQL and NoSQL databases considering query patterns, data relationships, and team expertise.
-
-The system will handle:
-
-- Task CRUD operations with complex filtering
-- User and team relationships
-- Assignment history and audit trail
-- Real-time updates via change notifications
+The application requires offline-first functionality where users can create, edit, and complete tasks without network connectivity. We need to choose a client-side storage solution that can handle structured data with efficient querying.
 ```
 `@/cpt:example`
 
@@ -2440,8 +2429,6 @@ id = "adr-decision-drivers"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2466,10 +2453,10 @@ examples = ["## Decision Drivers"]
 
 `@cpt:example`
 ```markdown
-- Strong consistency required for task state transitions
-- Relational queries needed for assignments and team structures
-- Team has existing PostgreSQL expertise
-- Operational maturity and hosting options important
+* Must support structured data with indexes for filtering
+* Must handle storage of thousands of tasks efficiently
+* Must work across all target browsers
+* Must support asynchronous operations to avoid UI blocking
 ```
 `@/cpt:example`
 
@@ -2485,8 +2472,6 @@ id = "adr-considered-options"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2512,9 +2497,9 @@ examples = ["## Considered Options"]
 
 `@cpt:example`
 ```markdown
-1. **PostgreSQL** — Relational database with strong ACID guarantees, mature ecosystem, team expertise
-2. **MongoDB** — Document store with flexible schema, good for rapid iteration, less suited for relational data
-3. **SQLite** — Embedded database for simpler deployment, limited concurrent access, no built-in replication
+* LocalStorage with JSON serialization
+* IndexedDB with Dexie.js wrapper
+* SQLite via WebAssembly (sql.js)
 ```
 `@/cpt:example`
 
@@ -2530,8 +2515,6 @@ id = "adr-decision-outcome"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2555,7 +2538,7 @@ Chosen option: "{title of option 1}", because {justification, e.g., only option 
 
 `@cpt:example`
 ```markdown
-Chosen option: **PostgreSQL**, because tasks have relational data (users, assignments, comments) that benefit from joins, strong consistency is needed for status transitions and assignments, team has existing PostgreSQL expertise, and it supports JSON columns for flexible metadata if needed later.
+Chosen option: "IndexedDB with Dexie.js wrapper", because it provides native browser support for structured data with indexes, handles large datasets efficiently, and Dexie.js provides a clean Promise-based API that simplifies development.
 ```
 `@/cpt:example`
 
@@ -2571,8 +2554,6 @@ id = "adr-decision-outcome-consequences"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2597,11 +2578,11 @@ examples = ["### Consequences"]
 
 `@cpt:example`
 ```markdown
-- Positive: ACID transactions ensure data integrity during concurrent updates
-- Positive: Efficient queries for filtering tasks by status, assignee, due date
-- Negative: Requires separate database server (vs embedded SQLite)
-- Negative: Schema migrations needed for model changes
-- Follow-up: Set up connection pooling for scalability
+* Good, because IndexedDB is supported by all modern browsers natively
+* Good, because Dexie.js provides TypeScript support and intuitive query syntax
+* Good, because we can create indexes for efficient filtering by status, category, and due date
+* Bad, because IndexedDB API complexity requires the Dexie.js abstraction layer
+* Bad, because debugging IndexedDB issues requires specialized browser dev tools
 ```
 `@/cpt:example`
 
@@ -2619,8 +2600,6 @@ id = "adr-decision-outcome-confirmation"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2644,10 +2623,11 @@ examples = ["### Confirmation"]
 
 `@cpt:example`
 ```markdown
-Confirmed when:
+Implementation verified via:
 
-- A prototype persists tasks and assignments with required relational queries
-- Migration story is documented and validated on a schema change
+* Unit tests for IndexedDB operations using fake-indexeddb
+* Integration tests with Dexie.js queries
+* Manual testing of offline scenarios in Chrome DevTools
 ```
 `@/cpt:example`
 
@@ -2665,8 +2645,6 @@ id = "adr-pros-cons"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2687,9 +2665,7 @@ id = "adr-pros-cons-entry"
 # Markdown heading level (1=H1 … 6=H6)
 level = 3
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = true
 # Suggested heading text template for authors
@@ -2697,7 +2673,7 @@ template = "{Title of option 1}"
 # Human description of this heading's purpose
 description = "A single option evaluation entry (pros/cons)."
 # Example heading texts showing correct usage
-examples = ["### PostgreSQL", "### MongoDB", "### SQLite"]
+examples = ["### LocalStorage with JSON serialization"]
 ```
 `@/cpt:heading`
 
@@ -2725,18 +2701,34 @@ examples = ["### PostgreSQL", "### MongoDB", "### SQLite"]
 
 `@cpt:example`
 ```markdown
-- Pros: Strong consistency, rich SQL queries, mature ecosystem
-- Cons: Operational overhead (DB server, backups, migrations)
+Simple key-value storage with JSON.stringify/parse.
 
-### MongoDB
+* Good, because simple API
+* Good, because universal browser support
+* Bad, because no indexing — filtering requires loading all data
+* Bad, because 5MB storage limit
+* Bad, because synchronous API blocks UI thread
 
-- Pros: Flexible schema, quick iteration
-- Cons: Harder relational queries and consistency model trade-offs
+### IndexedDB with Dexie.js wrapper
 
-### SQLite
+Native browser database with Promise-based wrapper library.
 
-- Pros: Simple deployment, minimal ops
-- Cons: Limited concurrent writes and scaling options
+* Good, because supports indexes for efficient queries
+* Good, because handles large datasets (100MB+)
+* Good, because asynchronous API
+* Good, because Dexie.js simplifies complex API
+* Bad, because requires additional dependency
+* Bad, because debugging is more complex
+
+### SQLite via WebAssembly (sql.js)
+
+Full SQL database compiled to WebAssembly.
+
+* Good, because full SQL support
+* Good, because familiar query language
+* Bad, because large bundle size (~1MB)
+* Bad, because requires manual persistence to IndexedDB anyway
+* Bad, because performance overhead from WASM
 ```
 `@/cpt:example`
 
@@ -2750,8 +2742,6 @@ id = "adr-more-info"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = false
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2775,8 +2765,7 @@ examples = ["## More Information"]
 
 `@cpt:example`
 ```markdown
-- [`cpt-ex-task-flow-fr-task-management`](../PRD.md) — Primary requirement for task storage
-- [`cpt-ex-task-flow-feature-task-crud`](../specs/task-crud/DESIGN.md) — Spec implementing task persistence
+Decision aligns with offline-first architecture principle. Dexie.js chosen over raw IndexedDB for developer productivity.
 ```
 `@/cpt:example`
 
@@ -2790,8 +2779,6 @@ id = "adr-traceability"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = false
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2799,7 +2786,7 @@ pattern = "Traceability"
 # Human description of this heading's purpose
 description = "Optional traceability links back to requirements/decisions."
 # Example heading texts showing correct usage
-examples = []
+examples = ["## Traceability"]
 ```
 `@/cpt:heading`
 
@@ -2819,4 +2806,27 @@ This decision directly addresses the following requirements or design elements:
 ```
 `@/cpt:prompt`
 
+> **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/ADR/examples/example.md`.
+
+`@cpt:example`
+```markdown
+- **PRD**: [PRD.md](../PRD.md)
+- **DESIGN**: [DESIGN.md](../DESIGN.md)
+
+This decision directly addresses the following requirements or design elements:
+
+* `cpt-examples-todo-app-nfr-offline-support` — Enables full offline functionality by providing local storage for tasks
+* `cpt-examples-todo-app-nfr-response-time` — IndexedDB's indexed queries enable <200ms response times for filtering/search operations
+* `cpt-examples-todo-app-fr-filter-tasks` — Indexes on status/category/priority enable efficient filtering without loading all data
+* `cpt-examples-todo-app-principle-offline-first` — This is the core technical decision enabling the offline-first design principle
+
+**Actors**:
+* `cpt-examples-todo-app-actor-user` - Primary beneficiary of offline functionality
+* `cpt-examples-todo-app-actor-sync-service` - Syncs IndexedDB changes to server
+* `cpt-examples-todo-app-actor-notification-service` - Uses local persistence to schedule notifications reliably
+
+**Additional referenced IDs**:
+* `cpt-examples-todo-app-nfr-data-persistence` - IndexedDB enables immediate local persistence
+* `cpt-examples-todo-app-interface-task-model` - Task schema stored locally and exchanged with sync backend
+```
 `@/cpt:example`

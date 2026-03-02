@@ -144,3 +144,7 @@ The system **MUST** {clear description of what to implement}.
 
 - [ ] {Testable criterion for this feature}
 - [ ] {Another testable criterion}
+
+## 7. Additional Context (optional)
+
+{Any additional context, notes, or references that help understand this feature.}

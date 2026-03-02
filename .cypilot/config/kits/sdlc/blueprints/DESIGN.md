@@ -2560,8 +2560,6 @@ id = "design-h1-title"
 level = 1
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Suggested heading text template for authors
@@ -2571,7 +2569,7 @@ prompt = "Module or system name"
 # Human description of this heading's purpose
 description = "DESIGN document title (H1)."
 # Example heading texts showing correct usage
-examples = ["# Technical Design: TaskFlow"]
+examples = ["# Technical Design \u2014 Todo App"]
 ```
 `@/cpt:heading`
 
@@ -2635,8 +2633,6 @@ id = "design-arch-overview"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2644,6 +2640,7 @@ pattern = "Architecture Overview"
 # Human description of this heading's purpose
 description = "Architecture overview section."
 # Example heading texts showing correct usage
+template = "1. Architecture Overview"
 examples = ["## 1. Architecture Overview"]
 ```
 `@/cpt:heading`
@@ -2658,8 +2655,6 @@ id = "design-arch-overview-vision"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2667,7 +2662,8 @@ pattern = "Architectural Vision"
 # Human description of this heading's purpose
 description = "High-level architectural vision."
 # Example heading texts showing correct usage
-examples = ["### Architectural Vision"]
+template = "1.1 Architectural Vision"
+examples = ["### 1.1 Architectural Vision"]
 ```
 `@/cpt:heading`
 
@@ -2683,9 +2679,11 @@ examples = ["### Architectural Vision"]
 
 `@cpt:example`
 ```markdown
-TaskFlow uses a layered architecture with clear separation of concerns: React SPA frontend, Node.js REST API, and PostgreSQL database. WebSocket connections enable real-time updates for collaborative task management.
+The Todo App follows a clean architecture approach with clear separation between presentation, business logic, and data layers. The frontend is built as a single-page application (SPA) communicating with a RESTful backend API.
 
-The architecture prioritizes simplicity and developer productivity while supporting real-time collaboration. System boundaries are clearly defined between presentation, business logic, and data persistence layers.
+The system prioritizes offline-first capabilities using local storage with background synchronization. This ensures users can work without interruption regardless of network conditions.
+
+Event-driven architecture is employed for real-time updates and cross-device synchronization via WebSockets.
 ```
 `@/cpt:example`
 
@@ -2699,8 +2697,6 @@ id = "design-arch-overview-drivers"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2708,7 +2704,8 @@ pattern = "Architecture Drivers"
 # Human description of this heading's purpose
 description = "Architecture drivers: requirements, constraints, and ADR links."
 # Example heading texts showing correct usage
-examples = []
+template = "1.2 Architecture Drivers"
+examples = ["### 1.2 Architecture Drivers"]
 ```
 `@/cpt:heading`
 
@@ -2729,9 +2726,7 @@ id = "design-arch-overview-drivers-functional"
 # Markdown heading level (1=H1 … 6=H6)
 level = 4
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2762,9 +2757,7 @@ id = "design-arch-overview-drivers-nfr"
 # Markdown heading level (1=H1 … 6=H6)
 level = 4
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2795,7 +2788,6 @@ This table maps non-functional requirements from PRD to specific design/architec
 id = "design-arch-overview-drivers-adrs"
 level = 4
 required = false
-numbered = false
 multiple = false
 pattern = "Key ADRs"
 description = "Key architecture decision records relevant to this design."
@@ -2817,41 +2809,24 @@ examples = []
 
 `@cpt:example`
 ```markdown
-### Architecture drivers
+#### Functional Drivers
 
-#### Product requirements
+| Requirement | Design Response |
+|-------------|-----------------|
+| `cpt-examples-todo-app-fr-create-task` | REST API endpoint POST /tasks with validation |
+| `cpt-examples-todo-app-fr-complete-task` | PATCH /tasks/:id with status toggle |
+| `cpt-examples-todo-app-fr-delete-task` | DELETE /tasks/:id endpoint with authorization |
+| `cpt-examples-todo-app-fr-filter-tasks` | Query parameters on GET /tasks |
+| `cpt-examples-todo-app-nfr-offline-support` | IndexedDB local storage with sync queue |
 
-##### Task Management
+#### NFR Allocation
 
-- [ ] `p1` - `cpt-ex-task-flow-fr-task-management`
+This table maps non-functional requirements from PRD to specific design/architecture responses, demonstrating how quality attributes are realized.
 
-**Solution**: REST API with idempotent endpoints and PostgreSQL persistence for task CRUD.
-
-##### Notifications
-
-- [ ] `p1` - `cpt-ex-task-flow-fr-notifications`
-
-**Solution**: WebSocket push with Redis PubSub for real-time notification delivery.
-
-##### Security
-
-- [ ] `p1` - `cpt-ex-task-flow-nfr-security`
-
-**Solution**: JWT authentication with role-based authorization middleware.
-
-##### Performance
-
-- [ ] `p2` - `cpt-ex-task-flow-nfr-performance`
-
-**Solution**: Connection pooling and query optimization for sub-500ms responses.
-
-#### Architecture Decisions Records
-
-##### PostgreSQL for Storage
-
-- [ ] `p1` - `cpt-ex-task-flow-adr-postgres-storage`
-
-Use PostgreSQL for durable task storage. Chosen for strong ACID guarantees, relational query support, and team expertise. Trade-off: requires separate DB server vs embedded SQLite.
+| NFR ID | NFR Summary | Allocated To | Design Response | Verification Approach |
+|--------|-------------|--------------|-----------------|----------------------|
+| `cpt-examples-todo-app-nfr-response-time` | UI interactions <200ms p95 | TaskService + IndexedDB | Local-first architecture: all reads from IndexedDB (sub-10ms), writes optimistic with background sync | Performance benchmarks measure p95 latency |
+| `cpt-examples-todo-app-nfr-data-persistence` | Local persist <50ms, cloud sync <5s | SyncService + IndexedDB + REST API | IndexedDB for immediate local persistence; background WebSocket sync with retry queue | Integration tests verify timing + recovery scenarios |
 ```
 `@/cpt:example`
 
@@ -2865,8 +2840,6 @@ id = "design-arch-overview-layers"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2874,7 +2847,8 @@ pattern = "Architecture Layers"
 # Human description of this heading's purpose
 description = "Architecture layering and responsibilities."
 # Example heading texts showing correct usage
-examples = ["### Architecture Layers"]
+template = "1.3 Architecture Layers"
+examples = ["### 1.3 Architecture Layers"]
 ```
 `@/cpt:heading`
 
@@ -2919,10 +2893,10 @@ coverage = false           # true = must reference | false = referencing prohibi
 ```markdown
 | Layer | Responsibility | Technology |
 |-------|---------------|------------|
-| Presentation | User interface, state management | React, TypeScript |
-| API | REST endpoints, WebSocket handling | Node.js, Express |
-| Business Logic | Task operations, authorization | TypeScript |
-| Data Access | Database queries, caching | PostgreSQL, Redis |
+| Presentation | User interface, user input handling | React, TailwindCSS |
+| Application | Use case orchestration, DTOs | TypeScript services |
+| Domain | Business logic, entities, validation | TypeScript classes |
+| Infrastructure | Data persistence, external APIs | PostgreSQL, Redis |
 ```
 `@/cpt:example`
 
@@ -2938,8 +2912,6 @@ id = "design-principles-constraints"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2947,6 +2919,7 @@ pattern = "Principles & Constraints"
 # Human description of this heading's purpose
 description = "Principles and constraints section."
 # Example heading texts showing correct usage
+template = "2. Principles & Constraints"
 examples = ["## 2. Principles & Constraints"]
 ```
 `@/cpt:heading`
@@ -2961,8 +2934,6 @@ id = "design-principles"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2970,6 +2941,7 @@ pattern = "Design Principles"
 # Human description of this heading's purpose
 description = "Design principles list."
 # Example heading texts showing correct usage
+template = "2.1 Design Principles"
 examples = ["### 2.1 Design Principles"]
 ```
 `@/cpt:heading`
@@ -3010,8 +2982,7 @@ coverage = false           # true = must reference | false = referencing prohibi
 ```toml
 id = "design-principle-entry"
 level = 4
-required = true
-numbered = false
+required = false
 # multiple: omitted = allowed (can repeat)
 template = "{Principle Name}"
 description = "Individual design principle entry."
@@ -3035,17 +3006,21 @@ examples = []
 
 `@cpt:example`
 ```markdown
-#### Real-time First
+#### Offline-First
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-principle-realtime-first`
+- [ ] `p2` - **ID**: `cpt-examples-todo-app-principle-offline-first`
 
-Prefer architectures that keep task state and notifications consistent and observable for all users. Changes should propagate to all connected clients within 2 seconds.
+**ADRs**: `cpt-examples-todo-app-adr-local-storage`
 
-#### Simplicity over Specs
+All operations must work without network connectivity. Data is persisted locally first, then synchronized to the server when connection is available.
 
-- [ ] `p2` - **ID**: `cpt-ex-task-flow-principle-simplicity`
+#### Optimistic Updates
 
-Choose simpler solutions over spec-rich ones. Avoid premature optimization and unnecessary abstractions. Code should be readable by junior developers.
+- [ ] `p2` - **ID**: `cpt-examples-todo-app-principle-optimistic-updates`
+
+**ADRs**: `cpt-examples-todo-app-adr-optimistic-ui`
+
+UI updates immediately on user action without waiting for server confirmation. Rollback occurs only on server rejection.
 ```
 `@/cpt:example`
 
@@ -3059,8 +3034,6 @@ id = "design-constraints"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3068,6 +3041,7 @@ pattern = "Constraints"
 # Human description of this heading's purpose
 description = "Design constraints list."
 # Example heading texts showing correct usage
+template = "2.2 Constraints"
 examples = ["### 2.2 Constraints"]
 ```
 `@/cpt:heading`
@@ -3108,8 +3082,7 @@ coverage = false           # true = must reference | false = referencing prohibi
 ```toml
 id = "design-constraint-entry"
 level = 4
-required = true
-numbered = false
+required = false
 # multiple: omitted = allowed (can repeat)
 template = "{Constraint Name}"
 description = "Individual design constraint entry."
@@ -3133,11 +3106,13 @@ examples = []
 
 `@cpt:example`
 ```markdown
-#### Supported Platforms
+#### Browser Compatibility
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-constraint-platforms`
+- [ ] `p2` - **ID**: `cpt-examples-todo-app-constraint-browser-compat`
 
-Must run on Node.js 18+. PostgreSQL 14+ required for JSONB support. Browser support: last 2 versions of Chrome, Firefox, Safari, Edge.
+**ADRs**: `cpt-examples-todo-app-adr-browser-support`
+
+Application must support latest 2 versions of Chrome, Firefox, Safari, and Edge.
 ```
 `@/cpt:example`
 
@@ -3155,8 +3130,6 @@ id = "design-tech-arch"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3164,6 +3137,7 @@ pattern = "Technical Architecture"
 # Human description of this heading's purpose
 description = "Technical architecture section."
 # Example heading texts showing correct usage
+template = "3. Technical Architecture"
 examples = ["## 3. Technical Architecture"]
 ```
 `@/cpt:heading`
@@ -3198,8 +3172,6 @@ id = "design-tech-arch-domain"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3207,6 +3179,7 @@ pattern = "Domain Model"
 # Human description of this heading's purpose
 description = "Domain model."
 # Example heading texts showing correct usage
+template = "3.1 Domain Model"
 examples = ["### 3.1 Domain Model"]
 ```
 `@/cpt:heading`
@@ -3234,7 +3207,22 @@ examples = ["### 3.1 Domain Model"]
 
 `@cpt:example`
 ```markdown
-Core entities: **Task** (id, title, description, status, priority, dueDate, assigneeId, createdBy, createdAt, updatedAt) and **User** (id, email, name, role). Task status follows state machine: TODO -> IN_PROGRESS -> DONE. Invariants: assignee must be team member, due date must be future.
+**Technology**: TypeScript
+
+**Location**: [src/domain/entities](../src/domain/entities)
+
+**Core Entities**:
+
+| Entity | Description | Schema |
+|--------|-------------|--------|
+| Task | Core task entity with title, status, priority | [task.ts](../src/domain/entities/task.ts) |
+| Category | Task grouping entity | [category.ts](../src/domain/entities/category.ts) |
+| User | User account entity | [user.ts](../src/domain/entities/user.ts) |
+
+**Relationships**:
+- Task → Category: Many-to-one (task belongs to optional category)
+- Task → User: Many-to-one (task belongs to user)
+- Category → User: Many-to-one (category belongs to user)
 ```
 `@/cpt:example`
 
@@ -3248,8 +3236,6 @@ id = "design-tech-arch-component-model"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3257,6 +3243,7 @@ pattern = "Component Model"
 # Human description of this heading's purpose
 description = "Component model and responsibilities."
 # Example heading texts showing correct usage
+template = "3.2 Component Model"
 examples = ["### 3.2 Component Model"]
 ```
 `@/cpt:heading`
@@ -3307,11 +3294,28 @@ graph LR
 `@cpt:example`
 ````markdown
 ```mermaid
-graph LR
-    A[React SPA] -->|REST/WS| B[API Server]
-    B --> C[PostgreSQL]
-    B --> D[Redis PubSub]
-    D --> B
+graph TD
+    subgraph Frontend["Frontend (SPA)"]
+        UI[React UI Components]
+        TS[TaskService]
+        SS[SyncService]
+        IDB[(IndexedDB)]
+    end
+
+    subgraph Backend["Backend API"]
+        API[REST API]
+        WS[WebSocket Server]
+        DB[(PostgreSQL)]
+    end
+
+    UI --> TS
+    TS --> IDB
+    TS --> SS
+    SS --> IDB
+    SS <--> WS
+    SS --> API
+    API --> DB
+    WS --> DB
 ```
 ````
 `@/cpt:example`
@@ -3322,8 +3326,7 @@ graph LR
 ```toml
 id = "design-component-entry"
 level = 4
-required = true
-numbered = false
+required = false
 # multiple: omitted = allowed (can repeat)
 template = "{Component Name}"
 description = "Individual component entry."
@@ -3348,9 +3351,7 @@ id = "design-component-why"
 # Markdown heading level (1=H1 … 6=H6)
 level = 5
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3379,9 +3380,7 @@ id = "design-component-scope"
 # Markdown heading level (1=H1 … 6=H6)
 level = 5
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3410,9 +3409,7 @@ id = "design-component-boundaries"
 # Markdown heading level (1=H1 … 6=H6)
 level = 5
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3441,9 +3438,7 @@ id = "design-component-related"
 # Markdown heading level (1=H1 … 6=H6)
 level = 5
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3470,14 +3465,54 @@ examples = []
 
 `@cpt:example`
 ```markdown
-#### API Server
+#### React UI
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-component-api-server`
+**ID**: `cpt-examples-todo-app-component-react-ui`
 
-- Responsibilities: Handle HTTP requests, enforce authorization, coordinate business logic
-- Boundaries: Exposes REST API and WebSocket endpoint, no direct database access from handlers
-- Dependencies: Express, pg-pool, ioredis
-- Key interfaces: TaskController, AuthMiddleware, WebSocketManager
+User interface rendering and input handling. Interface: React components, event handlers.
+
+#### TaskService
+
+**ID**: `cpt-examples-todo-app-component-task-service`
+
+Business logic orchestration, CRUD operations. Interface: TypeScript async methods.
+
+#### SyncService
+
+**ID**: `cpt-examples-todo-app-component-sync-service`
+
+Background synchronization, conflict resolution. Interface: Event-driven, queue-based.
+
+#### IndexedDB
+
+**ID**: `cpt-examples-todo-app-component-indexeddb`
+
+Local data persistence. Interface: Dexie.js wrapper API.
+
+#### REST API
+
+**ID**: `cpt-examples-todo-app-component-rest-api`
+
+Server-side task management. Interface: HTTP endpoints (see § 3.3).
+
+#### WebSocket Server
+
+**ID**: `cpt-examples-todo-app-component-websocket-server`
+
+Real-time sync notifications. Interface: JSON messages.
+
+#### PostgreSQL
+
+**ID**: `cpt-examples-todo-app-component-postgresql`
+
+Persistent data storage. Interface: SQL via backend.
+
+**Interactions**:
+- React UI → TaskService: Method calls for CRUD operations
+- TaskService → IndexedDB: Local persistence (immediate)
+- TaskService → SyncService: Queue sync operations
+- SyncService ↔ WebSocket: Bidirectional real-time updates
+- SyncService → REST API: HTTP requests for persistence
 ```
 `@/cpt:example`
 
@@ -3491,8 +3526,6 @@ id = "design-tech-arch-api-contracts"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3500,6 +3533,7 @@ pattern = "API Contracts"
 # Human description of this heading's purpose
 description = "API contracts and external interfaces."
 # Example heading texts showing correct usage
+template = "3.3 API Contracts"
 examples = ["### 3.3 API Contracts"]
 ```
 `@/cpt:heading`
@@ -3551,7 +3585,36 @@ coverage = false           # true = must reference | false = referencing prohibi
 
 `@cpt:example`
 ```markdown
-REST API at `/api/v1/` with JSON request/response. Authentication via Bearer JWT token. Standard endpoints: `POST /tasks`, `GET /tasks`, `PATCH /tasks/:id`, `DELETE /tasks/:id`. WebSocket at `/ws` for real-time events: `task.created`, `task.updated`, `task.deleted`.
+**Technology**: REST/OpenAPI
+
+**Public interface**: `cpt-examples-todo-app-interface-rest-api`
+
+**Location**: [api/openapi.yaml](../api/openapi.yaml)
+
+**Endpoints Overview**:
+
+| Method | Path | Description | Stability |
+|--------|------|-------------|-----------|
+| `GET` | `/tasks` | List tasks with optional filters | stable |
+| `POST` | `/tasks` | Create a new task | stable |
+| `GET` | `/tasks/:id` | Get task by ID | stable |
+| `PATCH` | `/tasks/:id` | Update task fields | stable |
+| `DELETE` | `/tasks/:id` | Delete a task | stable |
+
+#### WebSocket Sync Protocol
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-interface-websocket`
+
+**Technology**: WebSocket + JSON
+**Protocol**: Messages follow format: `{ type: "sync" | "update" | "delete", payload: Task }`
+**References**: PRD `cpt-examples-todo-app-contract-sync`
+
+#### IndexedDB Local Storage Interface
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-interface-indexeddb`
+
+**Technology**: Dexie.js (IndexedDB wrapper)
+**Data Format**: Task objects with additional metadata (syncState, lastModified)
 ```
 `@/cpt:example`
 
@@ -3564,9 +3627,7 @@ id = "design-tech-arch-internal-deps"
 # Markdown heading level (1=H1 … 6=H6)
 level = 3
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3574,6 +3635,7 @@ pattern = "Internal Dependencies"
 # Human description of this heading's purpose
 description = "Internal dependencies."
 # Example heading texts showing correct usage
+template = "3.4 Internal Dependencies"
 examples = ["### 3.4 Internal Dependencies"]
 ```
 `@/cpt:heading`
@@ -3601,7 +3663,11 @@ examples = ["### 3.4 Internal Dependencies"]
 
 `@cpt:example`
 ```markdown
-None.
+No internal module dependencies — Todo App is a standalone module with no platform module consumers or providers.
+
+| Dependency Module | Interface Used | Purpose |
+|-------------------|---------------|--------|
+| (none) | — | — |
 ```
 `@/cpt:example`
 
@@ -3614,9 +3680,7 @@ id = "design-tech-arch-external-deps"
 # Markdown heading level (1=H1 … 6=H6)
 level = 3
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3624,6 +3688,7 @@ pattern = "External Dependencies"
 # Human description of this heading's purpose
 description = "External dependencies."
 # Example heading texts showing correct usage
+template = "3.5 External Dependencies"
 examples = ["### 3.5 External Dependencies"]
 ```
 `@/cpt:heading`
@@ -3640,7 +3705,35 @@ External systems, databases, and third-party services this module interacts with
 
 `@cpt:example`
 ```markdown
-None.
+#### WebSocket Sync Backend
+
+**Contract**: `cpt-examples-todo-app-interface-websocket`
+
+**Type**: External API
+**Direction**: bidirectional
+**Protocol / Driver**: WebSocket + JSON; messages follow format: `{ type: "sync" | "update" | "delete", payload: Task }`
+**Data Format**: JSON (follows Task model from `cpt-examples-todo-app-interface-task-model`)
+**Compatibility**: Protocol version negotiated on connection; supports fallback to HTTP polling
+
+#### IndexedDB (Browser Local Storage)
+
+**Contract**: `cpt-examples-todo-app-interface-indexeddb`
+
+**Type**: Database
+**Direction**: bidirectional
+**Protocol / Driver**: Dexie.js (IndexedDB wrapper) with indexes on userId, status, categoryId, dueDate
+**Data Format**: Task objects stored as-is with additional metadata (syncState, lastModified)
+**Compatibility**: Schema migrations handled by Dexie.js version upgrade hooks
+
+#### PostgreSQL
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-design-ext-postgresql`
+
+**Type**: Database
+**Direction**: outbound
+**Protocol / Driver**: PostgreSQL driver via Express backend
+**Data Format**: SQL (relational schema, see 3.7)
+**Compatibility**: Schema migrations managed via migration tool
 ```
 `@/cpt:example`
 
@@ -3651,7 +3744,6 @@ None.
 id = "design-external-dep-entry"
 level = 4
 required = false
-numbered = false
 # multiple: omitted = allowed (can repeat)
 template = "{External System / Database / Service Name}"
 description = "Individual external dependency entry."
@@ -3688,8 +3780,6 @@ id = "design-tech-arch-seq"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3697,6 +3787,7 @@ pattern = "Interactions & Sequences"
 # Human description of this heading's purpose
 description = "Interactions and sequences."
 # Example heading texts showing correct usage
+template = "3.6 Interactions & Sequences"
 examples = ["### 3.6 Interactions & Sequences"]
 ```
 `@/cpt:heading`
@@ -3735,8 +3826,7 @@ coverage = false           # true = must reference | false = referencing prohibi
 ```toml
 id = "design-seq-entry"
 level = 4
-required = true
-numbered = false
+required = false
 # multiple: omitted = allowed (can repeat)
 template = "{Sequence Name}"
 description = "Individual sequence diagram entry."
@@ -3771,20 +3861,40 @@ sequenceDiagram
 
 `@cpt:example`
 ````markdown
-#### Create Task Flow
+#### Create Task (Optimistic UI + Local Persistence + API Sync)
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-seq-create-task`
+- [ ] `p1` - **ID**: `cpt-examples-todo-app-seq-create-task-v1`
+
+Sequence showing how a new task is created with optimistic UI update, immediate IndexedDB persistence, and eventual server persistence via REST API.
 
 ```mermaid
 sequenceDiagram
-    Member->>API: POST /tasks
-    API->>PostgreSQL: INSERT task
-    API->>Redis: PUBLISH task.created
-    Redis-->>API: FAN-OUT
-    API-->>Member: WS task.created
+    actor User
+    participant UI as React UI
+    participant TS as TaskService
+    participant IDB as IndexedDB
+    participant API as REST API
+    participant DB as PostgreSQL
+
+    User->>UI: Click "Add Task"
+    UI->>UI: Show TaskForm
+    User->>UI: Enter task data & Save
+    UI->>TS: createTask(data)
+    TS->>IDB: store(task)
+    IDB-->>TS: stored
+    TS-->>UI: task (optimistic)
+    UI-->>User: Show new task
+
+    TS->>API: POST /tasks
+    API->>DB: INSERT task
+    DB-->>API: created
+    API-->>TS: 201 Created
+    TS->>IDB: markSynced(task.id)
 ```
 
-Lead or member creates task via REST API. Server validates input, inserts into database, then publishes event to Redis for real-time distribution. All connected clients receive WebSocket notification within 2 seconds.
+**Use cases**: `cpt-examples-todo-app-usecase-create-task`
+
+**Actors**: `cpt-examples-todo-app-actor-user`, `cpt-examples-todo-app-actor-sync-service`
 ````
 `@/cpt:example`
 
@@ -3798,8 +3908,6 @@ id = "design-tech-arch-db"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3807,6 +3915,7 @@ pattern = "Database schemas & tables"
 # Human description of this heading's purpose
 description = "Database schemas and tables."
 # Example heading texts showing correct usage
+template = "3.7 Database schemas & tables"
 examples = ["### 3.7 Database schemas & tables"]
 ```
 `@/cpt:heading`
@@ -3876,7 +3985,6 @@ coverage = false           # true = must reference | false = referencing prohibi
 id = "design-dbtable-entry"
 level = 4
 required = false
-numbered = false
 # multiple: omitted = allowed (can repeat)
 template = "Table: {table_name}"
 description = "Individual database table entry."
@@ -3914,41 +4022,26 @@ examples = []
 
 `@cpt:example`
 ```markdown
-#### Table tasks
+#### Table: tasks
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-dbtable-tasks`
+**ID**: `cpt-examples-todo-app-design-db-tasks`
 
-Schema
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | UUID | PK | Primary key |
+| user_id | UUID | FK, NOT NULL | Foreign key to users |
+| title | VARCHAR(255) | NOT NULL | Task title |
+| description | TEXT | | Optional description |
+| status | ENUM | NOT NULL, DEFAULT 'active' | 'active', 'completed' |
+| priority | ENUM | NOT NULL | 'low', 'medium', 'high' |
+| category_id | UUID | FK | Optional foreign key to categories |
+| due_date | TIMESTAMP | | Optional due date |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | Task ID (PK) |
-| title | text | Task title (required) |
-| description | text | Task description |
-| status | enum | TODO, IN_PROGRESS, DONE |
-| assignee_id | uuid | FK to users.id |
+**Indexes**: user_id, status, due_date
 
-PK: `id`
-
-Constraints: `status IN ('TODO', 'IN_PROGRESS', 'DONE')`, `assignee_id REFERENCES users(id)`
-
-Example
-
-| id | title | status |
-|----|-------|--------|
-| 550e8400... | Implement login | IN_PROGRESS |
-
-### 3.6: Topology (optional)
-
-- [ ] **ID**: `cpt-ex-task-flow-topology-local`
-
-Local development: React SPA (port 3000) + API server (port 4000) + PostgreSQL (port 5432) + Redis (port 6379) on single machine. Production: Kubernetes deployment with horizontal scaling of API pods.
-
-### 3.7: Tech stack (optional)
-
-**Status**: Accepted
-
-Backend: Node.js 18 LTS, TypeScript 5.x, Express 4.x, pg-pool for PostgreSQL, ioredis for Redis. Frontend: React 18, TypeScript, Vite build tool. Testing: Jest, React Testing Library. Rationale: Team familiarity, mature ecosystem, strong TypeScript support.
+**Notes**: status defaults to 'active' on insert
 ```
 `@/cpt:example`
 
@@ -3964,8 +4057,6 @@ id = "design-additional-context"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = false
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -3973,7 +4064,8 @@ pattern = "Additional context"
 # Human description of this heading's purpose
 description = "Optional additional context."
 # Example heading texts showing correct usage
-examples = ["## 4. Additional Context"]
+template = "4. Additional context"
+examples = ["## 4. Additional context"]
 ```
 `@/cpt:heading`
 
@@ -3995,16 +4087,15 @@ id = "design-traceability"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = false
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
 pattern = "Traceability"
+template = "5. Traceability"
 # Human description of this heading's purpose
 description = "Optional traceability links."
 # Example heading texts showing correct usage
-examples = []
+examples = ["## 5. Traceability"]
 ```
 `@/cpt:heading`
 
@@ -4022,9 +4113,15 @@ examples = []
 
 `@cpt:example`
 ```markdown
-TaskFlow prioritizes real-time collaboration and predictable REST semantics. Future considerations include mobile app support and Slack integration. Trade-offs accepted: PostgreSQL requires operational overhead vs SQLite simplicity.
+**ID**: `cpt-examples-todo-app-design-context-decisions`
 
-**Date**: 2025-01-15
+The choice of React over other frameworks was driven by team expertise and ecosystem maturity. PostgreSQL was selected for its reliability and JSON support for flexible task metadata.
+
+## 5. Traceability
+
+- **PRD**: [PRD.md](./PRD.md)
+- **ADRs**: [ADR/](./ADR/)
+- **Features**: [features/](./features/)
 ```
 `@/cpt:example`
 

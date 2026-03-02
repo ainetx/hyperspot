@@ -139,7 +139,6 @@ def _convert_constraints_v2_to_v3(v2_data: Dict[str, Any]) -> Dict[str, Any]:
 # WP1: V2 Detection
 # ===========================================================================
 
-# @cpt-algo:cpt-cypilot-algo-v2-v3-migration-detect-core-install-type:p1
 def detect_core_install_type(project_root: Path, core_path: str) -> str:
     """Detect how the v2 core directory was installed.
 
@@ -185,7 +184,6 @@ def detect_core_install_type(project_root: Path, core_path: str) -> str:
     # @cpt-end:cpt-cypilot-algo-v2-v3-migration-detect-core-install-type:p1:inst-return-plain-dir
 
 
-# @cpt-algo:cpt-cypilot-algo-v2-v3-migration-detect-v2:p1
 def detect_v2(project_root: Path) -> Dict[str, Any]:
     """Detect a v2 Cypilot installation in the project.
 
@@ -293,7 +291,6 @@ def detect_v2(project_root: Path) -> Dict[str, Any]:
 # WP2: Backup & Cleanup
 # ===========================================================================
 
-# @cpt-algo:cpt-cypilot-algo-v2-v3-migration-backup-v2-state:p1
 def backup_v2_state(
     project_root: Path,
     adapter_path: str,
@@ -414,7 +411,6 @@ def _rollback(project_root: Path, backup_dir: Path) -> Dict[str, Any]:
     }
 
 
-# @cpt-algo:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1
 def cleanup_core_path(
     project_root: Path,
     core_path: str,
@@ -447,25 +443,6 @@ def cleanup_core_path(
             )
             # @cpt-end:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-submodule-deinit
 
-            # @cpt-begin:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-remove-gitmodules-entry
-            gitmodules = project_root / ".gitmodules"
-            if gitmodules.is_file():
-                content = gitmodules.read_text(encoding="utf-8")
-                cleaned = _remove_gitmodule_entry(content, core_path)
-                # @cpt-begin:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-delete-empty-gitmodules
-                if cleaned.strip():
-                    gitmodules.write_text(cleaned, encoding="utf-8")
-                else:
-                    gitmodules.unlink()
-                # @cpt-end:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-delete-empty-gitmodules
-            # @cpt-end:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-remove-gitmodules-entry
-
-            # @cpt-begin:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-remove-git-modules-dir
-            git_modules_dir = project_root / ".git" / "modules" / core_path
-            if git_modules_dir.is_dir():
-                shutil.rmtree(git_modules_dir)
-            # @cpt-end:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-remove-git-modules-dir
-
             # @cpt-begin:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-git-rm-submodule
             subprocess.run(
                 ["git", "rm", "-f", core_path],
@@ -476,17 +453,44 @@ def cleanup_core_path(
             )
             # @cpt-end:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-git-rm-submodule
 
-            # @cpt-begin:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-stage-gitmodules
-            gitmodules_path = project_root / ".gitmodules"
-            if gitmodules_path.is_file():
-                subprocess.run(
-                    ["git", "add", ".gitmodules"],
-                    cwd=str(project_root),
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-            # @cpt-end:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-stage-gitmodules
+            # @cpt-begin:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-remove-git-modules-dir
+            git_modules_dir = project_root / ".git" / "modules" / core_path
+            if git_modules_dir.is_dir():
+                shutil.rmtree(git_modules_dir)
+            # @cpt-end:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-remove-git-modules-dir
+
+            # @cpt-begin:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-remove-gitmodules-entry
+            # git rm updates .gitmodules but may leave the entry in older git;
+            # ensure the entry is removed and handle empty .gitmodules
+            gitmodules = project_root / ".gitmodules"
+            if gitmodules.is_file():
+                content = gitmodules.read_text(encoding="utf-8")
+                cleaned = _remove_gitmodule_entry(content, core_path)
+                # @cpt-begin:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-delete-empty-gitmodules
+                if cleaned.strip():
+                    gitmodules.write_text(cleaned, encoding="utf-8")
+                    subprocess.run(
+                        ["git", "add", ".gitmodules"],
+                        cwd=str(project_root),
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+                else:
+                    gitmodules.unlink()
+                    subprocess.run(
+                        ["git", "rm", "--cached", ".gitmodules"],
+                        cwd=str(project_root),
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+                # @cpt-end:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-delete-empty-gitmodules
+            # @cpt-end:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-remove-gitmodules-entry
+
+            # Remove leftover empty directory if deinit/git-rm left it
+            if core_dir.is_dir():
+                shutil.rmtree(core_dir, ignore_errors=True)
 
             # @cpt-begin:cpt-cypilot-algo-v2-v3-migration-cleanup-core-path:p1:inst-return-submodule-ok
             warnings.append(
@@ -589,17 +593,14 @@ def _remove_gitmodule_entry(content: str, path: str) -> str:
 # WP3: Config Conversion
 # ===========================================================================
 
-# @cpt-algo:cpt-cypilot-algo-v2-v3-migration-convert-artifacts-registry:p1
 def convert_artifacts_registry(
     artifacts_json: Dict[str, Any],
-    cypilot_path: str,
     target_dir: Path,
 ) -> Dict[str, Any]:
     """Convert v2 artifacts.json to v3 artifacts.toml.
 
     Args:
         artifacts_json: Parsed v2 artifacts.json content.
-        cypilot_path: Relative path to the cypilot directory (e.g., 'cypilot').
         target_dir: Directory to write artifacts.toml into (config/).
 
     Returns:
@@ -718,7 +719,6 @@ def _convert_system(
     return v3
 
 
-# @cpt-algo:cpt-cypilot-algo-v2-v3-migration-convert-agents-md:p1
 def convert_agents_md(
     project_root: Path,
     adapter_path: str,
@@ -782,7 +782,6 @@ def convert_agents_md(
     # @cpt-end:cpt-cypilot-algo-v2-v3-migration-convert-agents-md:p1:inst-return-agents-result
 
 
-# @cpt-algo:cpt-cypilot-algo-v2-v3-migration-generate-core-toml:p1
 def generate_core_toml(
     project_root: Path,
     v2_systems: List[Dict[str, Any]],
@@ -864,7 +863,6 @@ def generate_core_toml(
 # WP4: Kit Migration
 # ===========================================================================
 
-# @cpt-algo:cpt-cypilot-algo-v2-v3-migration-migrate-kits:p1
 def migrate_kits(
     v2_kits: Dict[str, Any],
     adapter_path: str,
@@ -891,7 +889,6 @@ def migrate_kits(
         # @cpt-begin:cpt-cypilot-algo-v2-v3-migration-migrate-kits:p1:inst-locate-kit-dir
         v2_kit_dir = adapter_dir / "kits" / v2_slug
         config_kit_dir = config_dir / "kits" / v2_slug
-        gen_kit_dir = gen_dir / "kits" / v2_slug
         # @cpt-end:cpt-cypilot-algo-v2-v3-migration-migrate-kits:p1:inst-locate-kit-dir
 
         if not v2_kit_dir.is_dir():
@@ -967,7 +964,6 @@ def _copy_tree_contents(src: Path, dst: Path) -> None:
 # WP5: Integration — Validation + Main Flow
 # ===========================================================================
 
-# @cpt-algo:cpt-cypilot-algo-v2-v3-migration-validate-migration:p1
 def validate_migration(
     project_root: Path,
     cypilot_dir: Path,
@@ -1114,7 +1110,6 @@ def validate_migration(
 # Main migration flow
 # ===========================================================================
 
-# @cpt-flow:cpt-cypilot-flow-v2-v3-migration-migrate-project:p1
 def run_migrate(
     project_root: Path,
     install_dir: Optional[str] = None,
@@ -1255,7 +1250,7 @@ def run_migrate(
         kit_slug_map: Dict[str, str] = {}
         if artifacts_json:
             reg_result = convert_artifacts_registry(
-                artifacts_json, install_dir, config_dir,
+                artifacts_json, config_dir,
             )
             all_warnings.extend(reg_result.get("warnings", []))
             kit_slug_map = reg_result.get("kit_slug_map", {})
@@ -1474,7 +1469,6 @@ def _write_gen_agents(gen_dir: Path, project_name: str) -> None:
 # Migrate Config Flow (JSON → TOML)
 # ===========================================================================
 
-# @cpt-flow:cpt-cypilot-flow-v2-v3-migration-migrate-config:p1
 def run_migrate_config(project_root: Path) -> Dict[str, Any]:
     """Convert remaining JSON config files to TOML.
 

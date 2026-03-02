@@ -1,177 +1,316 @@
-# Technical Design: TaskFlow
+# Technical Design — Todo App
 
 ## 1. Architecture Overview
 
-### Architectural Vision
+### 1.1 Architectural Vision
 
-TaskFlow uses a layered architecture with clear separation of concerns: React SPA frontend, Node.js REST API, and PostgreSQL database. WebSocket connections enable real-time updates for collaborative task management.
+The Todo App follows a clean architecture approach with clear separation between presentation, business logic, and data layers. The frontend is built as a single-page application (SPA) communicating with a RESTful backend API.
 
-The architecture prioritizes simplicity and developer productivity while supporting real-time collaboration. System boundaries are clearly defined between presentation, business logic, and data persistence layers.
+The system prioritizes offline-first capabilities using local storage with background synchronization. This ensures users can work without interruption regardless of network conditions.
 
-### Architecture drivers
+Event-driven architecture is employed for real-time updates and cross-device synchronization via WebSockets.
 
-#### Product requirements
+### 1.2 Architecture Drivers
 
-##### Task Management
+#### Functional Drivers
 
-- [ ] `p1` - `cpt-ex-task-flow-fr-task-management`
+| Requirement | Design Response |
+|-------------|-----------------|
+| `cpt-examples-todo-app-fr-create-task` | REST API endpoint POST /tasks with validation |
+| `cpt-examples-todo-app-fr-complete-task` | PATCH /tasks/:id with status toggle |
+| `cpt-examples-todo-app-fr-delete-task` | DELETE /tasks/:id endpoint with authorization |
+| `cpt-examples-todo-app-fr-filter-tasks` | Query parameters on GET /tasks |
+| `cpt-examples-todo-app-nfr-offline-support` | IndexedDB local storage with sync queue |
 
-**Solution**: REST API with idempotent endpoints and PostgreSQL persistence for task CRUD.
+#### NFR Allocation
 
-##### Notifications
+This table maps non-functional requirements from PRD to specific design/architecture responses, demonstrating how quality attributes are realized.
 
-- [ ] `p1` - `cpt-ex-task-flow-fr-notifications`
+| NFR ID | NFR Summary | Allocated To | Design Response | Verification Approach |
+|--------|-------------|--------------|-----------------|----------------------|
+| `cpt-examples-todo-app-nfr-response-time` | UI interactions <200ms p95 | TaskService + IndexedDB | Local-first architecture: all reads from IndexedDB (sub-10ms), writes optimistic with background sync | Performance benchmarks measure p95 latency |
+| `cpt-examples-todo-app-nfr-data-persistence` | Local persist <50ms, cloud sync <5s | SyncService + IndexedDB + REST API | IndexedDB for immediate local persistence; background WebSocket sync with retry queue | Integration tests verify timing + recovery scenarios |
 
-**Solution**: WebSocket push with Redis PubSub for real-time notification delivery.
-
-##### Security
-
-- [ ] `p1` - `cpt-ex-task-flow-nfr-security`
-
-**Solution**: JWT authentication with role-based authorization middleware.
-
-##### Performance
-
-- [ ] `p2` - `cpt-ex-task-flow-nfr-performance`
-
-**Solution**: Connection pooling and query optimization for sub-500ms responses.
-
-#### Architecture Decisions Records
-
-##### PostgreSQL for Storage
-
-- [ ] `p1` - `cpt-ex-task-flow-adr-postgres-storage`
-
-Use PostgreSQL for durable task storage. Chosen for strong ACID guarantees, relational query support, and team expertise. Trade-off: requires separate DB server vs embedded SQLite.
-
-### Architecture Layers
+### 1.3 Architecture Layers
 
 | Layer | Responsibility | Technology |
 |-------|---------------|------------|
-| Presentation | User interface, state management | React, TypeScript |
-| API | REST endpoints, WebSocket handling | Node.js, Express |
-| Business Logic | Task operations, authorization | TypeScript |
-| Data Access | Database queries, caching | PostgreSQL, Redis |
+| Presentation | User interface, user input handling | React, TailwindCSS |
+| Application | Use case orchestration, DTOs | TypeScript services |
+| Domain | Business logic, entities, validation | TypeScript classes |
+| Infrastructure | Data persistence, external APIs | PostgreSQL, Redis |
 
 ## 2. Principles & Constraints
 
 ### 2.1 Design Principles
 
-#### Real-time First
+#### Offline-First
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-principle-realtime-first`
+- [ ] `p2` - **ID**: `cpt-examples-todo-app-principle-offline-first`
 
-Prefer architectures that keep task state and notifications consistent and observable for all users. Changes should propagate to all connected clients within 2 seconds.
+**ADRs**: `cpt-examples-todo-app-adr-local-storage`
 
-#### Simplicity over Specs
+All operations must work without network connectivity. Data is persisted locally first, then synchronized to the server when connection is available.
 
-- [ ] `p2` - **ID**: `cpt-ex-task-flow-principle-simplicity`
+#### Optimistic Updates
 
-Choose simpler solutions over spec-rich ones. Avoid premature optimization and unnecessary abstractions. Code should be readable by junior developers.
+- [ ] `p2` - **ID**: `cpt-examples-todo-app-principle-optimistic-updates`
+
+**ADRs**: `cpt-examples-todo-app-adr-optimistic-ui`
+
+UI updates immediately on user action without waiting for server confirmation. Rollback occurs only on server rejection.
 
 ### 2.2 Constraints
 
-#### Supported Platforms
+#### Browser Compatibility
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-constraint-platforms`
+- [ ] `p2` - **ID**: `cpt-examples-todo-app-constraint-browser-compat`
 
-Must run on Node.js 18+. PostgreSQL 14+ required for JSONB support. Browser support: last 2 versions of Chrome, Firefox, Safari, Edge.
+**ADRs**: `cpt-examples-todo-app-adr-browser-support`
+
+Application must support latest 2 versions of Chrome, Firefox, Safari, and Edge.
 
 ## 3. Technical Architecture
 
 ### 3.1 Domain Model
 
-Core entities: **Task** (id, title, description, status, priority, dueDate, assigneeId, createdBy, createdAt, updatedAt) and **User** (id, email, name, role). Task status follows state machine: TODO -> IN_PROGRESS -> DONE. Invariants: assignee must be team member, due date must be future.
+**Technology**: TypeScript
+
+**Location**: [src/domain/entities](../src/domain/entities)
+
+**Core Entities**:
+
+| Entity | Description | Schema |
+|--------|-------------|--------|
+| Task | Core task entity with title, status, priority | [task.ts](../src/domain/entities/task.ts) |
+| Category | Task grouping entity | [category.ts](../src/domain/entities/category.ts) |
+| User | User account entity | [user.ts](../src/domain/entities/user.ts) |
+
+**Relationships**:
+- Task → Category: Many-to-one (task belongs to optional category)
+- Task → User: Many-to-one (task belongs to user)
+- Category → User: Many-to-one (category belongs to user)
 
 ### 3.2 Component Model
 
 ```mermaid
-graph LR
-    A[React SPA] -->|REST/WS| B[API Server]
-    B --> C[PostgreSQL]
-    B --> D[Redis PubSub]
-    D --> B
+graph TD
+    subgraph Frontend["Frontend (SPA)"]
+        UI[React UI Components]
+        TS[TaskService]
+        SS[SyncService]
+        IDB[(IndexedDB)]
+    end
+
+    subgraph Backend["Backend API"]
+        API[REST API]
+        WS[WebSocket Server]
+        DB[(PostgreSQL)]
+    end
+
+    UI --> TS
+    TS --> IDB
+    TS --> SS
+    SS --> IDB
+    SS <--> WS
+    SS --> API
+    API --> DB
+    WS --> DB
 ```
 
-#### API Server
+#### React UI
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-component-api-server`
+**ID**: `cpt-examples-todo-app-component-react-ui`
 
-- Responsibilities: Handle HTTP requests, enforce authorization, coordinate business logic
-- Boundaries: Exposes REST API and WebSocket endpoint, no direct database access from handlers
-- Dependencies: Express, pg-pool, ioredis
-- Key interfaces: TaskController, AuthMiddleware, WebSocketManager
+User interface rendering and input handling. Interface: React components, event handlers.
+
+#### TaskService
+
+**ID**: `cpt-examples-todo-app-component-task-service`
+
+Business logic orchestration, CRUD operations. Interface: TypeScript async methods.
+
+#### SyncService
+
+**ID**: `cpt-examples-todo-app-component-sync-service`
+
+Background synchronization, conflict resolution. Interface: Event-driven, queue-based.
+
+#### IndexedDB
+
+**ID**: `cpt-examples-todo-app-component-indexeddb`
+
+Local data persistence. Interface: Dexie.js wrapper API.
+
+#### REST API
+
+**ID**: `cpt-examples-todo-app-component-rest-api`
+
+Server-side task management. Interface: HTTP endpoints (see § 3.3).
+
+#### WebSocket Server
+
+**ID**: `cpt-examples-todo-app-component-websocket-server`
+
+Real-time sync notifications. Interface: JSON messages.
+
+#### PostgreSQL
+
+**ID**: `cpt-examples-todo-app-component-postgresql`
+
+Persistent data storage. Interface: SQL via backend.
+
+**Interactions**:
+- React UI → TaskService: Method calls for CRUD operations
+- TaskService → IndexedDB: Local persistence (immediate)
+- TaskService → SyncService: Queue sync operations
+- SyncService ↔ WebSocket: Bidirectional real-time updates
+- SyncService → REST API: HTTP requests for persistence
 
 ### 3.3 API Contracts
 
-REST API at `/api/v1/` with JSON request/response. Authentication via Bearer JWT token. Standard endpoints: `POST /tasks`, `GET /tasks`, `PATCH /tasks/:id`, `DELETE /tasks/:id`. WebSocket at `/ws` for real-time events: `task.created`, `task.updated`, `task.deleted`.
+**Technology**: REST/OpenAPI
+
+**Public interface**: `cpt-examples-todo-app-interface-rest-api`
+
+**Location**: [api/openapi.yaml](../api/openapi.yaml)
+
+**Endpoints Overview**:
+
+| Method | Path | Description | Stability |
+|--------|------|-------------|-----------|
+| `GET` | `/tasks` | List tasks with optional filters | stable |
+| `POST` | `/tasks` | Create a new task | stable |
+| `GET` | `/tasks/:id` | Get task by ID | stable |
+| `PATCH` | `/tasks/:id` | Update task fields | stable |
+| `DELETE` | `/tasks/:id` | Delete a task | stable |
+
+#### WebSocket Sync Protocol
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-interface-websocket`
+
+**Technology**: WebSocket + JSON
+**Protocol**: Messages follow format: `{ type: "sync" | "update" | "delete", payload: Task }`
+**References**: PRD `cpt-examples-todo-app-contract-sync`
+
+#### IndexedDB Local Storage Interface
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-interface-indexeddb`
+
+**Technology**: Dexie.js (IndexedDB wrapper)
+**Data Format**: Task objects with additional metadata (syncState, lastModified)
 
 ### 3.4 Internal Dependencies
 
-None.
+No internal module dependencies — Todo App is a standalone module with no platform module consumers or providers.
+
+| Dependency Module | Interface Used | Purpose |
+|-------------------|---------------|--------|
+| (none) | — | — |
 
 ### 3.5 External Dependencies
 
-None.
+#### WebSocket Sync Backend
+
+**Contract**: `cpt-examples-todo-app-interface-websocket`
+
+**Type**: External API
+**Direction**: bidirectional
+**Protocol / Driver**: WebSocket + JSON; messages follow format: `{ type: "sync" | "update" | "delete", payload: Task }`
+**Data Format**: JSON (follows Task model from `cpt-examples-todo-app-interface-task-model`)
+**Compatibility**: Protocol version negotiated on connection; supports fallback to HTTP polling
+
+#### IndexedDB (Browser Local Storage)
+
+**Contract**: `cpt-examples-todo-app-interface-indexeddb`
+
+**Type**: Database
+**Direction**: bidirectional
+**Protocol / Driver**: Dexie.js (IndexedDB wrapper) with indexes on userId, status, categoryId, dueDate
+**Data Format**: Task objects stored as-is with additional metadata (syncState, lastModified)
+**Compatibility**: Schema migrations handled by Dexie.js version upgrade hooks
+
+#### PostgreSQL
+
+- [x] `p1` - **ID**: `cpt-examples-todo-app-design-ext-postgresql`
+
+**Type**: Database
+**Direction**: outbound
+**Protocol / Driver**: PostgreSQL driver via Express backend
+**Data Format**: SQL (relational schema, see 3.7)
+**Compatibility**: Schema migrations managed via migration tool
 
 ### 3.6 Interactions & Sequences
 
-#### Create Task Flow
+#### Create Task (Optimistic UI + Local Persistence + API Sync)
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-seq-create-task`
+- [ ] `p1` - **ID**: `cpt-examples-todo-app-seq-create-task-v1`
+
+Sequence showing how a new task is created with optimistic UI update, immediate IndexedDB persistence, and eventual server persistence via REST API.
 
 ```mermaid
 sequenceDiagram
-    Member->>API: POST /tasks
-    API->>PostgreSQL: INSERT task
-    API->>Redis: PUBLISH task.created
-    Redis-->>API: FAN-OUT
-    API-->>Member: WS task.created
+    actor User
+    participant UI as React UI
+    participant TS as TaskService
+    participant IDB as IndexedDB
+    participant API as REST API
+    participant DB as PostgreSQL
+
+    User->>UI: Click "Add Task"
+    UI->>UI: Show TaskForm
+    User->>UI: Enter task data & Save
+    UI->>TS: createTask(data)
+    TS->>IDB: store(task)
+    IDB-->>TS: stored
+    TS-->>UI: task (optimistic)
+    UI-->>User: Show new task
+
+    TS->>API: POST /tasks
+    API->>DB: INSERT task
+    DB-->>API: created
+    API-->>TS: 201 Created
+    TS->>IDB: markSynced(task.id)
 ```
 
-Lead or member creates task via REST API. Server validates input, inserts into database, then publishes event to Redis for real-time distribution. All connected clients receive WebSocket notification within 2 seconds.
+**Use cases**: `cpt-examples-todo-app-usecase-create-task`
+
+**Actors**: `cpt-examples-todo-app-actor-user`, `cpt-examples-todo-app-actor-sync-service`
 
 ### 3.7 Database schemas & tables
 
-#### Table tasks
+#### Table: tasks
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-dbtable-tasks`
+**ID**: `cpt-examples-todo-app-design-db-tasks`
 
-Schema
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | UUID | PK | Primary key |
+| user_id | UUID | FK, NOT NULL | Foreign key to users |
+| title | VARCHAR(255) | NOT NULL | Task title |
+| description | TEXT | | Optional description |
+| status | ENUM | NOT NULL, DEFAULT 'active' | 'active', 'completed' |
+| priority | ENUM | NOT NULL | 'low', 'medium', 'high' |
+| category_id | UUID | FK | Optional foreign key to categories |
+| due_date | TIMESTAMP | | Optional due date |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | Task ID (PK) |
-| title | text | Task title (required) |
-| description | text | Task description |
-| status | enum | TODO, IN_PROGRESS, DONE |
-| assignee_id | uuid | FK to users.id |
+**Indexes**: user_id, status, due_date
 
-PK: `id`
+**Notes**: status defaults to 'active' on insert
 
-Constraints: `status IN ('TODO', 'IN_PROGRESS', 'DONE')`, `assignee_id REFERENCES users(id)`
+## 4. Additional context
 
-Example
+## 5. Traceability
 
-| id | title | status |
-|----|-------|--------|
-| 550e8400... | Implement login | IN_PROGRESS |
+**ID**: `cpt-examples-todo-app-design-context-decisions`
 
-### 3.6: Topology (optional)
+The choice of React over other frameworks was driven by team expertise and ecosystem maturity. PostgreSQL was selected for its reliability and JSON support for flexible task metadata.
 
-- [ ] **ID**: `cpt-ex-task-flow-topology-local`
+## 5. Traceability
 
-Local development: React SPA (port 3000) + API server (port 4000) + PostgreSQL (port 5432) + Redis (port 6379) on single machine. Production: Kubernetes deployment with horizontal scaling of API pods.
-
-### 3.7: Tech stack (optional)
-
-**Status**: Accepted
-
-Backend: Node.js 18 LTS, TypeScript 5.x, Express 4.x, pg-pool for PostgreSQL, ioredis for Redis. Frontend: React 18, TypeScript, Vite build tool. Testing: Jest, React Testing Library. Rationale: Team familiarity, mature ecosystem, strong TypeScript support.
-
-## 4. Additional Context
-
-TaskFlow prioritizes real-time collaboration and predictable REST semantics. Future considerations include mobile app support and Slack integration. Trade-offs accepted: PostgreSQL requires operational overhead vs SQLite simplicity.
-
-**Date**: 2025-01-15
+- **PRD**: [PRD.md](./PRD.md)
+- **ADRs**: [ADR/](./ADR/)
+- **Features**: [features/](./features/)
 

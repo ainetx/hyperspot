@@ -11,7 +11,6 @@ id = "adr-h1-title"
 level = 1
 required = true
 multiple = false
-numbered = false
 description = "ADR document title (H1)."
 
 [[artifacts.ADR.headings]]
@@ -19,7 +18,6 @@ id = "adr-context"
 level = 2
 required = true
 multiple = false
-numbered = false
 pattern = "Context and Problem Statement"
 description = "Problem context and motivating forces."
 
@@ -28,7 +26,6 @@ id = "adr-decision-drivers"
 level = 2
 required = true
 multiple = false
-numbered = false
 pattern = "Decision Drivers"
 description = "Key decision drivers and constraints."
 
@@ -37,7 +34,6 @@ id = "adr-considered-options"
 level = 2
 required = true
 multiple = false
-numbered = false
 pattern = "Considered Options"
 description = "Options that were considered."
 
@@ -46,7 +42,6 @@ id = "adr-decision-outcome"
 level = 2
 required = true
 multiple = false
-numbered = false
 pattern = "Decision Outcome"
 description = "Selected decision and outcome."
 
@@ -55,7 +50,6 @@ id = "adr-decision-outcome-consequences"
 level = 3
 required = true
 multiple = false
-numbered = false
 pattern = "Consequences"
 description = "Consequences of the decision."
 
@@ -64,7 +58,6 @@ id = "adr-decision-outcome-confirmation"
 level = 3
 required = true
 multiple = false
-numbered = false
 pattern = "Confirmation"
 description = "How/when the decision will be confirmed."
 
@@ -73,16 +66,14 @@ id = "adr-pros-cons"
 level = 2
 required = true
 multiple = false
-numbered = false
 pattern = "Pros and Cons of the Options"
 description = "Pros and cons analysis for the options."
 
 [[artifacts.ADR.headings]]
 id = "adr-pros-cons-entry"
 level = 3
-required = true
+required = false
 multiple = true
-numbered = false
 description = "A single option evaluation entry (pros/cons)."
 
 [[artifacts.ADR.headings]]
@@ -90,7 +81,6 @@ id = "adr-more-info"
 level = 2
 required = false
 multiple = false
-numbered = false
 pattern = "More Information"
 description = "Optional additional information and links."
 
@@ -99,7 +89,6 @@ id = "adr-traceability"
 level = 2
 required = false
 multiple = false
-numbered = false
 pattern = "Traceability"
 description = "Optional traceability links back to requirements/decisions."
 
@@ -132,7 +121,6 @@ id = "decomposition-h1-title"
 level = 1
 required = true
 multiple = false
-numbered = false
 description = "DECOMPOSITION document title (H1)."
 
 [[artifacts.DECOMPOSITION.headings]]
@@ -140,7 +128,6 @@ id = "decomposition-overview"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Overview"
 description = "Overview of decomposition strategy."
 
@@ -149,7 +136,6 @@ id = "decomposition-entries"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Entries"
 description = "List of feature entries."
 
@@ -158,15 +144,13 @@ id = "decomposition-entry"
 level = 3
 required = true
 multiple = true
-numbered = false
 description = "A single feature entry."
 
 [[artifacts.DECOMPOSITION.headings]]
 id = "decomposition-feature-deps"
 level = 2
-required = true
+required = false
 multiple = false
-numbered = true
 pattern = "Feature Dependencies"
 description = "Cross-feature dependency overview."
 
@@ -202,7 +186,6 @@ id = "design-h1-title"
 level = 1
 required = true
 multiple = false
-numbered = false
 description = "DESIGN document title (H1)."
 
 [[artifacts.DESIGN.headings]]
@@ -210,7 +193,6 @@ id = "design-arch-overview"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Architecture Overview"
 description = "Architecture overview section."
 
@@ -219,7 +201,6 @@ id = "design-arch-overview-vision"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Architectural Vision"
 description = "High-level architectural vision."
 
@@ -228,25 +209,22 @@ id = "design-arch-overview-drivers"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Architecture Drivers"
 description = "Architecture drivers: requirements, constraints, and ADR links."
 
 [[artifacts.DESIGN.headings]]
 id = "design-arch-overview-drivers-functional"
 level = 4
-required = true
+required = false
 multiple = false
-numbered = false
 pattern = "Functional Drivers"
 description = "Functional drivers table mapping PRD requirements to design responses."
 
 [[artifacts.DESIGN.headings]]
 id = "design-arch-overview-drivers-nfr"
 level = 4
-required = true
+required = false
 multiple = false
-numbered = false
 pattern = "NFR Allocation"
 description = "NFR allocation table mapping non-functional requirements to design elements."
 
@@ -255,7 +233,6 @@ id = "design-arch-overview-drivers-adrs"
 level = 4
 required = false
 multiple = false
-numbered = false
 pattern = "Key ADRs"
 description = "Key architecture decision records relevant to this design."
 
@@ -264,7 +241,6 @@ id = "design-arch-overview-layers"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Architecture Layers"
 description = "Architecture layering and responsibilities."
 
@@ -273,7 +249,6 @@ id = "design-principles-constraints"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Principles & Constraints"
 description = "Principles and constraints section."
 
@@ -282,15 +257,13 @@ id = "design-principles"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Design Principles"
 description = "Design principles list."
 
 [[artifacts.DESIGN.headings]]
 id = "design-principle-entry"
 level = 4
-required = true
-numbered = false
+required = false
 description = "Individual design principle entry."
 
 [[artifacts.DESIGN.headings]]
@@ -298,15 +271,13 @@ id = "design-constraints"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Constraints"
 description = "Design constraints list."
 
 [[artifacts.DESIGN.headings]]
 id = "design-constraint-entry"
 level = 4
-required = true
-numbered = false
+required = false
 description = "Individual design constraint entry."
 
 [[artifacts.DESIGN.headings]]
@@ -314,7 +285,6 @@ id = "design-tech-arch"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Technical Architecture"
 description = "Technical architecture section."
 
@@ -323,7 +293,6 @@ id = "design-tech-arch-domain"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Domain Model"
 description = "Domain model."
 
@@ -332,50 +301,44 @@ id = "design-tech-arch-component-model"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Component Model"
 description = "Component model and responsibilities."
 
 [[artifacts.DESIGN.headings]]
 id = "design-component-entry"
 level = 4
-required = true
-numbered = false
+required = false
 description = "Individual component entry."
 
 [[artifacts.DESIGN.headings]]
 id = "design-component-why"
 level = 5
-required = true
+required = false
 multiple = false
-numbered = false
 pattern = "Why this component exists"
 description = "Rationale for this component's existence."
 
 [[artifacts.DESIGN.headings]]
 id = "design-component-scope"
 level = 5
-required = true
+required = false
 multiple = false
-numbered = false
 pattern = "Responsibility scope"
 description = "Core responsibilities and invariants."
 
 [[artifacts.DESIGN.headings]]
 id = "design-component-boundaries"
 level = 5
-required = true
+required = false
 multiple = false
-numbered = false
 pattern = "Responsibility boundaries"
 description = "Explicit non-responsibilities and delegation boundaries."
 
 [[artifacts.DESIGN.headings]]
 id = "design-component-related"
 level = 5
-required = true
+required = false
 multiple = false
-numbered = false
 pattern = "Related components (by ID)"
 description = "Component-to-component relationships using IDs."
 
@@ -384,25 +347,22 @@ id = "design-tech-arch-api-contracts"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "API Contracts"
 description = "API contracts and external interfaces."
 
 [[artifacts.DESIGN.headings]]
 id = "design-tech-arch-internal-deps"
 level = 3
-required = true
+required = false
 multiple = false
-numbered = true
 pattern = "Internal Dependencies"
 description = "Internal dependencies."
 
 [[artifacts.DESIGN.headings]]
 id = "design-tech-arch-external-deps"
 level = 3
-required = true
+required = false
 multiple = false
-numbered = true
 pattern = "External Dependencies"
 description = "External dependencies."
 
@@ -410,7 +370,6 @@ description = "External dependencies."
 id = "design-external-dep-entry"
 level = 4
 required = false
-numbered = false
 description = "Individual external dependency entry."
 
 [[artifacts.DESIGN.headings]]
@@ -418,15 +377,13 @@ id = "design-tech-arch-seq"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Interactions & Sequences"
 description = "Interactions and sequences."
 
 [[artifacts.DESIGN.headings]]
 id = "design-seq-entry"
 level = 4
-required = true
-numbered = false
+required = false
 description = "Individual sequence diagram entry."
 
 [[artifacts.DESIGN.headings]]
@@ -434,7 +391,6 @@ id = "design-tech-arch-db"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Database schemas & tables"
 description = "Database schemas and tables."
 
@@ -442,7 +398,6 @@ description = "Database schemas and tables."
 id = "design-dbtable-entry"
 level = 4
 required = false
-numbered = false
 description = "Individual database table entry."
 
 [[artifacts.DESIGN.headings]]
@@ -450,7 +405,6 @@ id = "design-additional-context"
 level = 2
 required = false
 multiple = false
-numbered = true
 pattern = "Additional context"
 description = "Optional additional context."
 
@@ -459,7 +413,6 @@ id = "design-traceability"
 level = 2
 required = false
 multiple = false
-numbered = true
 pattern = "Traceability"
 description = "Optional traceability links."
 
@@ -610,7 +563,6 @@ id = "feature-h1-title"
 level = 1
 required = true
 multiple = false
-numbered = false
 description = "FEATURE document title (H1)."
 
 [[artifacts.FEATURE.headings]]
@@ -618,7 +570,6 @@ id = "feature-context"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Feature Context"
 description = "Feature context section."
 
@@ -627,7 +578,6 @@ id = "feature-context-overview"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Overview"
 description = "Feature overview."
 
@@ -636,7 +586,6 @@ id = "feature-context-purpose"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Purpose"
 description = "Feature purpose."
 
@@ -645,7 +594,6 @@ id = "feature-context-actors"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Actors"
 description = "Actors involved in the feature."
 
@@ -654,7 +602,6 @@ id = "feature-context-references"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "References"
 description = "References to related artifacts."
 
@@ -663,16 +610,14 @@ id = "feature-actor-flows"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Actor Flows (CDSL)"
 description = "Actor flows section."
 
 [[artifacts.FEATURE.headings]]
 id = "feature-actor-flow"
 level = 3
-required = true
+required = false
 multiple = true
-numbered = false
 description = "A single actor flow."
 
 [[artifacts.FEATURE.headings]]
@@ -680,33 +625,29 @@ id = "feature-processes"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Processes / Business Logic (CDSL)"
 description = "Processes / business logic section."
 
 [[artifacts.FEATURE.headings]]
 id = "feature-process"
 level = 3
-required = true
+required = false
 multiple = true
-numbered = false
 description = "A single process/algorithm."
 
 [[artifacts.FEATURE.headings]]
 id = "feature-states"
 level = 2
-required = true
+required = false
 multiple = false
-numbered = true
 pattern = "States (CDSL)"
 description = "States section."
 
 [[artifacts.FEATURE.headings]]
 id = "feature-state"
 level = 3
-required = true
+required = false
 multiple = true
-numbered = false
 description = "A single state machine."
 
 [[artifacts.FEATURE.headings]]
@@ -714,7 +655,6 @@ id = "feature-dod"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Definitions of Done"
 description = "Definitions of done section."
 
@@ -723,7 +663,6 @@ id = "feature-dod-entry"
 level = 3
 required = true
 multiple = true
-numbered = false
 description = "A single definition of done entry."
 
 [[artifacts.FEATURE.headings]]
@@ -731,9 +670,16 @@ id = "feature-acceptance-criteria"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Acceptance Criteria"
 description = "Acceptance criteria for the feature."
+
+[[artifacts.FEATURE.headings]]
+id = "feature-additional-context"
+level = 2
+required = false
+multiple = false
+pattern = "Additional Context.*"
+description = "Optional additional context for the feature."
 
 # ── FEATURE ID kinds ───────────────────────────────────────────
 
@@ -808,8 +754,6 @@ id = "prd-h1-title"
 level = 1
 required = true
 multiple = false
-numbered = false
-pattern = "PRD\\s*[—–-]\\s*.+"
 description = "PRD document title (H1)."
 
 [[artifacts.PRD.headings]]
@@ -817,7 +761,6 @@ id = "prd-overview"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Overview"
 description = "High-level overview of the product and problem."
 
@@ -826,7 +769,6 @@ id = "prd-overview-purpose"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Purpose"
 description = "Purpose of the PRD and the product."
 
@@ -835,7 +777,6 @@ id = "prd-overview-background"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Background / Problem Statement"
 description = "Background and problem statement."
 
@@ -844,7 +785,6 @@ id = "prd-overview-goals"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Goals (Business Outcomes)"
 description = "Business outcomes and goals."
 
@@ -853,7 +793,6 @@ id = "prd-overview-glossary"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Glossary"
 description = "Definitions of key terms."
 
@@ -862,7 +801,6 @@ id = "prd-actors"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Actors"
 description = "Actors (human and system) that interact with the product."
 
@@ -871,15 +809,13 @@ id = "prd-actors-human"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Human Actors"
 description = "Human actors."
 
 [[artifacts.PRD.headings]]
 id = "prd-actor-entry"
 level = 4
-required = true
-numbered = false
+required = false
 description = "Individual human actor entry."
 
 [[artifacts.PRD.headings]]
@@ -887,15 +823,13 @@ id = "prd-actors-system"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "System Actors"
 description = "System and external actors."
 
 [[artifacts.PRD.headings]]
 id = "prd-actor-system-entry"
 level = 4
-required = true
-numbered = false
+required = false
 description = "Individual system actor entry."
 
 [[artifacts.PRD.headings]]
@@ -903,16 +837,14 @@ id = "prd-operational-concept"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Operational Concept & Environment"
 description = "Operational concept and environment constraints."
 
 [[artifacts.PRD.headings]]
 id = "prd-operational-concept-constraints"
 level = 3
-required = true
+required = false
 multiple = false
-numbered = true
 pattern = "Module-Specific Environment Constraints"
 description = "Module-specific environment constraints beyond project defaults."
 
@@ -921,7 +853,6 @@ id = "prd-scope"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Scope"
 description = "Scope of the product and release."
 
@@ -930,7 +861,6 @@ id = "prd-scope-in"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "In Scope"
 description = "In-scope items."
 
@@ -939,7 +869,6 @@ id = "prd-scope-out"
 level = 3
 required = true
 multiple = false
-numbered = true
 pattern = "Out of Scope"
 description = "Out-of-scope items."
 
@@ -948,22 +877,19 @@ id = "prd-fr"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Functional Requirements"
 description = "Functional requirements section."
 
 [[artifacts.PRD.headings]]
 id = "prd-fr-group"
 level = 3
-required = true
-numbered = true
+required = false
 description = "Feature area or priority tier grouping."
 
 [[artifacts.PRD.headings]]
 id = "prd-fr-entry"
 level = 4
-required = true
-numbered = false
+required = false
 description = "Individual functional requirement entry."
 
 [[artifacts.PRD.headings]]
@@ -971,7 +897,6 @@ id = "prd-nfr"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Non-Functional Requirements"
 description = "Non-functional requirements section."
 
@@ -980,7 +905,6 @@ id = "prd-nfr-inclusions"
 level = 3
 required = false
 multiple = false
-numbered = true
 pattern = "Module-Specific NFRs"
 description = "Non-functional requirements that deviate from or extend project defaults."
 
@@ -988,15 +912,13 @@ description = "Non-functional requirements that deviate from or extend project d
 id = "prd-nfr-entry"
 level = 4
 required = false
-numbered = false
 description = "Individual non-functional requirement entry."
 
 [[artifacts.PRD.headings]]
 id = "prd-nfr-exclusions"
 level = 3
-required = true
+required = false
 multiple = false
-numbered = true
 pattern = "NFR Exclusions"
 description = "Explicit non-functional requirement exclusions."
 
@@ -1005,16 +927,14 @@ id = "prd-public-interfaces"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Public Library Interfaces"
 description = "Public library interfaces and integration contracts."
 
 [[artifacts.PRD.headings]]
 id = "prd-public-interfaces-api"
 level = 3
-required = true
+required = false
 multiple = false
-numbered = true
 pattern = "Public API Surface"
 description = "Public API surface."
 
@@ -1022,15 +942,13 @@ description = "Public API surface."
 id = "prd-interface-entry"
 level = 4
 required = false
-numbered = false
 description = "Individual public interface entry."
 
 [[artifacts.PRD.headings]]
 id = "prd-public-interfaces-external-contracts"
 level = 3
-required = true
+required = false
 multiple = false
-numbered = true
 pattern = "External Integration Contracts"
 description = "External integration contracts."
 
@@ -1038,7 +956,6 @@ description = "External integration contracts."
 id = "prd-contract-entry"
 level = 4
 required = false
-numbered = false
 description = "Individual external integration contract entry."
 
 [[artifacts.PRD.headings]]
@@ -1046,7 +963,6 @@ id = "prd-use-cases"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Use Cases"
 description = "Use cases section."
 
@@ -1054,7 +970,6 @@ description = "Use cases section."
 id = "prd-usecase-entry"
 level = 4
 required = false
-numbered = false
 description = "Individual use case entry."
 
 [[artifacts.PRD.headings]]
@@ -1062,7 +977,6 @@ id = "prd-acceptance-criteria"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Acceptance Criteria"
 description = "Acceptance criteria for delivery."
 
@@ -1071,7 +985,6 @@ id = "prd-dependencies"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Dependencies"
 description = "Dependencies required to deliver the PRD."
 
@@ -1080,7 +993,6 @@ id = "prd-assumptions"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Assumptions"
 description = "Assumptions that must hold."
 
@@ -1089,7 +1001,6 @@ id = "prd-risks"
 level = 2
 required = true
 multiple = false
-numbered = true
 pattern = "Risks"
 description = "Risks and mitigations."
 
@@ -1098,7 +1009,6 @@ id = "prd-open-questions"
 level = 2
 required = false
 multiple = false
-numbered = true
 pattern = "Open Questions"
 description = "Unresolved questions that need answers before or during implementation."
 
@@ -1107,7 +1017,6 @@ id = "prd-traceability"
 level = 2
 required = false
 multiple = false
-numbered = true
 pattern = "Traceability"
 description = "Links to related specification artifacts."
 
@@ -1163,7 +1072,6 @@ template = "cpt-{system}-interface-{slug}"
 headings = ["prd-public-interfaces"]
 
 [artifacts.PRD.identifiers.interface.references.DESIGN]
-coverage = true
 headings = ["design-tech-arch-api-contracts"]
 
 [artifacts.PRD.identifiers.nfr]

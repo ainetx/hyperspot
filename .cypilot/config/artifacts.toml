@@ -79,10 +79,10 @@ patterns = ["modules/mini-chat/*"]
 [[systems]]
 name = "cyberfabric"
 slug = "cf"
-kit = "cf-sdlc"
+kit = "sdlc"
 
 [[systems.autodetect]]
-kit = "cf-sdlc"
+kit = "sdlc"
 system_root = "{project_root}/modules/$system"
 artifacts_root = "{system_root}/docs"
 
@@ -128,7 +128,7 @@ path = "{system_root}/tests"
 extensions = [".rs"]
 
 [[systems.autodetect]]
-kit = "cf-sdlc"
+kit = "sdlc"
 system_root = "{project_root}/modules/system/$system"
 artifacts_root = "{system_root}/docs"
 
@@ -176,10 +176,10 @@ extensions = [".rs"]
 [[systems]]
 name = "examples"
 slug = "examples"
-kit = "cf-sdlc"
+kit = "sdlc"
 
 [[systems.autodetect]]
-kit = "cf-sdlc"
+kit = "sdlc"
 system_root = "{project_root}/docs/spec-templates/examples/$system"
 artifacts_root = "{system_root}"
 codebase = []

@@ -1632,8 +1632,6 @@ id = "decomposition-h1-title"
 level = 1
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Suggested heading text template for authors
@@ -1643,7 +1641,7 @@ prompt = "Project or system name"
 # Human description of this heading's purpose
 description = "DECOMPOSITION document title (H1)."
 # Example heading texts showing correct usage
-examples = ["# Decomposition: TaskFlow"]
+examples = ["# DECOMPOSITION \u2014 Todo App"]
 ```
 `@/cpt:heading`
 
@@ -1673,6 +1671,14 @@ headings = ["decomposition-h1-title"]  # heading constraint IDs where this ident
 ```
 `@/cpt:prompt`
 
+> **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/examples/example.md`.
+
+`@cpt:example`
+```markdown
+- [ ] `p1` - **ID**: `cpt-examples-todo-app-status-overall`
+```
+`@/cpt:example`
+
 ### Overview
 
 > **`@cpt:heading`** — Heading constraint. Defines required/optional heading in the artifact structure. Output: `constraints.toml` + `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/template.md`.
@@ -1685,8 +1691,6 @@ id = "decomposition-overview"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -1694,6 +1698,7 @@ pattern = "Overview"
 # Human description of this heading's purpose
 description = "Overview of decomposition strategy."
 # Example heading texts showing correct usage
+template = "1. Overview"
 examples = ["## 1. Overview"]
 ```
 `@/cpt:heading`
@@ -1711,13 +1716,13 @@ examples = ["## 1. Overview"]
 
 `@cpt:example`
 ```markdown
-TaskFlow design is decomposed into features organized around core task management capabilities. The decomposition follows a dependency order where foundational CRUD operations enable higher-level features like notifications and reporting.
+**Overall Progress**: 67% complete (2 of 3 features completed)
 
-**Decomposition Strategy**:
-- Features grouped by functional cohesion (related capabilities together)
-- Dependencies minimize coupling between features
-- Each feature covers specific components and sequences from DESIGN
-- 100% coverage of all DESIGN elements verified
+**Status**: In Progress
+
+**Notes**: Core task management and organization features are complete. Real-time synchronization is pending implementation.
+
+---
 ```
 `@/cpt:example`
 
@@ -1733,8 +1738,6 @@ id = "decomposition-entries"
 level = 2
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -1742,6 +1745,7 @@ pattern = "Entries"
 # Human description of this heading's purpose
 description = "List of feature entries."
 # Example heading texts showing correct usage
+template = "2. Entries"
 examples = ["## 2. Entries"]
 ```
 `@/cpt:heading`
@@ -1756,8 +1760,6 @@ id = "decomposition-entry"
 level = 3
 # true = heading MUST appear in artifact | false = optional
 required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = true
 # Suggested heading text template for authors
@@ -1924,122 +1926,75 @@ headings = ["feature-h1-title"]  # target heading constraint in FEATURE
 > **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/examples/example.md`.
 
 `@cpt:example`
-```markdown
-**Overall implementation status:**
+````markdown
+### Feature 1: Task Management Core
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-status-overall`
+- [x] `p1` - **ID**: `cpt-examples-todo-app-feature-core`
 
-### 1. [Task CRUD](feature-task-crud/) ⏳ HIGH
+**Feature**: [features/0001-cpt-todo-app-feature-core.md](./features/0001-cpt-todo-app-feature-core.md)
 
-- [ ] `p1` - **ID**: `cpt-ex-task-flow-feature-task-crud`
+**Purpose**: Implement core CRUD operations for tasks including creation, reading, updating, and deletion.
 
-- **Purpose**: Enable users to create, view, edit, and delete tasks with full lifecycle management.
+**Design Coverage**:
+- Component: `cpt-examples-todo-app-component-react-ui` (task UI rendering)
+- Component: `cpt-examples-todo-app-component-task-service` (CRUD orchestration)
+- Component: `cpt-examples-todo-app-component-indexeddb` (local persistence)
+- Component: `cpt-examples-todo-app-component-rest-api` (server-side CRUD)
+- Component: `cpt-examples-todo-app-component-postgresql` (persistent storage)
+- Database: `cpt-examples-todo-app-design-db-tasks` (task persistence)
+- Principle: `cpt-examples-todo-app-principle-offline-first` (IndexedDB local storage)
+- Sequence: `cpt-examples-todo-app-seq-create-task-v1` (optimistic create flow)
 
-- **Depends On**: None
+**Dependencies**: None
 
-- **Scope**:
-  - Task creation with title, description, priority, due date
-  - Task assignment to team members
-  - Status transitions (BACKLOG → IN_PROGRESS → DONE)
-  - Task deletion with soft-delete
+**Rationale**: Foundation for all other features — tasks must exist before they can be organized or synced.
 
-- **Out of scope**:
-  - Recurring tasks
-  - Task templates
+**Status**: Completed
 
-- **Requirements Covered**:
+---
 
-  - [ ] `p1` - `cpt-ex-task-flow-fr-task-crud`
-  - [ ] `p2` - `cpt-ex-task-flow-nfr-performance-reliability`
+### Feature 2: Task Organization & Logic
 
-- **Design Principles Covered**:
+- [x] `p2` - **ID**: `cpt-examples-todo-app-feature-logic`
 
-  - [ ] `p1` - `cpt-ex-task-flow-principle-realtime-first`
-  - [ ] `p2` - `cpt-ex-task-flow-principle-simplicity-over-features`
+**Feature**: [features/0002-cpt-todo-app-feature-logic.md](./features/0002-cpt-todo-app-feature-logic.md)
 
-- **Design Constraints Covered**:
+**Purpose**: Implement filtering, sorting, and display logic for task lists.
 
-  - [ ] `p1` - `cpt-ex-task-flow-constraint-supported-platforms`
+**Design Coverage**:
+- Principle: `cpt-examples-todo-app-principle-optimistic-updates` (immediate UI feedback)
 
-- **Domain Model Entities**:
-  - Task
-  - User
+**Dependencies**: `cpt-examples-todo-app-feature-core` (requires tasks to exist)
 
-- **Design Components**:
+**Rationale**: Task organization helps users manage growing task lists efficiently. Builds on core CRUD to provide filtering by status, category, and priority.
 
-  - [ ] `p1` - `cpt-ex-task-flow-component-react-spa`
-  - [ ] `p1` - `cpt-ex-task-flow-component-api-server`
-  - [ ] `p1` - `cpt-ex-task-flow-component-postgresql`
-  - [ ] `p2` - `cpt-ex-task-flow-component-redis-pubsub`
+**Status**: Completed
 
-- **API**:
-  - POST /api/tasks
-  - GET /api/tasks
-  - PUT /api/tasks/{id}
-  - DELETE /api/tasks/{id}
+---
 
-- **Sequences**:
+### Feature 3: Real-time Synchronization
 
-  - [ ] `p1` - `cpt-ex-task-flow-seq-task-creation`
+- [ ] `p2` - **ID**: `cpt-examples-todo-app-feature-sync`
 
-- **Data**:
+**Feature**: [features/0003-cpt-todo-app-feature-sync.md](./features/0003-cpt-todo-app-feature-sync.md)
 
-  - [ ] `p1` - `cpt-ex-task-flow-dbtable-tasks`
+**Purpose**: Implement cross-device synchronization via WebSocket with fallback to polling.
 
-### 2. [Notifications](feature-notifications/) ⏳ MEDIUM
+**Design Coverage**:
+- Component: `cpt-examples-todo-app-component-sync-service` (sync orchestration)
+- Component: `cpt-examples-todo-app-component-websocket-server` (real-time notifications)
+- Interface: `cpt-examples-todo-app-interface-websocket` (WebSocket sync protocol)
+- Constraint: `cpt-examples-todo-app-constraint-browser-compat` (WebSocket availability check)
+- Principle: `cpt-examples-todo-app-principle-offline-first` (sync queue when offline)
 
-- [ ] `p2` - **ID**: `cpt-ex-task-flow-feature-notifications`
+**Dependencies**: `cpt-examples-todo-app-feature-core` (syncs task data created/modified by core operations)
 
-- **Purpose**: Notify users about task assignments, due dates, and status changes.
+**Rationale**: Enables cross-device experience essential for users who work across multiple devices. Can be built after core functionality is stable. Implements sync queue for offline changes that get pushed when connectivity resumes.
 
-- **Depends On**: `cpt-ex-task-flow-feature-task-crud`
+**Status**: Pending
 
-- **Scope**:
-  - Push notifications for task assignments
-  - Email alerts for overdue tasks
-  - In-app notification center
-
-- **Out of scope**:
-  - SMS notifications
-  - Custom notification templates
-
-- **Requirements Covered**:
-
-  - [ ] `p2` - `cpt-ex-task-flow-fr-notifications`
-
-- **Design Principles Covered**:
-
-  - [ ] `p1` - `cpt-ex-task-flow-principle-realtime-first`
-  - [ ] `p2` - `cpt-ex-task-flow-principle-mobile-first`
-
-- **Design Constraints Covered**:
-
-  - [ ] `p1` - `cpt-ex-task-flow-constraint-supported-platforms`
-
-- **Domain Model Entities**:
-  - Task
-  - User
-  - Notification
-
-- **Design Components**:
-
-  - [ ] `p1` - `cpt-ex-task-flow-component-react-spa`
-  - [ ] `p1` - `cpt-ex-task-flow-component-api-server`
-  - [ ] `p2` - `cpt-ex-task-flow-component-redis-pubsub`
-
-- **API**:
-  - POST /api/notifications
-  - GET /api/notifications
-  - PUT /api/notifications/{id}/read
-
-- **Sequences**:
-
-  - [ ] `p2` - `cpt-ex-task-flow-seq-notification-delivery`
-
-- **Data**:
-
-  - [ ] `p2` - `cpt-ex-task-flow-dbtable-notifications`
-```
+---
+````
 `@/cpt:example`
 
 > **`@cpt:heading`** — Heading constraint. Defines required/optional heading in the artifact structure. Output: `constraints.toml` + `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/template.md`.
@@ -2051,9 +2006,7 @@ id = "decomposition-feature-deps"
 # Markdown heading level (1=H1 … 6=H6)
 level = 2
 # true = heading MUST appear in artifact | false = optional
-required = true
-# numbered: true = required | false = prohibited | omit = allowed
-numbered = true
+required = false
 # multiple: true = required (2+) | false = prohibited (exactly one) | omit = allowed
 multiple = false
 # Regex the heading text must match (omit or null = any text)
@@ -2061,6 +2014,7 @@ pattern = "Feature Dependencies"
 # Human description of this heading's purpose
 description = "Cross-feature dependency overview."
 # Example heading texts showing correct usage
+template = "3. Feature Dependencies"
 examples = ["## 3. Feature Dependencies"]
 ```
 `@/cpt:heading`
@@ -2087,7 +2041,18 @@ cpt-{system}-feature-{foundation-slug}
 > **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/examples/example.md`.
 
 `@cpt:example`
-```markdown
-None.
+````markdown
+```text
+cpt-examples-todo-app-feature-core
+    ↓
+    ├─→ cpt-examples-todo-app-feature-logic
+    └─→ cpt-examples-todo-app-feature-sync
 ```
+
+**Dependency Rationale**:
+
+- `cpt-examples-todo-app-feature-logic` requires `cpt-examples-todo-app-feature-core`: Cannot organize/filter tasks that don't exist
+- `cpt-examples-todo-app-feature-sync` requires `cpt-examples-todo-app-feature-core`: Cannot sync tasks that haven't been created
+- `cpt-examples-todo-app-feature-logic` and `cpt-examples-todo-app-feature-sync` are independent of each other and can be developed in parallel
+````
 `@/cpt:example`

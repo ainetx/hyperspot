@@ -7,6 +7,7 @@
 
 { Description of how the DESIGN was decomposed into features, the decomposition strategy, and any relevant decomposition rationale. }
 
+
 ## 2. Entries
 
 ### 1. [{Feature Title 1}](feature-{slug}/) - HIGH
@@ -54,7 +55,6 @@
   - [ ] `p1` - `cpt-{system}-dbtable-{slug}`
   - `cpt-{system}-db-{slug}`
 
-
 ### 2. [{Feature Title 2}](feature-{slug}/) - MEDIUM
 
 - [ ] `p2` - **ID**: `cpt-{system}-feature-{slug}`
@@ -95,7 +95,6 @@
 - **Data**:
   - [ ] `p2` - `cpt-{system}-dbtable-{slug}`
 
-
 ### 3. [{Feature Title 3}](feature-{slug}/) - LOW
 
 - [ ] `p3` - **ID**: `cpt-{system}-feature-{slug}`
@@ -133,7 +132,6 @@
 
 - **Data**:
   - [ ] `p3` - `cpt-{system}-dbtable-{slug}`
-
 
 ---
 

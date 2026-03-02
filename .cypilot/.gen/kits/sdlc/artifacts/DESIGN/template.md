@@ -156,6 +156,7 @@ graph LR
 
 - `cpt-{system}-component-{slug}` — {relationship type: depends on | calls | publishes to | subscribes to | shares model with | owns data for | etc.}
 
+
 ### 3.3 API Contracts
 
 {For module-level design: Document all public API contracts exposed by this module. For multi-component design: Document the primary API contracts exposed by each component. Add references to module designs}
