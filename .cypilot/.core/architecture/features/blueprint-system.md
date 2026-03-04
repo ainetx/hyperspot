@@ -11,6 +11,7 @@
 - [2. Actor Flows (CDSL)](#2-actor-flows-cdsl)
   - [Kit Installation](#kit-installation)
   - [Kit Update](#kit-update)
+  - [Kit Migrate](#kit-migrate)
   - [Resource Generation](#resource-generation)
   - [Kit Structural Validation](#kit-structural-validation)
 - [3. Processes / Business Logic (CDSL)](#3-processes-business-logic-cdsl)
@@ -19,6 +20,10 @@
   - [Generate Per-Artifact Outputs](#generate-per-artifact-outputs)
   - [Generate Kit-Wide Constraints](#generate-kit-wide-constraints)
   - [Three-Way Merge](#three-way-merge)
+  - [Seed Kit Config Files](#seed-kit-config-files)
+  - [Resolve Cypilot Directory](#resolve-cypilot-directory)
+  - [Write Kit Gen Outputs](#write-kit-gen-outputs)
+  - [Conf.toml Helpers](#conftoml-helpers)
   - [Collect SKILL Extensions](#collect-skill-extensions)
   - [Generate Workflows](#generate-workflows)
 - [4. States (CDSL)](#4-states-cdsl)
@@ -29,6 +34,7 @@
   - [Kit-Wide Constraints Generation](#kit-wide-constraints-generation)
   - [Kit Installation and Registration](#kit-installation-and-registration)
   - [Kit Update](#kit-update-1)
+  - [Kit Migrate](#kit-migrate-1)
   - [Kit Structural Validation](#kit-structural-validation-1)
   - [Resource Regeneration](#resource-regeneration)
 - [6. Implementation Modules](#6-implementation-modules)
@@ -73,7 +79,7 @@ Eliminates resource duplication across kit artifacts. Without blueprints, every 
 
 **Success Scenarios**:
 - User installs a kit from a local path → kit source saved to reference directory, blueprints copied to user-editable location, all resources generated, kit registered in `{cypilot_path}/config/core.toml`
-- User installs a kit during `cypilot init` → same as above, triggered automatically for bundled kits
+- User installs a kit during `cpt init` → same as above, triggered automatically for bundled kits
 
 **Error Scenarios**:
 - Kit path does not contain a `blueprints/` directory → error with structural requirements
@@ -119,6 +125,26 @@ Eliminates resource duplication across kit artifacts. Without blueprints, every 
    5. [x] - `p1` - Update kit version in `{cypilot_path}/config/core.toml` - `inst-update-version`
 4. [x] - `p1` - **RETURN** update summary (kits updated, files regenerated, conflicts if any) - `inst-return-update-ok`
 
+### Kit Migrate
+
+- [x] `p1` - **ID**: `cpt-cypilot-flow-blueprint-system-kit-migrate`
+
+**Actor**: `cpt-cypilot-actor-user`
+
+**Success Scenarios**:
+- User runs `cypilot kit migrate` → version-drifted kits merged via three-way merge, outputs regenerated
+- User runs `cypilot kit migrate --dry-run` → shows what would be done without writing files
+
+**Error Scenarios**:
+- No kits installed → error with hint to install first
+- No version drift detected → report "current" status, skip migration
+
+**Steps**:
+1. [x] - `p1` - User invokes `cypilot kit migrate [--kit SLUG] [--dry-run]` - `inst-user-migrate`
+2. [x] - `p1` - Resolve target kits from `{cypilot_path}/kits/` (reference directory) - `inst-resolve-migrate-kits`
+3. [x] - `p1` - **FOR EACH** kit: call `migrate_kit` (three-way merge) then regenerate outputs - `inst-foreach-migrate-kit`
+4. [x] - `p1` - **RETURN** migration summary (kits migrated, blueprints merged, conflicts if any) - `inst-return-migrate-ok`
+
 ### Resource Generation
 
 - [x] `p1` - **ID**: `cpt-cypilot-flow-blueprint-system-generate-resources`
@@ -126,13 +152,13 @@ Eliminates resource duplication across kit artifacts. Without blueprints, every 
 **Actor**: `cpt-cypilot-actor-user`
 
 **Success Scenarios**:
-- User runs `cypilot generate-resources` → all kit blueprints re-processed, outputs regenerated
+- User runs `cpt generate-resources` → all kit blueprints re-processed, outputs regenerated
 
 **Error Scenarios**:
 - Blueprint has syntax errors → error with marker, line number, and fix suggestion
 
 **Steps**:
-1. [x] - `p1` - User invokes `cypilot generate-resources [--kit SLUG]` - `inst-user-generate`
+1. [x] - `p1` - User invokes `cpt generate-resources [--kit SLUG]` - `inst-user-generate`
 2. [x] - `p1` - Resolve target kits from `{cypilot_path}/config/core.toml` - `inst-resolve-gen-kits`
 3. [x] - `p1` - **FOR EACH** kit in target kits - `inst-foreach-gen-kit`
    1. [x] - `p1` - Process all blueprints using `cpt-cypilot-algo-blueprint-system-process-kit` - `inst-gen-process`
@@ -145,14 +171,14 @@ Eliminates resource duplication across kit artifacts. Without blueprints, every 
 **Actor**: `cpt-cypilot-actor-user`
 
 **Success Scenarios**:
-- User runs `cypilot validate-kits` → all installed kits validated, PASS with coverage report
+- User runs `cpt validate-kits` → all installed kits validated, PASS with coverage report
 
 **Error Scenarios**:
 - Kit missing `blueprints/` directory → FAIL with details
 - Blueprint missing mandatory `@cpt:blueprint` marker → FAIL with details
 
 **Steps**:
-1. [x] - `p1` - User invokes `cypilot validate-kits` - `inst-user-validate-kits`
+1. [x] - `p1` - User invokes `cpt validate-kits` - `inst-user-validate-kits`
 2. [x] - `p1` - Load all registered kits from `{cypilot_path}/config/core.toml` - `inst-load-registered-kits`
 3. [x] - `p1` - **FOR EACH** kit - `inst-foreach-validate-kit`
    1. [x] - `p1` - Verify `blueprints/` directory exists in user-editable path - `inst-verify-blueprints-dir`
@@ -170,18 +196,32 @@ Eliminates resource duplication across kit artifacts. Without blueprints, every 
 
 **Input**: Path to a single blueprint `.md` file
 
-**Output**: Parsed blueprint structure: list of markers with type, content, line range, and metadata
+**Output**: Parsed blueprint structure: list of segments (text blocks and markers) with type, content, line range, stable identity key, and metadata
+
+**Marker Syntax**:
+- **Named** (required for new blueprints): `` `@cpt:TYPE:ID` `` / `` `@/cpt:TYPE:ID` `` — e.g., `` `@cpt:rule:prereq-load-dependencies` ``
+- **Legacy** (backward-compatible): `` `@cpt:TYPE` `` / `` `@/cpt:TYPE` `` — e.g., `` `@cpt:rule` ``
+- The `ID` part is a kebab-case slug unique within the blueprint for that marker type
+
+**Identity Key Resolution** (used by three-way merge for stable matching):
+1. **Explicit syntax ID** (highest priority): if marker uses named syntax `` `@cpt:TYPE:ID` ``, identity key = `TYPE:ID` (e.g., `rule:prereq-load-dependencies`)
+2. **TOML-derived key**: for markers with structured TOML content, extract key from data — `heading:{id}`, `id:{kind}`, `workflow:{name}`
+3. **Positional index** (legacy fallback): for unnamed markers without TOML keys, append `#N` ordinal per base key (e.g., `rule#0`, `rule#1`)
+
+**Singleton markers** (`blueprint`, `skill`, `system-prompt`, `rules`, `checklist`): identity key = marker type itself — these are inherently unique per blueprint and do not require an explicit ID
 
 **Steps**:
 1. [x] - `p1` - Read file content as UTF-8 text - `inst-read-file`
-2. [x] - `p1` - Scan for opening markers: lines matching `` `@cpt:TYPE` `` pattern - `inst-scan-open`
+2. [x] - `p1` - Scan for opening markers: lines matching `` `@cpt:TYPE` `` or `` `@cpt:TYPE:ID` `` pattern - `inst-scan-open`
 3. [x] - `p1` - **FOR EACH** opening marker - `inst-foreach-marker`
-   1. [x] - `p1` - Find matching closing marker `` `@/cpt:TYPE` `` - `inst-find-close`
+   1. [x] - `p1` - Find matching closing marker `` `@/cpt:TYPE` `` or `` `@/cpt:TYPE:ID` `` - `inst-find-close`
    2. [x] - `p1` - **IF** no closing marker found **RETURN** error with line number - `inst-if-unclosed`
    3. [x] - `p1` - Extract content between markers (fenced code blocks: ` ```toml `, ` ```markdown `) - `inst-extract-content`
    4. [x] - `p1` - Parse marker metadata based on type (TOML config for blueprint/heading/id, Markdown for rule/check/skill/workflow) - `inst-parse-metadata`
+   5. [x] - `p1` - Derive identity key using resolution chain: explicit syntax ID → TOML-derived key → positional fallback - `inst-derive-identity-key`
 4. [x] - `p1` - Validate no nested markers (flat structure required) - `inst-validate-flat`
-5. [x] - `p1` - **RETURN** parsed blueprint with ordered marker list - `inst-return-parsed`
+5. [x] - `p1` - **IF** any non-singleton marker lacks an explicit syntax ID, emit deprecation warning (legacy fallback used) - `inst-warn-legacy`
+6. [x] - `p1` - **RETURN** parsed blueprint with ordered segment list (text blocks and markers with stable identity keys) - `inst-return-parsed`
 
 ### Process Kit
 
@@ -243,54 +283,116 @@ Eliminates resource duplication across kit artifacts. Without blueprints, every 
 
 ### Three-Way Merge
 
-- [ ] `p2` - **ID**: `cpt-cypilot-algo-blueprint-system-three-way-merge`
+- [x] `p2` - **ID**: `cpt-cypilot-algo-blueprint-system-three-way-merge`
 
-**Input**: Reference blueprint (old version in `{cypilot_path}/kits/{slug}/`), user blueprint (`{cypilot_path}/config/kits/{slug}/blueprints/`), new blueprint (from updated kit source)
+**Input**: Reference blueprint (old version in `{cypilot_path}/kits/{slug}/.prev/`), user blueprint (`{cypilot_path}/config/kits/{slug}/blueprints/`), new blueprint (current reference in `{cypilot_path}/kits/{slug}/`)
 
-**Output**: Merged blueprint content, or list of conflicts
+**Output**: Merged blueprint content and merge report (updated, skipped, kept, inserted markers)
+
+**Identity matching**: Markers are matched across all three versions by their **stable identity key** (see `cpt-cypilot-algo-blueprint-system-parse-blueprint` — Identity Key Resolution). Named markers (`@cpt:TYPE:ID`) match by `TYPE:ID`; TOML-keyed markers match by derived key; legacy unnamed markers match by positional index fallback. This ensures that renaming, reordering, or inserting markers in the new reference does not break merge identity as long as explicit IDs are used.
 
 **Steps**:
-1. [ ] - `p2` - Parse all three versions into marker lists - `inst-parse-three`
-2. [ ] - `p2` - Identify marker-level changes: added markers (in new, not in reference), removed markers (in reference, not in new), modified markers (in both, content differs) - `inst-identify-changes`
-3. [ ] - `p2` - Identify user modifications: markers where user blueprint differs from reference - `inst-identify-user-mods`
-4. [ ] - `p2` - Apply merge rules - `inst-apply-merge`
-   1. [ ] - `p2` - Insert new markers (added by kit, not present in user) at appropriate positions - `inst-insert-new`
-   2. [ ] - `p2` - Preserve user-modified markers unchanged - `inst-preserve-user`
-   3. [ ] - `p2` - Update unmodified markers to new version - `inst-update-unmodified`
-   4. [ ] - `p2` - Respect user deletions: markers removed by user stay removed - `inst-respect-deletions`
-5. [ ] - `p2` - **IF** both user and kit modified the same marker - `inst-if-conflict`
-   1. [ ] - `p2` - Flag as conflict, include both versions - `inst-flag-conflict`
-6. [ ] - `p2` - **RETURN** merged content or conflict list - `inst-return-merge`
+1. [x] - `p1` - Parse all three versions into segment lists (text blocks and `@cpt:` markers with stable identity keys) using `cpt-cypilot-algo-blueprint-system-parse-blueprint` - `inst-parse-three`
+2. [x] - `p1` - Build lookup maps: old_map (identity_key → raw text), new_map (identity_key → raw text) - `inst-identify-changes`
+3. [x] - `p1` - Walk user segments in order, classify each marker by identity key, and apply merge rules - `inst-apply-merge`
+   1. [x] - `p1` - **IF** marker identity key not in old_map (user-added or unknown) **THEN** keep as-is (reported as "kept") - `inst-keep-user-added`
+   2. [x] - `p1` - **IF** marker identity key not in new_map (removed in new reference) **THEN** keep user version (reported as "kept") - `inst-keep-ref-removed`
+   3. [x] - `p1` - **IF** user raw matches old_map raw (user has NOT customized) **AND** new_map raw differs **THEN** replace with new version (reported as "updated") - `inst-update-unmodified`
+   4. [x] - `p1` - **IF** user raw matches old_map raw **AND** new_map raw matches old_map raw **THEN** keep as-is (reported as "kept") - `inst-keep-unchanged`
+   5. [x] - `p1` - **IF** user raw differs from old_map raw (user HAS customized) **THEN** preserve user version unchanged (reported as "skipped") - `inst-preserve-user`
+4. [x] - `p1` - Respect user deletions: markers present in old_map but absent from user segments are NOT re-inserted, even if present in new_map - `inst-respect-deletions`
+5. [x] - `p1` - Insert truly new markers (in new_map but NOT in old_map AND not already in user segments) at anchor-relative positions - `inst-insert-new`
+   1. [x] - `p1` - For each new marker, find the nearest preceding known marker in new_segments (by identity key) as anchor - `inst-find-anchor`
+   2. [x] - `p1` - **IF** anchor found in merged output **THEN** insert after anchor position - `inst-insert-after-anchor`
+   3. [x] - `p1` - **IF** anchor NOT found (all preceding markers deleted by user) **THEN** search forward for nearest following known marker in new_segments and insert before it; default to append at end - `inst-insert-fallback`
+6. [x] - `p2` - Upgrade legacy markers: for each marker in merged output that uses legacy syntax (`@cpt:TYPE` without ID), rewrite opening and closing tags to named syntax (`@cpt:TYPE:ID` / `@/cpt:TYPE:ID`). Skip singleton markers (`blueprint`, `skill`, `system-prompt`, `rules`, `checklist`). Derive ID per marker type: - `inst-upgrade-legacy`
+   1. [x] - `p2` - `heading` → use TOML `id` field (e.g., `@cpt:heading:prd-h1-title`) - `inst-upgrade-heading`
+   2. [x] - `p2` - `id` → use TOML `kind` field (e.g., `@cpt:id:fr`) - `inst-upgrade-id`
+   3. [x] - `p2` - `workflow` → use TOML `name` field (e.g., `@cpt:workflow:pr-review`) - `inst-upgrade-workflow`
+   4. [x] - `p2` - `check` → use TOML `id` field lowercased (e.g., `@cpt:check:biz-prd-001`) - `inst-upgrade-check`
+   5. [x] - `p2` - `rule` → use `{kind}-{section}` from TOML; append `-{N}` if multiple rules share same kind+section (e.g., `@cpt:rule:req-structural`, `@cpt:rule:req-structural-1`) - `inst-upgrade-rule`
+   6. [x] - `p2` - `prompt`, `example` → use nearest preceding heading's ID (e.g., `@cpt:prompt:prd-overview-purpose`); append `-{N}` if multiple per heading - `inst-upgrade-prompt-example`
+7. [x] - `p1` - **RETURN** merged text and report {updated[], skipped[], kept[], inserted[], upgraded[]} - `inst-return-merge`
+
+### Seed Kit Config Files
+
+- [x] `p1` - **ID**: `cpt-cypilot-algo-blueprint-system-seed-configs`
+
+**Input**: Generated scripts directory (`{cypilot_path}/.gen/kits/{slug}/scripts/`), config directory (`{cypilot_path}/config/`)
+
+**Output**: Seeded `.toml` config files in `config/` (only if not already present)
+
+**Steps**:
+1. [x] - `p1` - **FOR EACH** top-level `.toml` file in generated scripts directory - `inst-foreach-toml`
+   1. [x] - `p1` - **IF** file does not exist in config directory, copy it (never overwrite user config) - `inst-seed-if-missing`
+
+### Resolve Cypilot Directory
+
+- [x] `p1` - **ID**: `cpt-cypilot-algo-blueprint-system-resolve-dir`
+
+**Input**: Current working directory
+
+**Output**: Tuple of (project_root, cypilot_dir) or None with JSON error printed
+
+**Steps**:
+1. [x] - `p1` - Find project root from CWD using `find_project_root` - `inst-find-root`
+2. [x] - `p1` - Read `cypilot_path` variable from root `AGENTS.md` - `inst-read-cypilot-var`
+3. [x] - `p1` - Resolve absolute path and **RETURN** (project_root, cypilot_dir) - `inst-resolve-abs`
+
+### Write Kit Gen Outputs
+
+- [x] `p1` - **ID**: `cpt-cypilot-algo-blueprint-system-write-gen-outputs`
+
+**Input**: Kit slug, process_kit summary, gen_kits_dir
+
+**Output**: Per-kit `SKILL.md` and workflow `.md` files written to `.gen/kits/{slug}/`
+
+**Steps**:
+1. [x] - `p1` - **IF** summary contains `skill_content`, write `{cypilot_path}/.gen/kits/{slug}/SKILL.md` with YAML frontmatter and build skill navigation rule - `inst-write-skill`
+2. [x] - `p1` - **FOR EACH** workflow in summary, write `{cypilot_path}/.gen/kits/{slug}/workflows/{name}.md` with YAML frontmatter - `inst-write-workflow`
+3. [x] - `p1` - **RETURN** {skill_nav, workflows_written[]} - `inst-return-gen-outputs`
+
+### Conf.toml Helpers
+
+- [x] `p1` - **ID**: `cpt-cypilot-algo-blueprint-system-conf-toml-helpers`
+
+**Input**: Path to `conf.toml` file
+
+**Output**: Parsed config data or kit version string
+
+**Steps**:
+1. [x] - `p1` - `_read_conf_toml`: Read and parse `conf.toml` using `tomllib`; return empty dict on failure - `inst-read-conf`
+2. [x] - `p1` - `_read_conf_version`: Extract `version` field as integer from `conf.toml`; return 0 if missing - `inst-read-version`
 
 ### Collect SKILL Extensions
 
-- [ ] `p2` - **ID**: `cpt-cypilot-algo-blueprint-system-collect-skill`
+- [x] `p2` - **ID**: `cpt-cypilot-algo-blueprint-system-collect-skill`
 
 **Input**: List of parsed blueprints
 
 **Output**: Aggregated SKILL extension content for SKILL.md composition
 
 **Steps**:
-1. [ ] - `p2` - **FOR EACH** parsed blueprint - `inst-foreach-skill-bp`
-   1. [ ] - `p2` - Extract all `@cpt:skill` marker content - `inst-extract-skill`
-2. [ ] - `p2` - Concatenate sections in blueprint order - `inst-concat-skill`
-3. [ ] - `p2` - **RETURN** aggregated SKILL content - `inst-return-skill`
+1. [x] - `p2` - **FOR EACH** parsed blueprint - `inst-foreach-skill-bp`
+   1. [x] - `p2` - Extract all `@cpt:skill` marker content - `inst-extract-skill`
+2. [x] - `p2` - Concatenate sections in blueprint order - `inst-concat-skill`
+3. [x] - `p2` - **RETURN** aggregated SKILL content - `inst-return-skill`
 
 ### Generate Workflows
 
-- [ ] `p2` - **ID**: `cpt-cypilot-algo-blueprint-system-generate-workflows`
+- [x] `p2` - **ID**: `cpt-cypilot-algo-blueprint-system-generate-workflows`
 
 **Input**: List of parsed blueprints, output directory (`{cypilot_path}/.gen/kits/{slug}/workflows/`)
 
 **Output**: Generated workflow `.md` files
 
 **Steps**:
-1. [ ] - `p2` - **FOR EACH** parsed blueprint - `inst-foreach-wf-bp`
-   1. [ ] - `p2` - Extract all `@cpt:workflow` markers - `inst-extract-workflow`
-   2. [ ] - `p2` - **FOR EACH** workflow marker - `inst-foreach-workflow`
-      1. [ ] - `p2` - Parse TOML header (name, description) and Markdown body (steps) - `inst-parse-workflow`
-      2. [ ] - `p2` - Write to `{cypilot_path}/.gen/kits/{slug}/workflows/{name}.md` - `inst-write-workflow`
-2. [ ] - `p2` - **RETURN** list of generated workflow paths - `inst-return-workflows`
+1. [x] - `p2` - **FOR EACH** parsed blueprint - `inst-foreach-wf-bp`
+   1. [x] - `p2` - Extract all `@cpt:workflow` markers - `inst-extract-workflow`
+   2. [x] - `p2` - **FOR EACH** workflow marker - `inst-foreach-workflow`
+      1. [x] - `p2` - Parse TOML header (name, description) and Markdown body (steps) - `inst-parse-workflow`
+      2. [x] - `p2` - Write to `{cypilot_path}/.gen/kits/{slug}/workflows/{name}.md` - `inst-write-workflow`
+2. [x] - `p2` - **RETURN** list of generated workflow paths - `inst-return-workflows`
 
 ## 4. States (CDSL)
 
@@ -313,7 +415,7 @@ Eliminates resource duplication across kit artifacts. Without blueprints, every 
 
 - [x] `p1` - **ID**: `cpt-cypilot-dod-blueprint-system-parsing`
 
-The system **MUST** parse blueprint `.md` files, extracting all `@cpt:` marker types (`blueprint`, `heading`, `id`, `rule`, `check`, `prompt`, `example`, `rules`, `checklist`, `skill`, `system-prompt`, `workflow`) with their content, metadata, and line ranges. Malformed markers **MUST** produce actionable error messages with file path and line number.
+The system **MUST** parse blueprint `.md` files, extracting all `@cpt:` marker types (`blueprint`, `heading`, `id`, `rule`, `check`, `prompt`, `example`, `rules`, `checklist`, `skill`, `system-prompt`, `workflow`) with their content, metadata, line ranges, and stable identity keys. The parser **MUST** support both named syntax (`` `@cpt:TYPE:ID` ``) and legacy syntax (`` `@cpt:TYPE` ``). Identity keys **MUST** be resolved via the chain: explicit syntax ID → TOML-derived key → positional index fallback. Non-singleton markers without explicit IDs **MUST** produce a deprecation warning. Malformed markers **MUST** produce actionable error messages with file path and line number.
 
 **Implements**:
 - `cpt-cypilot-algo-blueprint-system-parse-blueprint`
@@ -389,11 +491,29 @@ The system **MUST** provide `cypilot kit update [--force] [--kit SLUG]`. Force m
 - `cpt-cypilot-component-kit-manager`
 - `cpt-cypilot-principle-no-manual-maintenance`
 
+### Kit Migrate
+
+- [x] `p1` - **ID**: `cpt-cypilot-dod-blueprint-system-kit-migrate`
+
+The system **MUST** provide `cypilot kit migrate [--kit SLUG] [--dry-run]` that detects kit-level version drift between reference and config `conf.toml`, applies identity-key-based three-way merge to all `.md` blueprints (matching markers by stable identity key — explicit syntax ID, TOML-derived key, or positional fallback), updates the config `conf.toml` to match reference, cleans up `.prev/`, and regenerates `.gen/` outputs. Kits with no version drift **MUST** be skipped with "current" status.
+
+**Implements**:
+- `cpt-cypilot-flow-blueprint-system-kit-migrate`
+- `cpt-cypilot-algo-blueprint-system-three-way-merge`
+- `cpt-cypilot-algo-blueprint-system-conf-toml-helpers`
+
+**Covers (PRD)**:
+- `cpt-cypilot-fr-core-kits`
+
+**Covers (DESIGN)**:
+- `cpt-cypilot-component-kit-manager`
+- `cpt-cypilot-principle-no-manual-maintenance`
+
 ### Kit Structural Validation
 
 - [x] `p1` - **ID**: `cpt-cypilot-dod-blueprint-system-validate-kits`
 
-The system **MUST** provide `cypilot validate-kits` that validates all installed kits have a `blueprints/` directory, each blueprint has a valid `@cpt:blueprint` identity marker, and marker syntax is correct. Output **MUST** be JSON with PASS/FAIL status and per-kit details.
+The system **MUST** provide `cpt validate-kits` that validates all installed kits have a `blueprints/` directory, each blueprint has a valid `@cpt:blueprint` identity marker, and marker syntax is correct. Output **MUST** be JSON with PASS/FAIL status and per-kit details.
 
 **Implements**:
 - `cpt-cypilot-flow-blueprint-system-validate-kits`
@@ -408,7 +528,7 @@ The system **MUST** provide `cypilot validate-kits` that validates all installed
 
 - [x] `p1` - **ID**: `cpt-cypilot-dod-blueprint-system-regenerate`
 
-The system **MUST** provide `cypilot generate-resources [--kit SLUG]` that re-processes all blueprints for the specified kit (or all kits) and regenerates all output files. This enables users to customize blueprints and see the results without a full kit update cycle.
+The system **MUST** provide `cpt generate-resources [--kit SLUG]` that re-processes all blueprints for the specified kit (or all kits) and regenerates all output files. This enables users to customize blueprints and see the results without a full kit update cycle.
 
 **Implements**:
 - `cpt-cypilot-flow-blueprint-system-generate-resources`
@@ -434,11 +554,17 @@ The system **MUST** provide `cypilot generate-resources [--kit SLUG]` that re-pr
 
 - [ ] `cypilot kit install <path>` installs a kit, generates all outputs, and registers in `{cypilot_path}/config/core.toml`
 - [ ] `cypilot kit update --force` overwrites user blueprints and regenerates all outputs
-- [ ] `cypilot generate-resources` re-processes all blueprints and regenerates outputs from user-edited blueprints
-- [ ] `cypilot validate-kits` reports PASS for structurally valid kits and FAIL with details for invalid ones
+- [ ] `cpt generate-resources` re-processes all blueprints and regenerates outputs from user-edited blueprints
+- [ ] `cpt validate-kits` reports PASS for structurally valid kits and FAIL with details for invalid ones
 - [ ] Blueprint parsing handles all marker types: `@cpt:blueprint`, `@cpt:heading`, `@cpt:id`, `@cpt:rule`, `@cpt:check`, `@cpt:prompt`, `@cpt:example`, `@cpt:rules`, `@cpt:checklist`, `@cpt:skill`, `@cpt:system-prompt`, `@cpt:workflow`
+- [ ] Blueprint parsing supports both named syntax (`` `@cpt:TYPE:ID` ``) and legacy syntax (`` `@cpt:TYPE` ``)
+- [ ] Identity keys are resolved via the chain: explicit syntax ID → TOML-derived key → positional index fallback
+- [ ] Non-singleton markers without explicit IDs produce a deprecation warning
+- [ ] Three-way merge matches markers by stable identity key, not by position
+- [ ] Three-way merge inserts new markers at anchor-relative positions (nearest preceding known marker as anchor; forward search when preceding anchor deleted; append as last resort)
+- [ ] Three-way merge respects user deletions: markers present in old reference but absent from user segments are not re-inserted
 - [ ] Generated `template.md` preserves placeholder syntax `{descriptive text}` from `@cpt:heading` markers
 - [ ] Generated `constraints.toml` aggregates ID kinds with `to_code`, `defined_in`, `referenced_in` from all blueprints
 - [ ] Malformed blueprint markers produce actionable error messages with file path and line number
 - [ ] All commands output JSON to stdout and use exit codes 0/1/2
-- [ ] Kit installation during `cypilot init` works identically to explicit `cypilot kit install`
+- [ ] Kit installation during `cpt init` works identically to explicit `cypilot kit install`

@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from ..utils.artifacts_meta import create_backup, generate_default_registry, generate_slug
 from ..utils.files import find_project_root
 from ..utils import toml_utils
+from ..utils.ui import ui
 
 # Directories to copy from cache into project cypilot/.core/ dir
 COPY_DIRS = ["architecture", "requirements", "schemas", "workflows", "skills"]
@@ -353,10 +354,21 @@ def cmd_init(argv: List[str]) -> int:
     # @cpt-end:cpt-cypilot-flow-core-infra-project-init:p1:inst-user-init
 
     cwd = Path.cwd().resolve()
+    interactive = not args.yes
+
+    if interactive:
+        sys.stderr.write("\n")
+        sys.stderr.write("  \033[1mWelcome to Cypilot\033[0m\n")
+        sys.stderr.write("  Set up AI-powered architecture traceability for your project.\n")
+        sys.stderr.write("  Cypilot will create a configuration directory with design artifacts,\n")
+        sys.stderr.write("  validation rules, and agent integration files.\n")
+        sys.stderr.write("\n")
 
     # Resolve project root
     default_project_root = cwd
-    if args.project_root is None and not args.yes:
+    if args.project_root is None and interactive:
+        sys.stderr.write("  \033[2mThe project root is the top-level directory of your repository.\033[0m\n")
+        sys.stderr.write("  \033[2mPress Enter to use the current directory.\033[0m\n")
         raw_root = _prompt_path("Project root directory?", default_project_root.as_posix())
         project_root = _resolve_user_path(raw_root, cwd)
     else:
@@ -370,12 +382,22 @@ def cmd_init(argv: List[str]) -> int:
     # @cpt-begin:cpt-cypilot-flow-core-infra-project-init:p1:inst-if-exists
     # @cpt-begin:cpt-cypilot-flow-core-infra-project-init:p1:inst-return-exists
     if existing_install_rel is not None and not args.force:
-        print(json.dumps({
-            "status": "FAIL",
-            "message": "Cypilot already initialized. Use 'cypilot update' to upgrade or --force to reinitialize.",
-            "project_root": project_root.as_posix(),
-            "cypilot_dir": (project_root / existing_install_rel).as_posix(),
-        }, indent=2, ensure_ascii=False))
+        ui.result(
+            {
+                "status": "FAIL",
+                "message": "Cypilot already initialized. Use 'cypilot update' to upgrade or --force to reinitialize.",
+                "project_root": project_root.as_posix(),
+                "cypilot_dir": (project_root / existing_install_rel).as_posix(),
+            },
+            human_fn=lambda d: (
+                ui.error("Cypilot is already initialized in this project."),
+                ui.detail("Directory", (project_root / existing_install_rel).as_posix()),
+                ui.blank(),
+                ui.hint("To refresh to the latest version:  cpt update"),
+                ui.hint("To reinitialize from scratch:      cpt init --force"),
+                ui.blank(),
+            ),
+        )
         return 2
     # @cpt-end:cpt-cypilot-flow-core-infra-project-init:p1:inst-return-exists
     # @cpt-end:cpt-cypilot-flow-core-infra-project-init:p1:inst-if-exists
@@ -383,7 +405,10 @@ def cmd_init(argv: List[str]) -> int:
     # @cpt-begin:cpt-cypilot-flow-core-infra-project-init:p1:inst-if-interactive
     # @cpt-begin:cpt-cypilot-flow-core-infra-project-init:p1:inst-prompt-dir
     default_install_dir = existing_install_rel or DEFAULT_INSTALL_DIR
-    if args.install_dir is None and not args.yes:
+    if args.install_dir is None and interactive:
+        sys.stderr.write("\n")
+        sys.stderr.write("  \033[2mCypilot stores its files in a subdirectory of your project.\033[0m\n")
+        sys.stderr.write("  \033[2mThis directory will contain .core/, .gen/, and config/ folders.\033[0m\n")
         install_rel = _prompt_path("Cypilot directory (relative to project root)?", default_install_dir)
     else:
         install_rel = args.install_dir or default_install_dir
@@ -404,11 +429,20 @@ def cmd_init(argv: List[str]) -> int:
 
     # Verify cache exists
     if not CACHE_DIR.is_dir():
-        print(json.dumps({
-            "status": "ERROR",
-            "message": f"Cypilot cache not found at {CACHE_DIR}. Run 'cypilot update' first.",
-            "project_root": project_root.as_posix(),
-        }, indent=2, ensure_ascii=False))
+        ui.result(
+            {
+                "status": "ERROR",
+                "message": f"Cypilot cache not found at {CACHE_DIR}. Run 'cypilot update' first.",
+                "project_root": project_root.as_posix(),
+            },
+            human_fn=lambda d: (
+                ui.error("Cypilot cache not found."),
+                ui.detail("Expected at", str(CACHE_DIR)),
+                ui.blank(),
+                ui.hint("Install Cypilot first:  pip install cypilot && cpt update"),
+                ui.blank(),
+            ),
+        )
         return 1
 
     actions: Dict[str, str] = {}
@@ -624,12 +658,12 @@ def cmd_init(argv: List[str]) -> int:
         }
         if backups:
             err_result["backups"] = backups
-        print(json.dumps(err_result, indent=2, ensure_ascii=False))
+        ui.result(err_result, human_fn=lambda d: _human_init_error(d))
         return 1
 
     # @cpt-begin:cpt-cypilot-flow-core-infra-project-init:p1:inst-return-init-ok
     # @cpt-begin:cpt-cypilot-state-core-infra-project-install:p1:inst-init-complete
-    result: Dict[str, object] = {
+    init_result: Dict[str, object] = {
         "status": "PASS",
         "project_root": project_root.as_posix(),
         "cypilot_dir": cypilot_dir.as_posix(),
@@ -639,8 +673,68 @@ def cmd_init(argv: List[str]) -> int:
         "root_system": root_system,
     }
     if backups:
-        result["backups"] = backups
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+        init_result["backups"] = backups
+    ui.result(init_result, human_fn=lambda d: _human_init_ok(d, project_root, cypilot_dir, install_rel, project_name, kit_results))
     return 0
     # @cpt-end:cpt-cypilot-state-core-infra-project-install:p1:inst-init-complete
     # @cpt-end:cpt-cypilot-flow-core-infra-project-init:p1:inst-return-init-ok
+
+
+# ---------------------------------------------------------------------------
+# Human-friendly formatters
+# ---------------------------------------------------------------------------
+
+def _human_init_ok(
+    data: Dict[str, object],
+    project_root: Path,
+    cypilot_dir: Path,
+    install_rel: str,
+    project_name: str,
+    kit_results: Dict[str, Any],
+) -> None:
+    dry = data.get("dry_run", False)
+    prefix = "[dry-run] " if dry else ""
+
+    ui.header(f"{prefix}Cypilot Init")
+    ui.detail("Project", project_name)
+    ui.detail("Root", project_root.as_posix())
+    ui.detail("Cypilot dir", f"{install_rel}/")
+    ui.blank()
+
+    ui.step("Core files copied to .core/")
+    ui.step("Config created in config/")
+    ui.substep("core.toml      — project settings")
+    ui.substep("artifacts.toml — artifact registry")
+    ui.substep("AGENTS.md      — custom agent rules (edit freely)")
+    ui.substep("SKILL.md       — custom skill extensions (edit freely)")
+
+    if kit_results:
+        ui.step("Kits installed:")
+        for slug, kr in kit_results.items():
+            n = kr.get("files_written", 0)
+            kinds = kr.get("artifact_kinds", [])
+            ui.substep(f"{slug}: {n} files generated ({', '.join(kinds)})")
+
+    ui.step("AGENTS.md navigation block injected into project root")
+
+    if dry:
+        ui.success("Dry run complete — no files were written.")
+    else:
+        ui.success("Cypilot initialized!")
+        ui.blank()
+        ui.info("Next steps:")
+        ui.hint("1. Set up your IDE:  cpt generate-agents")
+        ui.hint("2. Review config:    open " + install_rel + "/config/core.toml")
+        ui.hint("3. Start using:      type '/cypilot' in your IDE chat")
+    ui.blank()
+
+
+def _human_init_error(data: Dict[str, object]) -> None:
+    ui.error("Initialization failed")
+    errors = data.get("errors", [])
+    for err in errors:
+        if isinstance(err, dict):
+            ui.substep(f"• {err.get('path', '?')}: {err.get('error', '?')}")
+        else:
+            ui.substep(f"• {err}")
+    ui.blank()

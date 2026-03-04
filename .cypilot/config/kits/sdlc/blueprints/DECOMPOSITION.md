@@ -20,10 +20,6 @@ dependencies, and traceability to PRD/DESIGN.
 
 `@cpt:blueprint`
 ```toml
-# Blueprint version (semver)
-version = 1
-# Kit slug this blueprint belongs to
-kit = "sdlc"
 # Artifact kind: PRD | ADR | DESIGN | DECOMPOSITION | FEATURE | CODE
 artifact = "DECOMPOSITION"
 codebase = false
@@ -107,7 +103,7 @@ sections = ["options"]
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:prerequisites-load_dependencies`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "prerequisites"
@@ -124,7 +120,7 @@ section = "load_dependencies"
 - [ ] Load `{cypilot_path}/.gen/kits/sdlc/constraints.toml` for kit-level constraints
 - [ ] Load `{cypilot_path}/.core/architecture/specs/traceability.md` for ID formats
 ```
-`@/cpt:rule`
+`@/cpt:rule:prerequisites-load_dependencies`
 
 ### Requirements
 
@@ -132,7 +128,7 @@ section = "load_dependencies"
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-structural`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -148,13 +144,13 @@ section = "structural"
 - [ ] No placeholder content (TODO, TBD, FIXME)
 - [ ] No duplicate feature IDs
 ```
-`@/cpt:rule`
+`@/cpt:rule:requirements-structural`
 
 #### Decomposition Quality
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-decomposition_quality`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -186,13 +182,13 @@ section = "decomposition_quality"
 - [ ] No circular dependencies
 - [ ] Foundation features have no dependencies
 ```
-`@/cpt:rule`
+`@/cpt:rule:requirements-decomposition_quality`
 
 #### Upstream Traceability
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-upstream_traceability`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -204,13 +200,13 @@ section = "upstream_traceability"
 - [ ] When all features for a component IMPLEMENTED → mark component `[x]` in DESIGN
 - [ ] When all features for a capability IMPLEMENTED → mark capability `[x]` in PRD
 ```
-`@/cpt:rule`
+`@/cpt:rule:requirements-upstream_traceability`
 
 #### Checkbox Management
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-checkbox_management`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -230,13 +226,13 @@ section = "checkbox_management"
 - [ ] A `feature` ID should not be checked until the feature entry is fully implemented
 - [ ] `status-overall` should not be checked until ALL `feature` entries are checked
 ```
-`@/cpt:rule`
+`@/cpt:rule:requirements-checkbox_management`
 
 #### Constraints
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-constraints`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -259,7 +255,7 @@ section = "constraints"
 - `cypilot validate` enforces headings scoping for ID definitions and references
 - `cypilot validate` enforces "checked ref implies checked def" consistency
 ```
-`@/cpt:rule`
+`@/cpt:rule:requirements-constraints`
 
 ### Task Phases
 
@@ -267,7 +263,7 @@ section = "constraints"
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-setup`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -281,13 +277,13 @@ section = "setup"
 - [ ] Read DESIGN to identify elements to decompose
 - [ ] Read PRD to identify requirements to cover
 ```
-`@/cpt:rule`
+`@/cpt:rule:tasks-setup`
 
 #### Content Creation
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-content_creation`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -302,13 +298,13 @@ section = "content_creation"
 4. Verify 100% coverage (all elements assigned)
 5. Verify mutual exclusivity (no overlaps)
 ```
-`@/cpt:rule`
+`@/cpt:rule:tasks-content_creation`
 
 #### IDs & Structure
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-ids_and_structure`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -322,13 +318,13 @@ section = "ids_and_structure"
 - [ ] Link to DESIGN elements being implemented
 - [ ] Verify uniqueness with `cypilot list-ids`
 ```
-`@/cpt:rule`
+`@/cpt:rule:tasks-ids_and_structure`
 
 #### Quality Check
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-quality_check`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -342,13 +338,13 @@ section = "quality_check"
 - [ ] Verify no scope overlaps between features
 - [ ] Verify dependency graph is valid DAG
 ```
-`@/cpt:rule`
+`@/cpt:rule:tasks-quality_check`
 
 #### Checkbox Workflow
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-checkbox_workflow`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -377,7 +373,7 @@ section = "checkbox_workflow"
 2. Run `cypilot validate` to confirm cascade consistency
 3. Change the `status-overall` line from `[ ]` to `[x]`
 ```
-`@/cpt:rule`
+`@/cpt:rule:tasks-checkbox_workflow`
 
 ### Error Handling
 
@@ -385,7 +381,7 @@ section = "checkbox_workflow"
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:error_handling-missing_dependencies`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "error_handling"
@@ -396,13 +392,13 @@ section = "missing_dependencies"
 - [ ] If DESIGN not accessible: ask user for DESIGN location
 - [ ] If template not found: STOP — cannot proceed without template
 ```
-`@/cpt:rule`
+`@/cpt:rule:error_handling-missing_dependencies`
 
 #### Quality Issues
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:error_handling-quality_issues`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "error_handling"
@@ -413,13 +409,13 @@ section = "quality_issues"
 - [ ] Coverage gap: add design element to appropriate feature or document exclusion
 - [ ] Scope overlap: assign to single feature or document sharing with reasoning
 ```
-`@/cpt:rule`
+`@/cpt:rule:error_handling-quality_issues`
 
 #### Escalation
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:error_handling-escalation`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "error_handling"
@@ -431,7 +427,7 @@ section = "escalation"
 - [ ] Ask user when decomposition granularity unclear
 - [ ] Ask user when dependency ordering unclear
 ```
-`@/cpt:rule`
+`@/cpt:rule:error_handling-escalation`
 
 ### Validation
 
@@ -439,7 +435,7 @@ section = "escalation"
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-structural`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -454,13 +450,13 @@ section = "structural"
   - Valid status values
   - No placeholders
 ```
-`@/cpt:rule`
+`@/cpt:rule:validation-structural`
 
 #### Decomposition Quality
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-decomposition_quality`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -475,13 +471,13 @@ Apply `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md` syste
 4. **TRC (Traceability)**: Verify bidirectional traceability
 5. **DEP (Dependencies)**: Verify valid dependency graph
 ```
-`@/cpt:rule`
+`@/cpt:rule:validation-decomposition_quality`
 
 #### Validation Report
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-validation_report`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -500,13 +496,13 @@ Issues:
 - [SEVERITY] CHECKLIST-ID: Description
 ```
 ````
-`@/cpt:rule`
+`@/cpt:rule:validation-validation_report`
 
 #### Applicability Context
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-applicability`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -525,13 +521,13 @@ section = "applicability"
 4. **Consistent granularity** — features are at similar abstraction levels
 5. **Bidirectional traceability** — can trace both ways between design and features
 ```
-`@/cpt:rule`
+`@/cpt:rule:validation-applicability`
 
 #### Report Format
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-report_format`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -576,13 +572,13 @@ For each issue include:
 {Concrete fix}
 ```
 ````
-`@/cpt:rule`
+`@/cpt:rule:validation-report_format`
 
 #### Domain Disposition
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-domain_disposition`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -598,13 +594,13 @@ For each major checklist category, confirm:
 - [ ] TRC (Traceability): Addressed or violation reported
 - [ ] DEP (Dependencies): Addressed or violation reported
 ```
-`@/cpt:rule`
+`@/cpt:rule:validation-domain_disposition`
 
 #### Reporting
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-reporting`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -647,13 +643,13 @@ For each issue include:
 {Concrete fix}
 ```
 ````
-`@/cpt:rule`
+`@/cpt:rule:validation-reporting`
 
 ### Next Steps
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:next_steps-options`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "next_steps"
@@ -667,7 +663,7 @@ section = "options"
 - [ ] New feature needed → add to decomposition, then `/cypilot-generate FEATURE`
 - [ ] Want checklist review only → `/cypilot-analyze semantic` — decomposition quality validation
 ```
-`@/cpt:rule`
+`@/cpt:rule:next_steps-options`
 
 ---
 
@@ -758,7 +754,7 @@ standards = []
 
 **Artifact**: Design Decomposition (DECOMPOSITION)
 **Version**: 2.0
-**Last Updated**: 2025-02-03
+**Last Updated**: 2026-02-03
 **Purpose**: Validate quality of design decomposition into implementable work packages
 
 ---
@@ -839,7 +835,7 @@ Mark review as "PARTIAL" if not all domains completed.
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:cov-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "COV-001"
@@ -864,11 +860,11 @@ kind = "must_have"
 
 **Verification method**: Cross-reference DESIGN IDs with DECOMPOSITION references.
 ```
-`@/cpt:check`
+`@/cpt:check:cov-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:cov-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "COV-002"
@@ -890,11 +886,11 @@ kind = "must_have"
 
 **Note**: This verifies that the decomposition covers requirements transitively through DESIGN.
 ```
-`@/cpt:check`
+`@/cpt:check:cov-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:cov-003`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "COV-003"
@@ -914,11 +910,11 @@ kind = "must_have"
 - [ ] Each feature explicitly lists "Data" with IDs (or "None")
 - [ ] No implicit or assumed coverage
 ```
-`@/cpt:check`
+`@/cpt:check:cov-003`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:exc-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "EXC-001"
@@ -941,11 +937,11 @@ kind = "must_have"
 
 **Verification method**: Check if any design element ID appears in multiple features' references.
 ```
-`@/cpt:check`
+`@/cpt:check:exc-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:exc-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "EXC-002"
@@ -964,11 +960,11 @@ kind = "must_have"
 - [ ] Boundaries between adjacent features are explicit and non-ambiguous
 - [ ] Domain entities are assigned to single feature (or clear reason for sharing)
 ```
-`@/cpt:check`
+`@/cpt:check:exc-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:exc-003`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "EXC-003"
@@ -986,11 +982,11 @@ kind = "must_have"
 - [ ] Shared components are documented as dependencies, not duplicate scope
 - [ ] Integration points are explicit
 ```
-`@/cpt:check`
+`@/cpt:check:exc-003`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:attr-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "ATTR-001"
@@ -1011,11 +1007,11 @@ kind = "must_have"
 - [ ] IDs are human-readable and meaningful
 - [ ] No duplicate IDs within the decomposition
 ```
-`@/cpt:check`
+`@/cpt:check:attr-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:attr-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "ATTR-002"
@@ -1035,11 +1031,11 @@ kind = "must_have"
 - [ ] Type indicates nature: core, supporting, infrastructure, integration, etc.
 - [ ] Types are consistent across similar features
 ```
-`@/cpt:check`
+`@/cpt:check:attr-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:attr-003`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "ATTR-003"
@@ -1060,11 +1056,11 @@ kind = "must_have"
 - [ ] Purpose is distinct from other features' purposes
 - [ ] Purpose is implementation-agnostic (describes intent, not approach)
 ```
-`@/cpt:check`
+`@/cpt:check:attr-003`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:attr-004`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "ATTR-004"
@@ -1085,11 +1081,11 @@ kind = "must_have"
 - [ ] Scope aligns with Purpose
 - [ ] Scope is at appropriate abstraction level (not too detailed, not too vague)
 ```
-`@/cpt:check`
+`@/cpt:check:attr-004`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:attr-005`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "ATTR-005"
@@ -1110,11 +1106,11 @@ kind = "must_have"
 - [ ] Subordinates represent meaningful implementation milestones
 - [ ] Subordinate relationships are hierarchically valid
 ```
-`@/cpt:check`
+`@/cpt:check:attr-005`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:lev-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "LEV-001"
@@ -1135,11 +1131,11 @@ kind = "must_have"
 - [ ] No feature is significantly smaller than others (≥1/3x size difference)
 - [ ] Size is measured by scope items or estimated effort
 ```
-`@/cpt:check`
+`@/cpt:check:lev-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:lev-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "LEV-002"
@@ -1159,11 +1155,11 @@ kind = "must_have"
 - [ ] Features are not over-decomposed (not too granular for this artifact level)
 - [ ] Hierarchy is clear: DESIGN → DECOMPOSITION → FEATURE
 ```
-`@/cpt:check`
+`@/cpt:check:lev-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:lev-003`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "LEV-003"
@@ -1181,11 +1177,11 @@ kind = "must_have"
 - [ ] No feature has disproportionately many phases (>5x average)
 - [ ] No feature has zero phases without explicit reason
 ```
-`@/cpt:check`
+`@/cpt:check:lev-003`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:cfg-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "CFG-001"
@@ -1205,11 +1201,11 @@ kind = "must_have"
 - [ ] Feature boundaries align with natural configuration/release boundaries
 - [ ] Features can be versioned and baselined independently (where applicable)
 ```
-`@/cpt:check`
+`@/cpt:check:cfg-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:cfg-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "CFG-002"
@@ -1229,11 +1225,11 @@ kind = "must_have"
 - [ ] Changes to features are trackable (ID versioning pattern documented)
 - [ ] Feature structure supports incremental delivery
 ```
-`@/cpt:check`
+`@/cpt:check:cfg-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:trc-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "TRC-001"
@@ -1253,11 +1249,11 @@ kind = "must_have"
 - [ ] Traceability links use valid design IDs
 - [ ] Coverage is explicit (listed in References sections)
 ```
-`@/cpt:check`
+`@/cpt:check:trc-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:trc-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "TRC-002"
@@ -1277,11 +1273,11 @@ kind = "must_have"
 - [ ] References to design IDs are valid and resolvable
 - [ ] No feature exists without design justification
 ```
-`@/cpt:check`
+`@/cpt:check:trc-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:trc-003`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "TRC-003"
@@ -1301,11 +1297,11 @@ kind = "must_have"
 - [ ] References between DECOMPOSITION and FEATURE artifacts are planned
 - [ ] Any missing feature design is documented as intentional
 ```
-`@/cpt:check`
+`@/cpt:check:trc-003`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:trc-004`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "TRC-004"
@@ -1325,11 +1321,11 @@ kind = "must_have"
 - [ ] Cross-references support reverse lookup (what depends on X)
 - [ ] Changes to design can be traced to affected features
 ```
-`@/cpt:check`
+`@/cpt:check:trc-004`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:dep-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "DEP-001"
@@ -1351,11 +1347,11 @@ kind = "must_have"
 - [ ] Foundation features have no dependencies
 - [ ] Dependency links reference existing features
 ```
-`@/cpt:check`
+`@/cpt:check:dep-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:dep-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "DEP-002"
@@ -1373,11 +1369,11 @@ kind = "must_have"
 - [ ] Features can be implemented independently (given dependencies)
 - [ ] Features support parallel development where possible
 ```
-`@/cpt:check`
+`@/cpt:check:dep-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:dep-003`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "DEP-003"
@@ -1395,11 +1391,11 @@ kind = "must_have"
 - [ ] Foundation/infrastructure features listed first
 - [ ] Feature ordering supports incremental delivery
 ```
-`@/cpt:check`
+`@/cpt:check:dep-003`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:chk-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "CHK-001"
@@ -1418,11 +1414,11 @@ kind = "must_have"
 - [ ] Priority markers (`p1`-`p9`) are consistent between definitions and references
 - [ ] Status emoji matches checkbox state (⏳ for in-progress, ✅ for done)
 ```
-`@/cpt:check`
+`@/cpt:check:chk-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:chk-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "CHK-002"
@@ -1440,11 +1436,11 @@ kind = "must_have"
 - [ ] No orphaned checked references (reference checked but definition unchecked)
 - [ ] No duplicate checkboxes for the same ID within a feature block
 ```
-`@/cpt:check`
+`@/cpt:check:chk-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:doc-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "DOC-001"
@@ -1462,11 +1458,11 @@ kind = "must_have"
 - [ ] If features intentionally overlap, the reason is documented
 - [ ] No silent omissions — reviewer can distinguish "considered and excluded" from "forgot"
 ```
-`@/cpt:check`
+`@/cpt:check:doc-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:decomp-no-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "DECOMP-NO-001"
@@ -1488,11 +1484,11 @@ kind = "must_not_have"
 
 **Where it belongs**: FEATURE (feature design) artifact
 ```
-`@/cpt:check`
+`@/cpt:check:decomp-no-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:decomp-no-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "DECOMP-NO-002"
@@ -1514,11 +1510,11 @@ kind = "must_not_have"
 
 **Where it belongs**: PRD artifact
 ```
-`@/cpt:check`
+`@/cpt:check:decomp-no-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:decomp-no-003`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "DECOMP-NO-003"
@@ -1539,11 +1535,11 @@ kind = "must_not_have"
 
 **Where it belongs**: ADR artifact
 ```
-`@/cpt:check`
+`@/cpt:check:decomp-no-003`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:fmt-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "FMT-001"
@@ -1561,11 +1557,11 @@ kind = "format_validation"
 - [ ] Each feature entry has stable identifier
 - [ ] Entries are consistently formatted
 ```
-`@/cpt:check`
+`@/cpt:check:fmt-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:fmt-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "FMT-002"
@@ -1587,11 +1583,11 @@ kind = "format_validation"
 - [ ] **Requirements Covered**: ID references
 - [ ] **Design Components**: ID references
 ```
-`@/cpt:check`
+`@/cpt:check:fmt-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:fmt-003`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "FMT-003"
@@ -1609,7 +1605,7 @@ kind = "format_validation"
 - [ ] Checkbox followed by backtick-enclosed priority: `[ ] \`p1\``
 - [ ] Priority followed by dash and backtick-enclosed ID
 ```
-`@/cpt:check`
+`@/cpt:check:fmt-003`
 
 
 ---
@@ -1624,7 +1620,7 @@ entries with status/priority/scope/dependencies/traceability.
 
 > **`@cpt:heading`** — Heading constraint. Defines required/optional heading in the artifact structure. Output: `constraints.toml` + `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/template.md`.
 
-`@cpt:heading`
+`@cpt:heading:decomposition-h1-title`
 ```toml
 # Unique heading constraint ID — referenced by identifier.headings to bind IDs to sections
 id = "decomposition-h1-title"
@@ -1643,11 +1639,11 @@ description = "DECOMPOSITION document title (H1)."
 # Example heading texts showing correct usage
 examples = ["# DECOMPOSITION \u2014 Todo App"]
 ```
-`@/cpt:heading`
+`@/cpt:heading:decomposition-h1-title`
 
 > **`@cpt:id`** — Identifier constraint. Defines an ID kind (template, references, task/priority rules). Output: `constraints.toml`.
 
-`@cpt:id`
+`@cpt:id:status`
 ```toml
 kind = "status"
 name = "Overall Status"
@@ -1660,30 +1656,30 @@ examples = ["cpt-cypilot-status-overall", "cpt-ex-ovwa-status-overall", "cpt-cyp
 to_code = false              # true = ID is expected to appear in code via @cpt-* markers
 headings = ["decomposition-h1-title"]  # heading constraint IDs where this identifier must be placed
 ```
-`@/cpt:id`
+`@/cpt:id:status`
 
 > **`@cpt:prompt`** — Status placement under H1 matching cf-sdlc.
 
-`@cpt:prompt`
+`@cpt:prompt:decomposition-overview`
 ```markdown
 **Overall implementation status:**
 - [ ] `p1` - **ID**: `cpt-{system}-status-{slug}`
 ```
-`@/cpt:prompt`
+`@/cpt:prompt:decomposition-overview`
 
 > **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/examples/example.md`.
 
-`@cpt:example`
+`@cpt:example:decomposition-h1-title`
 ```markdown
 - [ ] `p1` - **ID**: `cpt-examples-todo-app-status-overall`
 ```
-`@/cpt:example`
+`@/cpt:example:decomposition-h1-title`
 
 ### Overview
 
 > **`@cpt:heading`** — Heading constraint. Defines required/optional heading in the artifact structure. Output: `constraints.toml` + `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/template.md`.
 
-`@cpt:heading`
+`@cpt:heading:decomposition-overview`
 ```toml
 # Unique heading constraint ID — referenced by identifier.headings to bind IDs to sections
 id = "decomposition-overview"
@@ -1701,20 +1697,20 @@ description = "Overview of decomposition strategy."
 template = "1. Overview"
 examples = ["## 1. Overview"]
 ```
-`@/cpt:heading`
+`@/cpt:heading:decomposition-overview`
 
 > **`@cpt:prompt`** — Writing instruction. Markdown tells authors what to write under the preceding heading. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/template.md`.
 
-`@cpt:prompt`
+`@cpt:prompt:decomposition-entries`
 ```markdown
 { Description of how the DESIGN was decomposed into features, the decomposition strategy, and any relevant decomposition rationale. }
 
 ```
-`@/cpt:prompt`
+`@/cpt:prompt:decomposition-entries`
 
 > **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/examples/example.md`.
 
-`@cpt:example`
+`@cpt:example:decomposition-overview`
 ```markdown
 **Overall Progress**: 67% complete (2 of 3 features completed)
 
@@ -1724,13 +1720,13 @@ examples = ["## 1. Overview"]
 
 ---
 ```
-`@/cpt:example`
+`@/cpt:example:decomposition-overview`
 
 ### Feature Entries
 
 > **`@cpt:heading`** — Heading constraint. Defines required/optional heading in the artifact structure. Output: `constraints.toml` + `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/template.md`.
 
-`@cpt:heading`
+`@cpt:heading:decomposition-entries`
 ```toml
 # Unique heading constraint ID — referenced by identifier.headings to bind IDs to sections
 id = "decomposition-entries"
@@ -1748,11 +1744,11 @@ description = "List of feature entries."
 template = "2. Entries"
 examples = ["## 2. Entries"]
 ```
-`@/cpt:heading`
+`@/cpt:heading:decomposition-entries`
 
 > **`@cpt:heading`** — Heading constraint. Defines required/optional heading in the artifact structure. Output: `constraints.toml` + `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/template.md`.
 
-`@cpt:heading`
+`@cpt:heading:decomposition-entry`
 ```toml
 # Unique heading constraint ID — referenced by identifier.headings to bind IDs to sections
 id = "decomposition-entry"
@@ -1769,11 +1765,11 @@ description = "A single feature entry."
 # Example heading texts showing correct usage
 examples = []
 ```
-`@/cpt:heading`
+`@/cpt:heading:decomposition-entry`
 
 > **`@cpt:id`** — Identifier constraint. Defines an ID kind (template, references, task/priority rules). Output: `constraints.toml`.
 
-`@cpt:id`
+`@cpt:id:feature`
 ```toml
 kind = "feature"
 name = "Feature Entry"
@@ -1792,11 +1788,11 @@ coverage = true            # true = must reference | false = referencing prohibi
 # priority: omitted (optional) # true = ref must carry priority | false = prohibited | omit = optional
 headings = ["feature-h1-title"]  # target heading constraint in FEATURE
 ```
-`@/cpt:id`
+`@/cpt:id:feature`
 
 > **`@cpt:prompt`** — Writing instruction. Markdown tells authors what to write under the preceding heading. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/template.md`.
 
-`@cpt:prompt`
+`@cpt:prompt:decomposition-entry`
 ```markdown
 - [ ] `p1` - **ID**: `cpt-{system}-feature-{slug}`
 
@@ -1921,11 +1917,11 @@ headings = ["feature-h1-title"]  # target heading constraint in FEATURE
 
 ---
 ```
-`@/cpt:prompt`
+`@/cpt:prompt:decomposition-entry`
 
 > **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/examples/example.md`.
 
-`@cpt:example`
+`@cpt:example:decomposition-entry`
 ````markdown
 ### Feature 1: Task Management Core
 
@@ -1995,11 +1991,11 @@ headings = ["feature-h1-title"]  # target heading constraint in FEATURE
 
 ---
 ````
-`@/cpt:example`
+`@/cpt:example:decomposition-entry`
 
 > **`@cpt:heading`** — Heading constraint. Defines required/optional heading in the artifact structure. Output: `constraints.toml` + `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/template.md`.
 
-`@cpt:heading`
+`@cpt:heading:decomposition-feature-deps`
 ```toml
 # Unique heading constraint ID — referenced by identifier.headings to bind IDs to sections
 id = "decomposition-feature-deps"
@@ -2017,11 +2013,11 @@ description = "Cross-feature dependency overview."
 template = "3. Feature Dependencies"
 examples = ["## 3. Feature Dependencies"]
 ```
-`@/cpt:heading`
+`@/cpt:heading:decomposition-feature-deps`
 
 > **`@cpt:prompt`** — Writing instruction. Markdown tells authors what to write under the preceding heading. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/template.md`.
 
-`@cpt:prompt`
+`@cpt:prompt:decomposition-feature-deps`
 ````markdown
 ```text
 cpt-{system}-feature-{foundation-slug}
@@ -2036,11 +2032,11 @@ cpt-{system}-feature-{foundation-slug}
 - `cpt-{system}-feature-{dependent-2-slug}` requires `cpt-{system}-feature-{foundation-slug}`: {explain why dependent-2 needs foundation}
 - `cpt-{system}-feature-{dependent-1-slug}` and `cpt-{system}-feature-{dependent-2-slug}` are independent of each other and can be developed in parallel
 ````
-`@/cpt:prompt`
+`@/cpt:prompt:decomposition-feature-deps`
 
 > **`@cpt:example`** — Example content. Filled-in sample of the preceding section. Output: `{cypilot_path}/.gen/kits/sdlc/artifacts/DECOMPOSITION/examples/example.md`.
 
-`@cpt:example`
+`@cpt:example:decomposition-feature-deps`
 ````markdown
 ```text
 cpt-examples-todo-app-feature-core
@@ -2055,4 +2051,4 @@ cpt-examples-todo-app-feature-core
 - `cpt-examples-todo-app-feature-sync` requires `cpt-examples-todo-app-feature-core`: Cannot sync tasks that haven't been created
 - `cpt-examples-todo-app-feature-logic` and `cpt-examples-todo-app-feature-sync` are independent of each other and can be developed in parallel
 ````
-`@/cpt:example`
+`@/cpt:example:decomposition-feature-deps`

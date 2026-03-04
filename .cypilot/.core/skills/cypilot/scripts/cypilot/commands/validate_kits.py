@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from ..utils.constraints import error as constraints_error
+from ..utils.ui import ui
 
 
 def cmd_validate_kits(argv: List[str]) -> int:
@@ -33,7 +34,7 @@ def cmd_validate_kits(argv: List[str]) -> int:
 
     ctx = get_context()
     if not ctx:
-        print(json.dumps({"status": "ERROR", "message": "Cypilot not initialized. Run 'cypilot init' first."}, indent=None, ensure_ascii=False))
+        ui.result({"status": "ERROR", "message": "Cypilot not initialized. Run 'cypilot init' first."})
         return 1
 
     project_root = ctx.project_root
@@ -108,9 +109,58 @@ def cmd_validate_kits(argv: List[str]) -> int:
             if len(all_errors) > 10:
                 result["errors_truncated"] = len(all_errors) - 10
 
-    out = json.dumps(result, indent=2 if args.verbose else None, ensure_ascii=False)
-    if args.verbose:
-        out += "\n"
-    print(out)
+    ui.result(result, human_fn=lambda d: _human_validate_kits(d))
     # @cpt-end:cpt-cypilot-flow-blueprint-system-validate-kits:p1:inst-return-validate-ok
     return 0 if overall_status == "PASS" else 2
+
+
+def _human_validate_kits(data: dict) -> None:
+    ui.header("Validate Kits")
+    n = data.get("kits_validated", 0)
+    n_err = data.get("error_count", 0)
+    ui.detail("Kits validated", str(n))
+    ui.detail("Errors", str(n_err))
+
+    # Verbose mode: full kit reports
+    for k in data.get("kits", []):
+        kit_id = k.get("kit", "?")
+        status = k.get("status", "?")
+        kinds = k.get("kinds", [])
+        if status == "PASS":
+            kind_str = f"  ({', '.join(kinds)})" if kinds else ""
+            ui.step(f"{kit_id}: PASS{kind_str}")
+        else:
+            ui.warn(f"{kit_id}: {status} ({k.get('error_count', 0)} errors)")
+            for e in k.get("errors", [])[:10]:
+                msg = e.get("message", "") if isinstance(e, dict) else str(e)
+                ui.substep(f"  ✗ {msg}")
+
+    # Non-verbose mode: failed kits summary
+    failed = data.get("failed_kits", [])
+    if failed:
+        ui.blank()
+        for fk in failed:
+            ui.warn(f"{fk.get('kit', '?')}: {fk.get('error_count', 0)} error(s)")
+
+    # Show top-level errors
+    errors = data.get("errors", [])
+    if errors:
+        ui.blank()
+        for e in errors[:20]:
+            msg = e.get("message", "") if isinstance(e, dict) else str(e)
+            path = e.get("path", "") if isinstance(e, dict) else ""
+            if path:
+                ui.substep(f"  ✗ {path}: {msg}")
+            else:
+                ui.substep(f"  ✗ {msg}")
+        truncated = data.get("errors_truncated", 0)
+        if truncated:
+            ui.substep(f"  ... and {truncated} more error(s)")
+
+    overall = data.get("status", "")
+    ui.blank()
+    if overall == "PASS":
+        ui.success(f"{n} kit(s) validated, all passed.")
+    else:
+        ui.error(f"{n} kit(s) validated, {n_err} error(s).")
+    ui.blank()

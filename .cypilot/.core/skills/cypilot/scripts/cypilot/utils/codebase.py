@@ -315,6 +315,7 @@ def cross_validate_code(
     forbidden_code_ids: Optional[Set[str]] = None,
     traceability: str = "FULL",
     artifact_instances: Optional[Dict[str, Set[str]]] = None,
+    artifact_instances_all: Optional[Dict[str, Set[str]]] = None,
 ) -> Dict[str, List[Dict[str, object]]]:
     """Cross-validate code files against artifact IDs.
 
@@ -323,7 +324,8 @@ def cross_validate_code(
         artifact_ids: All IDs defined in artifacts
         to_code_ids: IDs with to_code="true" that MUST have code markers
         traceability: "FULL" or "DOCS-ONLY"
-        artifact_instances: Mapping of ID -> set of instruction slugs from CDSL steps
+        artifact_instances: Mapping of ID -> set of checked instruction slugs from CDSL steps
+        artifact_instances_all: Mapping of ID -> set of ALL instruction slugs (checked + unchecked)
 
     Returns:
         Dict with "errors" and "warnings" lists
@@ -377,8 +379,24 @@ def cross_validate_code(
 
     # @cpt-begin:cpt-cypilot-algo-traceability-validation-cross-validate-code:p1:inst-foreach-forbidden
     if forbidden_code_ids:
+        # Pre-collect code instructions per ID for checking completeness
+        _code_inst_lookup: Dict[str, Set[str]] = {}
+        for cf in code_files:
+            for bm in cf.block_markers:
+                _code_inst_lookup.setdefault(bm.id, set()).add(bm.inst)
+
         for fid in sorted(first_forbidden.keys()):
             p, ln = first_forbidden[fid]
+            # If this ID has CDSL instructions defined in the artifact,
+            # only require the checkbox when ALL instructions are implemented.
+            # Unchecked parent with missing child instructions is legitimate.
+            _all = artifact_instances_all or artifact_instances
+            if _all and fid in _all:
+                art_insts = _all[fid]
+                code_insts = _code_inst_lookup.get(fid, set())
+                if art_insts - code_insts:
+                    # Some instructions not yet implemented — skip error
+                    continue
             # @cpt-begin:cpt-cypilot-algo-traceability-validation-cross-validate-code:p1:inst-emit-forbidden
             errors.append(error(
                 "structure",

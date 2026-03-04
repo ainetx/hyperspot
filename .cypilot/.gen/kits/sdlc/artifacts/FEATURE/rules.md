@@ -165,9 +165,9 @@
 
 | ID kind | `to_code` | Check when... |
 |---------|-----------|---------------|
-| `flow` | `true` | ALL `@cpt-flow:cpt-{system}-flow-{slug}:p{N}` markers exist in code |
-| `algo` | `true` | ALL `@cpt-algo:cpt-{system}-algo-{slug}:p{N}` markers exist in code |
-| `state` | `true` | ALL `@cpt-state:cpt-{system}-state-{slug}:p{N}` markers exist in code |
+| `flow` | `true` | ALL `@cpt-flow:cpt-{system}-flow-{feature-slug}-{slug}:p{N}` markers exist in code |
+| `algo` | `true` | ALL `@cpt-algo:cpt-{system}-algo-{feature-slug}-{slug}:p{N}` markers exist in code |
+| `state` | `true` | ALL `@cpt-state:cpt-{system}-state-{feature-slug}-{slug}:p{N}` markers exist in code |
 | `dod` | `true` | Implementation complete AND tests pass |
 
 **Detailed Rules**:
@@ -181,17 +181,17 @@
 
 **Checkbox States**:
 1. **Flow Checkbox** (kind: `flow`):
-   - `[ ] **ID**: cpt-{system}-flow-{slug}` — unchecked until implemented
-   - `[x] **ID**: cpt-{system}-flow-{slug}` — checked when ALL code markers exist
+   - `[ ] **ID**: cpt-{system}-flow-{feature-slug}-{slug}` — unchecked until implemented
+   - `[x] **ID**: cpt-{system}-flow-{feature-slug}-{slug}` — checked when ALL code markers exist
 2. **Algorithm Checkbox** (kind: `algo`):
-   - `[ ] **ID**: cpt-{system}-algo-{slug}` — unchecked until implemented
-   - `[x] **ID**: cpt-{system}-algo-{slug}` — checked when ALL code markers exist
+   - `[ ] **ID**: cpt-{system}-algo-{feature-slug}-{slug}` — unchecked until implemented
+   - `[x] **ID**: cpt-{system}-algo-{feature-slug}-{slug}` — checked when ALL code markers exist
 3. **State Machine Checkbox** (kind: `state`):
-   - `[ ] **ID**: cpt-{system}-state-{slug}` — unchecked until implemented
-   - `[x] **ID**: cpt-{system}-state-{slug}` — checked when ALL code markers exist
+   - `[ ] **ID**: cpt-{system}-state-{feature-slug}-{slug}` — unchecked until implemented
+   - `[x] **ID**: cpt-{system}-state-{feature-slug}-{slug}` — checked when ALL code markers exist
 4. **DoD Checkbox** (kind: `dod`):
-   - `[ ] p1 - cpt-{system}-dod-{slug}` — unchecked until satisfied
-   - `[x] p1 - cpt-{system}-dod-{slug}` — checked when implementation complete and tests pass
+   - `[ ] p1 - cpt-{system}-dod-{feature-slug}-{slug}` — unchecked until satisfied
+   - `[x] p1 - cpt-{system}-dod-{feature-slug}-{slug}` — checked when implementation complete and tests pass
 
 **When to Update Upstream Artifacts**:
 - [ ] When `flow` is checked → verify all CDSL instructions have code markers
@@ -262,10 +262,10 @@ FEATURE documents must NOT contain the following — report as violation if foun
 
 ### Phase 3: IDs and Structure
 
-- [ ] Generate flow IDs: `cpt-{system}-flow-{slug}`
-- [ ] Generate algorithm IDs: `cpt-{system}-algo-{slug}`
-- [ ] Generate state IDs: `cpt-{system}-state-{slug}`
-- [ ] Generate DoD IDs: `cpt-{system}-dod-{slug}`
+- [ ] Generate flow IDs: `cpt-{system}-flow-{feature-slug}-{slug}`
+- [ ] Generate algorithm IDs: `cpt-{system}-algo-{feature-slug}-{slug}`
+- [ ] Generate state IDs: `cpt-{system}-state-{feature-slug}-{slug}`
+- [ ] Generate DoD IDs: `cpt-{system}-dod-{feature-slug}-{slug}`
 - [ ] Assign priorities (`p1`-`p9`) based on feature priority
 - [ ] Verify ID uniqueness with `cypilot list-ids`
 

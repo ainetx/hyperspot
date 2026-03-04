@@ -3,7 +3,7 @@ cypilot: true
 type: spec
 name: Project Extension Specification
 version: 1.0
-purpose: Define how projects extend Cypilot behavior through .cypilot/config/sysprompts and config/AGENTS.md with operation-scoped system prompts
+purpose: Define how projects extend Cypilot behavior through {cypilot_path}/config/sysprompts and config/AGENTS.md with operation-scoped system prompts
 drivers:
   - cpt-cypilot-fr-core-config
   - cpt-cypilot-fr-core-workflows
@@ -69,7 +69,7 @@ Projects extend Cypilot behavior by placing **system prompts** in `{cypilot_path
 ## Extension Directory
 
 ```
-.cypilot/
+{cypilot_path}/             # Install directory (default: cypilot/)
 └── config/
     ├── AGENTS.md              # Navigation rules (WHEN → spec file)
     ├── core.toml              # Core config
@@ -93,7 +93,8 @@ Cypilot injects a managed block into the **project root** `AGENTS.md` that route
 
 ```markdown
 <!-- @cpt:root-agents -->
-ALWAYS open @/.cypilot/config/AGENTS.md FIRST
+ALWAYS open and follow `{cypilot_path}/.gen/AGENTS.md` FIRST
+ALWAYS open and follow `{cypilot_path}/config/AGENTS.md` WHEN it exists
 <!-- @/cpt:root-agents -->
 ```
 
@@ -205,7 +206,7 @@ Workflows load project system prompts at specific points:
 |-----------|-------------------------------------------|
 | `cypilot generate PRD` | Prompts matching "working with entities", "writing requirements" |
 | `cypilot generate DESIGN` | Prompts matching "designing components", "choosing technologies" |
-| `cypilot validate` | Prompts matching relevant artifact content |
+| `cpt validate` | Prompts matching relevant artifact content |
 | Code generation/review | `tech-stack.md`, `conventions.md`, `patterns.md` |
 
 ### Loading Algorithm
@@ -232,7 +233,7 @@ If a project system prompt contradicts a kit prompt, the project system prompt t
 For existing projects, Cypilot can auto-discover system prompt candidates:
 
 ```bash
-cypilot init --discover
+cpt init --discover
 ```
 
 **Discovery process**:
@@ -278,7 +279,7 @@ cypilot init --discover
 
 **Validation command**:
 ```bash
-cypilot validate --sysprompts
+cpt validate --sysprompts
 ```
 
 ---
@@ -299,7 +300,7 @@ cypilot validate --sysprompts
 ```
 ⚠️ Project AGENTS.md not found: {cypilot_path}/config/AGENTS.md
 → No project-level system prompts will be loaded
-→ Fix: Run `cypilot init` to create AGENTS.md
+→ Fix: Run `cpt init` to create AGENTS.md
 ```
 **Action**: WARN — workflows proceed with kit-level system prompts only.
 

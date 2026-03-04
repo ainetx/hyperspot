@@ -2,10 +2,6 @@
 
 `@cpt:blueprint`
 ```toml
-# Blueprint version (semver)
-version = 1
-# Kit slug this blueprint belongs to
-kit = "sdlc"
 codebase = true
 toc = false
 ```
@@ -74,7 +70,7 @@ sections = ["after_success", "after_issues", "no_design"]
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:prerequisites-load_dependencies`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "prerequisites"
@@ -101,11 +97,11 @@ section = "load_dependencies"
 
 **ALWAYS read** the system's DESIGN artifact (if registered in `artifacts.toml`) to understand overall architecture, components, principles, and constraints before implementing code.
 ```
-`@/cpt:rule`
+`@/cpt:rule:prerequisites-load_dependencies`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-structural`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -116,11 +112,11 @@ section = "structural"
 - [ ] Code implements FEATURE design requirements
 - [ ] Code follows project conventions from config
 ```
-`@/cpt:rule`
+`@/cpt:rule:requirements-structural`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-traceability`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -138,11 +134,11 @@ section = "traceability"
 - [ ] If Mode ON: design checkboxes synced with code
 - [ ] If Mode OFF: no Cypilot markers in code
 ```
-`@/cpt:rule`
+`@/cpt:rule:requirements-traceability`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-checkbox_cascade`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -192,11 +188,11 @@ PRD/DESIGN: referenced IDs [x] when ALL downstream refs [x]
 - `cypilot validate` will warn if FEATURE checkbox is `[x]` but code marker is missing
 - `cypilot validate` will report coverage: N% of FEATURE IDs have code markers
 ````
-`@/cpt:rule`
+`@/cpt:rule:requirements-checkbox_cascade`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-versioning`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -209,11 +205,11 @@ section = "versioning"
 - [ ] Migration: update all markers when design version increments
 - [ ] Keep old markers commented during transition (optional)
 ```
-`@/cpt:rule`
+`@/cpt:rule:requirements-versioning`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-engineering`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -236,11 +232,11 @@ section = "engineering"
 - [ ] **Error handling**: Fail explicitly with clear errors; never silently ignore failures
 - [ ] **Observability**: Log meaningful events at integration boundaries (no secrets)
 ```
-`@/cpt:rule`
+`@/cpt:rule:requirements-engineering`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:requirements-quality`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "requirements"
@@ -255,11 +251,11 @@ section = "quality"
 - [ ] Error handling is consistent
 - [ ] Tests cover implemented requirements
 ```
-`@/cpt:rule`
+`@/cpt:rule:requirements-quality`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-setup`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -281,11 +277,11 @@ section = "setup"
 - [ ] Determine Traceability Mode
 - [ ] Plan implementation order
 ```
-`@/cpt:rule`
+`@/cpt:rule:tasks-setup`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-implementation`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -301,11 +297,11 @@ section = "implementation"
 5. If Traceability Mode ON: update FEATURE.md checkboxes
 6. Proceed to next work package
 ```
-`@/cpt:rule`
+`@/cpt:rule:tasks-implementation`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-markers`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -354,11 +350,11 @@ def process_data(items):
 # @cpt-end:cpt-system-algo-process:p1:inst-validate
 ```
 ````
-`@/cpt:rule`
+`@/cpt:rule:tasks-markers`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-sync_feature`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -374,11 +370,11 @@ After each work package, sync checkboxes:
 3. When all IDs done → mark feature entry `[x]` in DECOMPOSITION
 4. Update feature status: `⏳ PLANNED` → `🔄 IN_PROGRESS` → `✅ IMPLEMENTED`
 ```
-`@/cpt:rule`
+`@/cpt:rule:tasks-sync_feature`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-quality_check`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -392,11 +388,11 @@ section = "quality_check"
 - [ ] Run tests to verify implementation
 - [ ] Verify engineering best practices followed
 ```
-`@/cpt:rule`
+`@/cpt:rule:tasks-quality_check`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:tasks-tag_verification`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "tasks"
@@ -410,11 +406,11 @@ section = "tag_verification"
 - [ ] Confirm tags exist in files that implement corresponding logic/tests
 - [ ] If any FEATURE ID has no code tag → report as gap and/or add tag
 ```
-`@/cpt:rule`
+`@/cpt:rule:tasks-tag_verification`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-coverage`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -425,11 +421,11 @@ section = "coverage"
 - [ ] Code files exist and contain implementation
 - [ ] Code is not placeholder/stub (no TODO/FIXME/unimplemented!)
 ```
-`@/cpt:rule`
+`@/cpt:rule:validation-coverage`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-traceability`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -446,11 +442,11 @@ section = "traceability"
 - [ ] No orphaned/stale markers
 - [ ] Design checkboxes synced with code markers
 ```
-`@/cpt:rule`
+`@/cpt:rule:validation-traceability`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-tests`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -463,11 +459,11 @@ section = "tests"
 - [ ] Test is NOT ignored without justification
 - [ ] Test actually validates scenario behavior
 ```
-`@/cpt:rule`
+`@/cpt:rule:validation-tests`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-build_lint`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -494,11 +490,11 @@ Logic Consistency: PASS/FAIL
 - MINOR divergences: [...]
 ```
 ````
-`@/cpt:rule`
+`@/cpt:rule:validation-build_lint`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-test_execution`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -511,11 +507,11 @@ section = "test_execution"
 - [ ] All e2e tests pass (if applicable)
 - [ ] Coverage meets project requirements
 ```
-`@/cpt:rule`
+`@/cpt:rule:validation-test_execution`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-code_quality`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -532,11 +528,11 @@ section = "code_quality"
 - [ ] KISS: No unnecessary complexity
 - [ ] YAGNI: No speculative abstractions
 ```
-`@/cpt:rule`
+`@/cpt:rule:validation-code_quality`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-logic_consistency`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -562,11 +558,11 @@ section = "logic_consistency"
 - [ ] Edge cases handled as designed
 - [ ] No logic shortcuts that violate design constraints
 ```
-`@/cpt:rule`
+`@/cpt:rule:validation-logic_consistency`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:validation-semantic_review`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "validation"
@@ -616,11 +612,11 @@ Run expert panel review after producing validation output.
 - No CRITICAL divergences between code and design
 - If Traceability Mode ON: required tags present and properly paired
 ````
-`@/cpt:rule`
+`@/cpt:rule:validation-semantic_review`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:next_steps-after_success`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "next_steps"
@@ -633,11 +629,11 @@ section = "after_success"
 - [ ] New feature needed → `/cypilot-generate FEATURE` — design next feature
 - [ ] Want expert review only → `/cypilot-analyze semantic` — semantic validation
 ```
-`@/cpt:rule`
+`@/cpt:rule:next_steps-after_success`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:next_steps-after_issues`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "next_steps"
@@ -649,11 +645,11 @@ section = "after_issues"
 - [ ] Missing tests → continue `/cypilot-generate CODE` — add tests
 - [ ] Code quality issues → continue `/cypilot-generate CODE` — refactor
 ```
-`@/cpt:rule`
+`@/cpt:rule:next_steps-after_issues`
 
 > **`@cpt:rule`** — Rule entry. TOML selects category+section; markdown block becomes the section body in `{cypilot_path}/.gen/kits/sdlc/codebase/rules.md`.
 
-`@cpt:rule`
+`@cpt:rule:next_steps-no_design`
 ```toml
 # Rule category: prerequisites | requirements | tasks | validation | error_handling | next_steps
 kind = "next_steps"
@@ -665,7 +661,7 @@ section = "no_design"
 - [ ] Implementing from PRD → `/cypilot-generate DESIGN` then DECOMPOSITION
 - [ ] Quick prototype → proceed without traceability, suggest FEATURE later
 ```
-`@/cpt:rule`
+`@/cpt:rule:next_steps-no_design`
 
 > **`@cpt:checklist`** — Checklist preamble. Static markdown placed at the top of `{cypilot_path}/.gen/kits/sdlc/codebase/checklist.md` (standards, prerequisites, severity dictionary).
 
@@ -716,17 +712,17 @@ Before running the SDLC-specific checks:
 
 > **`@cpt:checklist_epilogue`** — Checklist epilogue. Static markdown appended at the end of `{cypilot_path}/.gen/kits/sdlc/codebase/checklist.md`.
 
-`@cpt:checklist_epilogue`
+`@cpt:checklist_epilogue:default`
 ````markdown
 ---
 
 Use `{cypilot_path}/.core/requirements/code-checklist.md` for all generic code quality checks.
 ````
-`@/cpt:checklist_epilogue`
+`@/cpt:checklist_epilogue:default`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/codebase/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:sem-code-001`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "SEM-CODE-001"
@@ -745,11 +741,11 @@ kind = "must_have"
 - [ ] If the user is unsure, search the repository for candidate feature designs and present options for user selection
 - [ ] Resolve Overall Design by following references from the Feature design (or ask the user for the design path)
 ```
-`@/cpt:check`
+`@/cpt:check:sem-code-001`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/codebase/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:sem-code-002`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "SEM-CODE-002"
@@ -767,11 +763,11 @@ kind = "must_have"
 - [ ] Verify all referenced actors are represented by actual interfaces, entrypoints, or roles in code
 - [ ] Ensure referenced ADRs and related specs do not conflict with current implementation choices
 ```
-`@/cpt:check`
+`@/cpt:check:sem-code-002`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/codebase/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:sem-code-003`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "SEM-CODE-003"
@@ -789,11 +785,11 @@ kind = "must_have"
 - [ ] Confirm conditionals, branching, and return paths match the flow logic
 - [ ] Validate all flow steps marked with IDs are implemented and traceable
 ```
-`@/cpt:check`
+`@/cpt:check:sem-code-003`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/codebase/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:sem-code-004`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "SEM-CODE-004"
@@ -811,11 +807,11 @@ kind = "must_have"
 - [ ] Ensure data transformations and calculations match the described business rules
 - [ ] Confirm loop/iteration behavior and validation rules align with algorithm steps
 ```
-`@/cpt:check`
+`@/cpt:check:sem-code-004`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/codebase/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:sem-code-005`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "SEM-CODE-005"
@@ -833,11 +829,11 @@ kind = "must_have"
 - [ ] Verify triggers and guards for transitions match defined conditions
 - [ ] Ensure invalid transitions are prevented or handled explicitly
 ```
-`@/cpt:check`
+`@/cpt:check:sem-code-005`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/codebase/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:sem-code-006`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "SEM-CODE-006"
@@ -857,11 +853,11 @@ kind = "must_have"
 - [ ] Ensure PRD coverage (FR/NFR) is preserved in implementation outcomes
 - [ ] Ensure Design coverage (principles, constraints, components, sequences, db tables) is satisfied
 ```
-`@/cpt:check`
+`@/cpt:check:sem-code-006`
 
 > **`@cpt:check`** — Checklist item. TOML defines id/domain/severity; markdown defines the check criteria. Output: `{cypilot_path}/.gen/kits/sdlc/codebase/checklist.md`.
 
-`@cpt:check`
+`@cpt:check:sem-code-007`
 ```toml
 # Unique check ID (format: {DOMAIN}-{ARTIFACT}-{NNN})
 id = "SEM-CODE-007"
@@ -887,4 +883,4 @@ kind = "must_have"
 - [ ] Confirm topology and tech stack choices are not contradicted
 - [ ] Document any deviation with a rationale and approval
 ```
-`@/cpt:check`
+`@/cpt:check:sem-code-007`

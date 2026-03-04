@@ -19,6 +19,7 @@ Uses only Python 3.11+ stdlib.
 from __future__ import annotations
 
 import re
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -37,6 +38,7 @@ class Marker:
     raw_content: str          # full text between open/close tags
     toml_data: Dict[str, Any] = field(default_factory=dict)   # parsed TOML block (if any)
     markdown_content: str = ""    # parsed markdown block (if any)
+    explicit_id: str = ""         # ID from named syntax @cpt:TYPE:ID (empty for legacy)
     line_start: int = 0
     line_end: int = 0
 
@@ -54,8 +56,11 @@ class ParsedBlueprint:
 
 
 # Regex for opening/closing marker tags (backtick-delimited)
-_OPEN_RE = re.compile(r"^`@cpt:(\w[\w-]*)` *$")
-_CLOSE_RE = re.compile(r"^`@/cpt:(\w[\w-]*)` *$")
+# Supports both legacy @cpt:TYPE and named @cpt:TYPE:ID syntax
+_OPEN_RE = re.compile(r"^`@cpt:(\w[\w-]*)(?::(\w[\w-]*))?` *$")
+_CLOSE_RE = re.compile(r"^`@/cpt:(\w[\w-]*)(?::(\w[\w-]*))?` *$")
+
+_SINGLETON_MARKERS = frozenset({"blueprint", "skill", "system-prompt", "sysprompt", "rules", "checklist"})
 
 # Regex for fenced code blocks inside marker content (3+ backticks)
 _FENCE_OPEN_RE = re.compile(r"^(`{3,})(\w+)\s*$")
@@ -100,6 +105,7 @@ def parse_blueprint(path: Path) -> ParsedBlueprint:
 
         # @cpt-begin:cpt-cypilot-algo-blueprint-system-parse-blueprint:p1:inst-foreach-marker
         marker_type = m_open.group(1)
+        explicit_id = m_open.group(2) or ""
         open_line = i + 1  # 1-indexed
         # @cpt-end:cpt-cypilot-algo-blueprint-system-parse-blueprint:p1:inst-foreach-marker
 
@@ -109,7 +115,7 @@ def parse_blueprint(path: Path) -> ParsedBlueprint:
         while j < len(lines):
             close_line_text = lines[j].strip()
             m_close = _CLOSE_RE.match(close_line_text)
-            if m_close and m_close.group(1) == marker_type:
+            if m_close and m_close.group(1) == marker_type and (m_close.group(2) or "") == explicit_id:
                 found_close = True
                 break
             j += 1
@@ -117,9 +123,10 @@ def parse_blueprint(path: Path) -> ParsedBlueprint:
 
         # @cpt-begin:cpt-cypilot-algo-blueprint-system-parse-blueprint:p1:inst-if-unclosed
         if not found_close:
+            tag = f"{marker_type}:{explicit_id}" if explicit_id else marker_type
             result.errors.append(
-                f"{path}:{open_line}: unclosed marker `@cpt:{marker_type}` — "
-                f"expected `@/cpt:{marker_type}` before end of file"
+                f"{path}:{open_line}: unclosed marker `@cpt:{tag}` — "
+                f"expected `@/cpt:{tag}` before end of file"
             )
             i += 1
             continue
@@ -144,12 +151,23 @@ def parse_blueprint(path: Path) -> ParsedBlueprint:
             raw_content=raw_content,
             toml_data=toml_data,
             markdown_content=markdown_content,
+            explicit_id=explicit_id,
             line_start=open_line,
             line_end=close_line,
         )
         markers.append(marker)
         i = j + 1
         # @cpt-end:cpt-cypilot-algo-blueprint-system-parse-blueprint:p1:inst-validate-flat
+
+    # @cpt-begin:cpt-cypilot-algo-blueprint-system-parse-blueprint:p1:inst-warn-legacy
+    for mk in markers:
+        if not mk.explicit_id and mk.marker_type not in _SINGLETON_MARKERS:
+            print(
+                f"WARNING: {path}:{mk.line_start}: legacy marker `@cpt:{mk.marker_type}` "
+                f"— use named syntax `@cpt:{mk.marker_type}:<id>` for stable merge identity",
+                file=sys.stderr,
+            )
+    # @cpt-end:cpt-cypilot-algo-blueprint-system-parse-blueprint:p1:inst-warn-legacy
 
     # @cpt-begin:cpt-cypilot-algo-blueprint-system-parse-blueprint:p1:inst-return-parsed
     result.markers = markers
@@ -345,10 +363,10 @@ def _collect_skill_blocks(bp: ParsedBlueprint) -> str:
 
 
 def _collect_sysprompt_blocks(bp: ParsedBlueprint) -> str:
-    """Extract markdown content from @cpt:sysprompt markers."""
+    """Extract markdown content from @cpt:system-prompt / @cpt:sysprompt markers."""
     parts: List[str] = []
     for mk in bp.markers:
-        if mk.marker_type == "sysprompt" and mk.markdown_content.strip():
+        if mk.marker_type in ("system-prompt", "sysprompt") and mk.markdown_content.strip():
             parts.append(mk.markdown_content.strip())
     return "\n\n".join(parts)
 
@@ -362,9 +380,11 @@ def _collect_workflow_blocks(bp: ParsedBlueprint) -> List[Dict[str, str]]:
     Returns list of dicts: [{name, description, version, purpose, content}, ...]
     """
     workflows: List[Dict[str, str]] = []
+    # @cpt-begin:cpt-cypilot-algo-blueprint-system-generate-workflows:p2:inst-foreach-workflow
     for mk in bp.markers:
         if mk.marker_type != "workflow":
             continue
+        # @cpt-begin:cpt-cypilot-algo-blueprint-system-generate-workflows:p2:inst-parse-workflow
         name = mk.toml_data.get("name", "")
         if not name:
             continue
@@ -378,6 +398,8 @@ def _collect_workflow_blocks(bp: ParsedBlueprint) -> List[Dict[str, str]]:
             "purpose": mk.toml_data.get("purpose", ""),
             "content": content,
         })
+        # @cpt-end:cpt-cypilot-algo-blueprint-system-generate-workflows:p2:inst-parse-workflow
+    # @cpt-end:cpt-cypilot-algo-blueprint-system-generate-workflows:p2:inst-foreach-workflow
     return workflows
 
 
@@ -1304,6 +1326,7 @@ def process_kit(
     for bp_file in bp_files:
         # @cpt-begin:cpt-cypilot-algo-blueprint-system-process-kit:p1:inst-parse-bp
         bp = parse_blueprint(bp_file)
+        bp.kit_slug = kit_slug  # kit slug comes from caller, not blueprint TOML
         all_blueprints.append(bp)
         # @cpt-end:cpt-cypilot-algo-blueprint-system-process-kit:p1:inst-parse-bp
 
@@ -1344,21 +1367,33 @@ def process_kit(
     errors.extend(c_errors)
     # @cpt-end:cpt-cypilot-algo-blueprint-system-process-kit:p1:inst-gen-constraints
 
+    # @cpt-begin:cpt-cypilot-algo-blueprint-system-collect-skill:p2:inst-foreach-skill-bp
+    # @cpt-begin:cpt-cypilot-algo-blueprint-system-generate-workflows:p2:inst-foreach-wf-bp
     # Aggregate @cpt:skill, @cpt:sysprompt, and @cpt:workflow blocks across all blueprints
     all_skill_parts: List[str] = []
     all_sysprompt_parts: List[str] = []
     all_workflows: List[Dict[str, str]] = []
     for bp in all_blueprints:
         kind_label = bp.artifact_kind.upper() or bp.path.stem.upper()
+        # @cpt-begin:cpt-cypilot-algo-blueprint-system-collect-skill:p2:inst-extract-skill
         skill_text = _collect_skill_blocks(bp)
         if skill_text:
             all_skill_parts.append(f"## {kind_label}\n\n{skill_text}")
+        # @cpt-end:cpt-cypilot-algo-blueprint-system-collect-skill:p2:inst-extract-skill
         sysprompt_text = _collect_sysprompt_blocks(bp)
         if sysprompt_text:
             all_sysprompt_parts.append(sysprompt_text)
+        # @cpt-begin:cpt-cypilot-algo-blueprint-system-generate-workflows:p2:inst-extract-workflow
         all_workflows.extend(_collect_workflow_blocks(bp))
+        # @cpt-end:cpt-cypilot-algo-blueprint-system-generate-workflows:p2:inst-extract-workflow
+    # @cpt-end:cpt-cypilot-algo-blueprint-system-generate-workflows:p2:inst-foreach-wf-bp
+    # @cpt-begin:cpt-cypilot-algo-blueprint-system-collect-skill:p2:inst-concat-skill
+    # Concatenation happens in summary below via "\n\n".join(all_skill_parts)
+    # @cpt-end:cpt-cypilot-algo-blueprint-system-collect-skill:p2:inst-concat-skill
+    # @cpt-end:cpt-cypilot-algo-blueprint-system-collect-skill:p2:inst-foreach-skill-bp
 
     # @cpt-begin:cpt-cypilot-algo-blueprint-system-process-kit:p1:inst-return-generated
+    # @cpt-begin:cpt-cypilot-algo-blueprint-system-collect-skill:p2:inst-return-skill
     summary: Dict[str, Any] = {
         "files_written": len(all_written),
         "artifact_kinds": artifact_kinds,
@@ -1367,5 +1402,6 @@ def process_kit(
         "sysprompt_content": "\n\n".join(all_sysprompt_parts),
         "workflows": all_workflows,
     }
+    # @cpt-end:cpt-cypilot-algo-blueprint-system-collect-skill:p2:inst-return-skill
     return summary, errors
     # @cpt-end:cpt-cypilot-algo-blueprint-system-process-kit:p1:inst-return-generated

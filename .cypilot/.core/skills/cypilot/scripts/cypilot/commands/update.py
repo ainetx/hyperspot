@@ -40,6 +40,7 @@ from .init import (
     _inject_root_agents,
     _inject_root_claude,
 )
+from ..utils.ui import ui
 
 
 def cmd_update(argv: List[str]) -> int:
@@ -55,6 +56,10 @@ def cmd_update(argv: List[str]) -> int:
     )
     p.add_argument("--project-root", default=None, help="Project root directory")
     p.add_argument("--dry-run", action="store_true", help="Show what would be done")
+    p.add_argument("--no-interactive", action="store_true",
+                   help="Disable interactive prompts (auto-skip customized markers)")
+    p.add_argument("-y", "--yes", action="store_true",
+                   help="Auto-approve all prompts (no interaction)")
     args = p.parse_args(argv)
     # @cpt-end:cpt-cypilot-flow-version-config-update:p1:inst-user-update
 
@@ -65,35 +70,52 @@ def cmd_update(argv: List[str]) -> int:
     project_root = Path(args.project_root).resolve() if args.project_root else find_project_root(cwd)
 
     if project_root is None:
-        print(json.dumps({
-            "status": "ERROR",
-            "message": "No project root found. Run 'cpt init' first.",
-        }, indent=2, ensure_ascii=False))
+        ui.result(
+            {"status": "ERROR", "message": "No project root found. Run 'cpt init' first."},
+            human_fn=lambda d: (
+                ui.error("No project root found."),
+                ui.hint("Initialize Cypilot first:  cpt init"),
+                ui.blank(),
+            ),
+        )
         return 1
 
     install_rel = _read_cypilot_var(project_root)
     if not install_rel:
-        print(json.dumps({
-            "status": "ERROR",
-            "message": "Cypilot not initialized in this project. Run 'cpt init' first.",
-            "project_root": project_root.as_posix(),
-        }, indent=2, ensure_ascii=False))
+        ui.result(
+            {"status": "ERROR", "message": "Cypilot not initialized in this project. Run 'cpt init' first.", "project_root": project_root.as_posix()},
+            human_fn=lambda d: (
+                ui.error("Cypilot is not initialized in this project."),
+                ui.detail("Project root", project_root.as_posix()),
+                ui.hint("Initialize first:  cpt init"),
+                ui.blank(),
+            ),
+        )
         return 1
 
     cypilot_dir = (project_root / install_rel).resolve()
     if not cypilot_dir.is_dir():
-        print(json.dumps({
-            "status": "ERROR",
-            "message": f"Cypilot directory not found: {cypilot_dir}",
-            "project_root": project_root.as_posix(),
-        }, indent=2, ensure_ascii=False))
+        ui.result(
+            {"status": "ERROR", "message": f"Cypilot directory not found: {cypilot_dir}", "project_root": project_root.as_posix()},
+            human_fn=lambda d: (
+                ui.error(f"Cypilot directory not found: {cypilot_dir}"),
+                ui.hint("Reinitialize:  cpt init --force"),
+                ui.blank(),
+            ),
+        )
         return 1
 
     if not CACHE_DIR.is_dir():
-        print(json.dumps({
-            "status": "ERROR",
-            "message": f"Cache not found at {CACHE_DIR}. Run 'cpt update' (proxy downloads first).",
-        }, indent=2, ensure_ascii=False))
+        ui.result(
+            {"status": "ERROR", "message": f"Cache not found at {CACHE_DIR}. Run 'cpt update' (proxy downloads first)."},
+            human_fn=lambda d: (
+                ui.error("Cypilot cache not found."),
+                ui.detail("Expected at", str(CACHE_DIR)),
+                ui.hint("The proxy layer downloads the cache before forwarding to this command."),
+                ui.hint("If running directly, ensure cache exists at the path above."),
+                ui.blank(),
+            ),
+        )
         return 1
     # @cpt-end:cpt-cypilot-flow-version-config-update:p1:inst-resolve-project
 
@@ -105,206 +127,117 @@ def cmd_update(argv: List[str]) -> int:
     gen_dir = cypilot_dir / GEN_SUBDIR
     config_dir = cypilot_dir / "config"
 
+    # ── Show core whatsnew (before .core/ is replaced) ────────────────────
+    if not args.dry_run:
+        cache_whatsnew = _read_core_whatsnew(CACHE_DIR / "whatsnew.toml")
+        core_whatsnew = _read_core_whatsnew(core_dir / "whatsnew.toml")
+        if cache_whatsnew:
+            ack = _show_core_whatsnew(
+                cache_whatsnew, core_whatsnew,
+                interactive=not args.no_interactive and not args.yes and sys.stdin.isatty(),
+            )
+            if not ack:
+                ui.result({"status": "ABORTED", "message": "Update aborted by user."})
+                return 0
+
     # @cpt-begin:cpt-cypilot-flow-version-config-update:p1:inst-replace-core
     # ── Step 1: Replace .core/ from cache (always force) ─────────────────
-    sys.stderr.write("Step 1: Updating .core/ from cache...\n")
+    ui.step("Updating core files from cache...")
     if not args.dry_run:
         cypilot_dir.mkdir(parents=True, exist_ok=True)
         copy_results = _copy_from_cache(CACHE_DIR, cypilot_dir, force=True)
         core_dir.mkdir(parents=True, exist_ok=True)
         (core_dir / "README.md").write_text(_core_readme(), encoding="utf-8")
+        # Copy whatsnew.toml into .core/ so next update knows what was seen
+        _cache_whatsnew = CACHE_DIR / "whatsnew.toml"
+        if _cache_whatsnew.is_file():
+            shutil.copy2(_cache_whatsnew, core_dir / "whatsnew.toml")
     else:
         copy_results = {d: "dry_run" for d in COPY_DIRS}
     actions["core_update"] = copy_results
-    sys.stderr.write(f"  {copy_results}\n")
+    for name, action in copy_results.items():
+        ui.file_action(f".core/{name}/", action)
     # @cpt-end:cpt-cypilot-flow-version-config-update:p1:inst-replace-core
 
-    # @cpt-begin:cpt-cypilot-flow-version-config-update:p1:inst-update-kit-refs
-    # ── Step 2: Update kit reference copies (cypilot/kits/) from cache ───
-    sys.stderr.write("Step 2: Updating kit references...\n")
-    kits_cache_dir = CACHE_DIR / "kits"
-    kits_ref_dir = cypilot_dir / "kits"
+    # @cpt-begin:cpt-cypilot-flow-version-config-update:p1:inst-update-kits
+    # ── Step 2: Update kits (ref copy, migrate, regen .gen/) ─────────────
+    ui.step("Updating kits...")
+    from .kit import update_kit
 
-    if not args.dry_run and kits_cache_dir.is_dir():
+    kits_cache_dir = CACHE_DIR / "kits"
+    if not args.dry_run:
+        gen_dir.mkdir(parents=True, exist_ok=True)
+    gen_skill_nav_parts: List[str] = []
+    gen_agents_parts: List[str] = []
+    kit_results: Dict[str, Any] = {}
+
+    if kits_cache_dir.is_dir():
         for kit_src in sorted(kits_cache_dir.iterdir()):
             if not kit_src.is_dir():
                 continue
             kit_slug = kit_src.name
-            ref_dst = kits_ref_dir / kit_slug
-            # Reference copies are always overwritten (like .core/)
-            for subdir_name in ("blueprints", "scripts"):
-                src = kit_src / subdir_name
-                dst = ref_dst / subdir_name
-                if src.is_dir():
-                    if dst.exists():
-                        shutil.rmtree(dst)
-                    dst.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copytree(src, dst)
-            # Copy conf.toml to reference
-            conf_src = kit_src / "conf.toml"
-            if conf_src.is_file():
-                ref_dst.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(conf_src, ref_dst / "conf.toml")
-            sys.stderr.write(f"  kits/{kit_slug}: reference updated\n")
-    actions["kit_references"] = "updated"
-    # @cpt-end:cpt-cypilot-flow-version-config-update:p1:inst-update-kit-refs
 
-    # @cpt-begin:cpt-cypilot-flow-version-config-update:p1:inst-compare-versions
-    # ── Step 3: Compare kit versions via conf.toml ───────────────────────
-    sys.stderr.write("Step 3: Checking kit versions...\n")
-    kit_version_report: Dict[str, Any] = {}
-
-    if kits_cache_dir.is_dir():
-        for kit_src in sorted(kits_cache_dir.iterdir()):
-            if not kit_src.is_dir() or not (kit_src / "blueprints").is_dir():
-                continue
-            kit_slug = kit_src.name
-            user_kit_dir = config_dir / "kits" / kit_slug
-            user_bp_dir = user_kit_dir / "blueprints"
-            user_conf = user_kit_dir / "conf.toml"
-            cache_conf = kit_src / "conf.toml"
-
-            if not user_bp_dir.is_dir():
-                # User blueprints don't exist yet — copy from cache (first install)
-                if not args.dry_run:
-                    user_bp_dir.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copytree(kit_src / "blueprints", user_bp_dir)
-                    # Copy conf.toml on first install
-                    if cache_conf.is_file():
-                        shutil.copy2(cache_conf, user_kit_dir / "conf.toml")
-                kit_version_report[kit_slug] = {"status": "created"}
-                sys.stderr.write(f"  {kit_slug}: blueprints created (first install)\n")
-            else:
-                # Compare versions via conf.toml
-                cache_ver = _read_conf_version(cache_conf)
-                user_ver = _read_conf_version(user_conf)
-                cache_bp_versions = _read_conf_section(cache_conf, "blueprints")
-                user_bp_versions = _read_conf_section(user_conf, "blueprints")
-                cache_script_versions = _read_conf_section(cache_conf, "scripts")
-                user_script_versions = _read_conf_section(user_conf, "scripts")
-
-                drift = _compare_conf_versions(
-                    cache_ver, user_ver,
-                    cache_bp_versions, user_bp_versions,
-                    cache_script_versions, user_script_versions,
+            try:
+                kit_r = update_kit(
+                    kit_slug, kit_src, cypilot_dir,
+                    dry_run=args.dry_run,
+                    interactive=not args.no_interactive and sys.stdin.isatty(),
+                    auto_approve=args.yes,
                 )
-                kit_version_report[kit_slug] = drift
-
-                if drift["status"] == "current":
-                    sys.stderr.write(f"  {kit_slug}: v{user_ver} — up to date\n")
-                elif drift["status"] == "migration_needed":
-                    details: List[str] = []
-                    if drift.get("kit_version_drift"):
-                        details.append(f"kit v{user_ver} → v{cache_ver}")
-                    for bp, d in drift.get("blueprint_drift", {}).items():
-                        details.append(f"{bp} v{d['user']} → v{d['cache']}")
-                    for sc, d in drift.get("script_drift", {}).items():
-                        details.append(f"script/{sc} v{d['user']} → v{d['cache']}")
-                    sys.stderr.write(
-                        f"  {kit_slug}: MIGRATION NEEDED — {', '.join(details)}\n"
-                        f"    Reference updated in kits/{kit_slug}/.\n"
-                        f"    User config in config/kits/{kit_slug}/ NOT touched.\n"
-                        f"    Review kits/{kit_slug}/ vs config/kits/{kit_slug}/, "
-                        f"then run 'cpt generate-resources'.\n"
-                    )
-                    warnings.append(f"Kit '{kit_slug}': migration needed — {', '.join(details)}")
-
-            # Copy scripts to .gen/kits/{slug}/scripts/ (always ok, generated)
-            scripts_src = kit_src / "scripts"
-            if not args.dry_run and scripts_src.is_dir():
-                gen_kit_scripts = gen_dir / "kits" / kit_slug / "scripts"
-                if gen_kit_scripts.exists():
-                    shutil.rmtree(gen_kit_scripts)
-                gen_kit_scripts.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copytree(scripts_src, gen_kit_scripts)
-
-    actions["kit_versions"] = kit_version_report
-    # @cpt-end:cpt-cypilot-flow-version-config-update:p1:inst-compare-versions
-
-    # @cpt-begin:cpt-cypilot-flow-version-config-update:p1:inst-regenerate-gen
-    # ── Step 4: Regenerate .gen/ from USER's blueprints ──────────────────
-    sys.stderr.write("Step 4: Regenerating .gen/ from user blueprints...\n")
-    from ..utils.blueprint import process_kit
-
-    gen_dir.mkdir(parents=True, exist_ok=True)
-    gen_kits_dir = gen_dir / "kits"
-    gen_skill_nav_parts: List[str] = []
-    gen_agents_parts: List[str] = []
-    kit_gen_results: Dict[str, Any] = {}
-
-    config_kits_dir = config_dir / "kits"
-    if config_kits_dir.is_dir():
-        for kit_dir in sorted(config_kits_dir.iterdir()):
-            bp_dir = kit_dir / "blueprints"
-            if not bp_dir.is_dir():
-                continue
-            kit_slug = kit_dir.name
+            except Exception as exc:
+                kit_r = {
+                    "kit": kit_slug,
+                    "status": "ERROR",
+                    "error": str(exc),
+                }
+                errors.append({"path": kit_slug, "error": str(exc)})
+            kit_results[kit_slug] = kit_r
 
             if args.dry_run:
-                kit_gen_results[kit_slug] = "dry_run"
                 continue
 
-            summary, kit_errors = process_kit(
-                kit_slug, bp_dir, gen_kits_dir, dry_run=False,
-            )
-            kit_gen_results[kit_slug] = {
-                "files_written": summary.get("files_written", 0),
-                "artifact_kinds": summary.get("artifact_kinds", []),
-            }
-            if kit_errors:
-                errors.extend({"path": kit_slug, "error": e} for e in kit_errors)
-
-            # Collect skill nav and sysprompt
-            skill_content = summary.get("skill_content", "")
-            if skill_content:
-                art_kinds = [k.upper() for k in summary.get("artifact_kinds", []) if k]
-                wf_names = [w["name"] for w in summary.get("workflows", []) if w.get("name")]
-                desc_parts: list[str] = []
-                if art_kinds:
-                    desc_parts.append(f"Artifacts: {', '.join(art_kinds)}")
-                if wf_names:
-                    desc_parts.append(f"Workflows: {', '.join(wf_names)}")
-                kit_description = "; ".join(desc_parts) if desc_parts else f"Kit {kit_slug}"
-
-                gen_kit_skill_path = gen_kits_dir / kit_slug / "SKILL.md"
-                gen_kit_skill_path.parent.mkdir(parents=True, exist_ok=True)
-                gen_kit_skill_path.write_text(
-                    f"---\nname: cypilot-{kit_slug}\n"
-                    f"description: \"{kit_description}\"\n---\n\n"
-                    f"# Cypilot Skill — Kit `{kit_slug}`\n\n"
-                    f"Generated from kit `{kit_slug}` blueprints.\n\n"
-                    + skill_content + "\n",
-                    encoding="utf-8",
-                )
-                gen_skill_nav_parts.append(
-                    f"ALWAYS invoke `{{cypilot_path}}/.gen/kits/{kit_slug}/SKILL.md` FIRST"
+            # Collect gen errors
+            if kit_r.get("gen_errors"):
+                errors.extend(
+                    {"path": kit_slug, "error": e} for e in kit_r["gen_errors"]
                 )
 
-            sysprompt_content = summary.get("sysprompt_content", "")
-            if sysprompt_content:
-                gen_agents_parts.append(sysprompt_content)
+            # Collect cross-kit aggregation parts
+            if kit_r.get("skill_nav"):
+                gen_skill_nav_parts.append(kit_r["skill_nav"])
+            if kit_r.get("agents_content"):
+                gen_agents_parts.append(kit_r["agents_content"])
 
-            # Write generated workflows
-            for wf in summary.get("workflows", []):
-                wf_name = wf["name"]
-                wf_path = gen_kits_dir / kit_slug / "workflows" / f"{wf_name}.md"
-                wf_path.parent.mkdir(parents=True, exist_ok=True)
-                fm_lines = ["---", "cypilot: true", "type: workflow", f"name: cypilot-{wf_name}"]
-                if wf.get("description"):
-                    fm_lines.append(f"description: {wf['description']}")
-                if wf.get("version"):
-                    fm_lines.append(f"version: {wf['version']}")
-                if wf.get("purpose"):
-                    fm_lines.append(f"purpose: {wf['purpose']}")
-                fm_lines.append("---")
-                wf_path.write_text("\n".join(fm_lines) + "\n\n" + wf["content"] + "\n", encoding="utf-8")
+            # Report progress
+            ver = kit_r.get("version", {})
+            ver_status = ver.get("status", "") if isinstance(ver, dict) else ver
+            gen = kit_r.get("gen", {})
+            files_written = gen.get("files_written", 0) if isinstance(gen, dict) else 0
 
-            sys.stderr.write(
-                f"  {kit_slug}: {summary.get('files_written', 0)} files generated\n"
-            )
+            if ver_status == "created":
+                ui.substep(f"{kit_slug}: first install, {files_written} files generated")
+            elif ver_status == "migrated":
+                ui.substep(f"{kit_slug}: migrated {ver.get('kit_version', '')}")
+                for bp_r in ver.get("blueprints", []):
+                    action = bp_r.get("action", "")
+                    bp_name = bp_r.get("blueprint", "")
+                    if action == "merged":
+                        updated = bp_r.get("markers_updated", [])
+                        skipped = bp_r.get("markers_skipped", [])
+                        msg = f"      {bp_name}: {len(updated)} markers updated"
+                        if skipped:
+                            msg += f", {len(skipped)} skipped (customized)"
+                        ui.substep(msg)
+                    elif action == "created":
+                        ui.substep(f"      {bp_name}: created (new)")
+                    elif action == "skipped_all_customized":
+                        ui.substep(f"      {bp_name}: all markers customized, skipped")
+                ui.substep(f"      {files_written} files generated")
+            elif ver_status == "current":
+                ui.substep(f"{kit_slug}: up to date, {files_written} files generated")
 
-    actions["gen_kits"] = kit_gen_results
-    # @cpt-end:cpt-cypilot-flow-version-config-update:p1:inst-regenerate-gen
+    actions["kits"] = kit_results
+    # @cpt-end:cpt-cypilot-flow-version-config-update:p1:inst-update-kits
 
     # @cpt-begin:cpt-cypilot-flow-version-config-update:p1:inst-regenerate-agents
     # Write .gen/AGENTS.md
@@ -348,7 +281,7 @@ def cmd_update(argv: List[str]) -> int:
 
     # @cpt-begin:cpt-cypilot-flow-version-config-update:p1:inst-ensure-scaffold
     # ── Step 5: Ensure config/ scaffold (create only if missing) ─────────
-    sys.stderr.write("Step 5: Ensuring config/ scaffold...\n")
+    ui.step("Ensuring config/ scaffold...")
     if not args.dry_run:
         config_dir.mkdir(parents=True, exist_ok=True)
         _ensure_file(config_dir / "README.md", _config_readme_content(), actions, "config_readme")
@@ -375,10 +308,18 @@ def cmd_update(argv: List[str]) -> int:
         actions["root_claude"] = root_claude_action
     # @cpt-end:cpt-cypilot-flow-version-config-update:p1:inst-ensure-scaffold
 
+    # ── Auto-regenerate agent integrations if real changes happened ────
+    if not args.dry_run:
+        agents_regen = _maybe_regenerate_agents(
+            copy_results, kit_results, project_root, cypilot_dir,
+        )
+        if agents_regen:
+            actions["agents_regenerated"] = agents_regen
+
     # @cpt-begin:cpt-cypilot-flow-version-config-update:p1:inst-return-report
     # ── Report ───────────────────────────────────────────────────────────
     status = "PASS" if not errors and not warnings else "WARN"
-    result: Dict[str, Any] = {
+    update_result: Dict[str, Any] = {
         "status": status,
         "project_root": project_root.as_posix(),
         "cypilot_dir": cypilot_dir.as_posix(),
@@ -386,11 +327,11 @@ def cmd_update(argv: List[str]) -> int:
         "actions": actions,
     }
     if errors:
-        result["errors"] = errors
+        update_result["errors"] = errors
     if warnings:
-        result["warnings"] = warnings
+        update_result["warnings"] = warnings
 
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    ui.result(update_result, human_fn=_human_update_ok)
     # @cpt-end:cpt-cypilot-flow-version-config-update:p1:inst-return-report
     return 0
 
@@ -450,73 +391,250 @@ def _read_project_name(config_dir: Path) -> Optional[str]:
     return None
 
 
-def _read_conf_version(conf_path: Path) -> int:
-    """Read top-level 'version' from conf.toml. Returns 0 if missing."""
-    if not conf_path.is_file():
-        return 0
-    try:
-        import tomllib
-        with open(conf_path, "rb") as f:
-            data = tomllib.load(f)
-        ver = data.get("version")
-        return int(ver) if ver is not None else 0
-    except Exception:
-        return 0
+def _maybe_regenerate_agents(
+    copy_results: Dict[str, str],
+    kit_results: Dict[str, Any],
+    project_root: Path,
+    cypilot_dir: Path,
+) -> List[str]:
+    """Auto-regenerate agent integration files when a real update happened.
 
-
-def _read_conf_section(conf_path: Path, section: str) -> Dict[str, int]:
-    """Read a [section] from conf.toml as {name: version_int}."""
-    if not conf_path.is_file():
-        return {}
-    try:
-        import tomllib
-        with open(conf_path, "rb") as f:
-            data = tomllib.load(f)
-        raw = data.get(section, {})
-        if not isinstance(raw, dict):
-            return {}
-        return {str(k): int(v) for k, v in raw.items()}
-    except Exception:
-        return {}
-
-
-def _compare_conf_versions(
-    cache_ver: int,
-    user_ver: int,
-    cache_bp: Dict[str, int],
-    user_bp: Dict[str, int],
-    cache_scripts: Dict[str, int],
-    user_scripts: Dict[str, int],
-) -> Dict[str, Any]:
-    """Compare kit versions from conf.toml (cache vs user).
-
-    Returns dict with status 'current' or 'migration_needed' plus drift details.
+    Triggers when core dirs were updated/created or any kit was created/migrated.
+    Only regenerates agents whose skill output files already exist on disk.
+    Returns list of agent names that were regenerated.
     """
-    result: Dict[str, Any] = {"status": "current"}
+    core_changed = any(v in ("updated", "created") for v in copy_results.values())
+    kits_changed = any(
+        isinstance(kr, dict)
+        and isinstance(kr.get("version"), dict)
+        and kr["version"].get("status") in ("created", "migrated")
+        for kr in kit_results.values()
+    )
+    if not core_changed and not kits_changed:
+        return []
 
-    # Kit-level version drift
-    if cache_ver > user_ver:
-        result["kit_version_drift"] = {"cache": cache_ver, "user": user_ver}
+    from .agents import (
+        _ALL_RECOGNIZED_AGENTS,
+        _default_agents_config,
+        _process_single_agent,
+    )
 
-    # Per-blueprint drift
-    bp_drift: Dict[str, Dict[str, int]] = {}
-    for name, cver in cache_bp.items():
-        uver = user_bp.get(name, 0)
-        if cver > uver:
-            bp_drift[name] = {"cache": cver, "user": uver}
-    if bp_drift:
-        result["blueprint_drift"] = bp_drift
+    cfg = _default_agents_config()
+    agents_cfg = cfg.get("agents", {})
+    regenerated: List[str] = []
 
-    # Per-script drift
-    sc_drift: Dict[str, Dict[str, int]] = {}
-    for name, cver in cache_scripts.items():
-        uver = user_scripts.get(name, 0)
-        if cver > uver:
-            sc_drift[name] = {"cache": cver, "user": uver}
-    if sc_drift:
-        result["script_drift"] = sc_drift
+    for agent in _ALL_RECOGNIZED_AGENTS:
+        agent_cfg = agents_cfg.get(agent, {})
+        skills_cfg = agent_cfg.get("skills", {})
+        outputs = skills_cfg.get("outputs", [])
+        # Only regenerate if at least one skill output file already exists
+        has_existing = any(
+            isinstance(out, dict)
+            and isinstance(out.get("path"), str)
+            and (project_root / out["path"]).is_file()
+            for out in outputs
+        )
+        if not has_existing:
+            continue
+        result = _process_single_agent(
+            agent, project_root, cypilot_dir, cfg, None, dry_run=False,
+        )
+        wf = result.get("workflows", {})
+        sk = result.get("skills", {})
+        n_changed = (
+            len(wf.get("updated", []))
+            + len(wf.get("created", []))
+            + len(sk.get("updated", []))
+            + len(sk.get("created", []))
+        )
+        if n_changed:
+            regenerated.append(agent)
 
-    if result.get("kit_version_drift") or bp_drift or sc_drift:
-        result["status"] = "migration_needed"
+    if regenerated:
+        ui.step("Regenerating agent integrations...")
+        for agent in regenerated:
+            ui.substep(f"{agent}: updated")
 
+    return regenerated
+
+
+# Re-exported from kit.py — tests import it from here
+from .kit import _read_conf_version as _read_conf_version  # noqa: F401
+
+
+def _read_core_whatsnew(path: Path) -> Dict[str, Dict[str, str]]:
+    """Read a standalone whatsnew.toml file.
+
+    Returns dict mapping version string to {summary, details}.
+    """
+    if not path.is_file():
+        return {}
+    try:
+        import tomllib
+        with open(path, "rb") as f:
+            data = tomllib.load(f)
+    except Exception:
+        return {}
+    result: Dict[str, Dict[str, str]] = {}
+    for key, entry in data.items():
+        if isinstance(entry, dict):
+            result[key] = {
+                "summary": str(entry.get("summary", "")),
+                "details": str(entry.get("details", "")),
+            }
     return result
+
+
+def _show_core_whatsnew(
+    ref_whatsnew: Dict[str, Dict[str, str]],
+    core_whatsnew: Dict[str, Dict[str, str]],
+    *,
+    interactive: bool = True,
+) -> bool:
+    """Display core whatsnew entries present in cache but missing from .core/.
+
+    Returns True if user acknowledged (or non-interactive), False if declined.
+    """
+    missing = sorted(
+        (v, ref_whatsnew[v]) for v in ref_whatsnew
+        if v not in core_whatsnew
+    )
+    if not missing:
+        return True
+
+    sys.stderr.write(f"\n{'=' * 60}\n")
+    sys.stderr.write(f"  What's new in Cypilot\n")
+    sys.stderr.write(f"{'=' * 60}\n")
+
+    for ver, entry in missing:
+        sys.stderr.write(f"\n  \033[1m{ver}: {entry['summary']}\033[0m\n")
+        if entry["details"]:
+            for line in entry["details"].splitlines():
+                sys.stderr.write(f"    {line}\n")
+
+    sys.stderr.write(f"\n{'=' * 60}\n")
+
+    if not interactive:
+        return True
+
+    sys.stderr.write("  Press Enter to continue with update (or 'q' to abort): ")
+    sys.stderr.flush()
+    try:
+        response = input().strip().lower()
+    except EOFError:
+        return False
+    return response != "q"
+
+
+# ---------------------------------------------------------------------------
+# Human-friendly formatter
+# ---------------------------------------------------------------------------
+
+def _human_update_ok(data: Dict[str, Any]) -> None:
+    dry = data.get("dry_run", False)
+    status = data.get("status", "")
+    errors = data.get("errors", [])
+    warnings = data.get("warnings", [])
+    prefix = "[dry-run] " if dry else ""
+
+    ui.header(f"{prefix}Cypilot Update")
+    ui.detail("Project root", str(data.get("project_root", "?")))
+    ui.detail("Cypilot dir", str(data.get("cypilot_dir", "?")))
+
+    actions = data.get("actions", {})
+    if actions:
+        # Summarize file actions
+        created = [k for k, v in actions.items() if v == "created"]
+        updated = [k for k, v in actions.items() if v == "updated"]
+        unchanged = [k for k, v in actions.items() if v in ("unchanged", "preserved")]
+
+        if created:
+            ui.blank()
+            ui.step(f"Created ({len(created)})")
+            for k in created:
+                ui.file_action(k, "created")
+        if updated:
+            ui.blank()
+            ui.step(f"Updated ({len(updated)})")
+            for k in updated:
+                ui.file_action(k, "updated")
+        if unchanged:
+            ui.blank()
+            ui.step(f"Unchanged ({len(unchanged)})")
+
+        # Core update details
+        core_update = actions.get("core_update")
+        if isinstance(core_update, dict):
+            ui.blank()
+            ui.step("Core:")
+            for sub_k, sub_v in core_update.items():
+                ui.file_action(sub_k, str(sub_v))
+
+        # Kit results
+        kits_data = actions.get("kits")
+        if isinstance(kits_data, dict):
+            ui.blank()
+            ui.step(f"Kits ({len(kits_data)})")
+            for slug, kr in kits_data.items():
+                if not isinstance(kr, dict):
+                    ui.substep(f"  {slug}: {kr}")
+                    continue
+                ref = kr.get("reference", "")
+                ver = kr.get("version", {})
+                ver_status = ver.get("status", "") if isinstance(ver, dict) else str(ver)
+                gen = kr.get("gen", {})
+                fw = gen.get("files_written", 0) if isinstance(gen, dict) else 0
+                kinds = gen.get("artifact_kinds", []) if isinstance(gen, dict) else []
+                parts = [f"{slug}: {ver_status}"]
+                if ref and ref != ver_status:
+                    parts.append(f"ref={ref}")
+                if fw:
+                    parts.append(f"{fw} files generated")
+                ui.substep(f"  {'  '.join(parts)}")
+                if kinds:
+                    ui.substep(f"    Kinds: {', '.join(kinds)}")
+
+        # Remaining dict/list actions (not already handled)
+        skip = {"core_update", "kits", "agents_regenerated"}
+        for k, v in actions.items():
+            if k in skip or isinstance(v, str):
+                continue
+            if isinstance(v, dict):
+                ui.blank()
+                ui.step(f"{k}:")
+                for sub_k, sub_v in v.items():
+                    if isinstance(sub_v, (dict, list)):
+                        ui.substep(f"  {sub_k}: ...")
+                    else:
+                        ui.substep(f"  {sub_k}: {sub_v}")
+            elif isinstance(v, list):
+                ui.blank()
+                ui.step(f"{k}:")
+                for item in v:
+                    ui.substep(f"  {item}")
+
+        agents_regen = actions.get("agents_regenerated")
+        if isinstance(agents_regen, list) and agents_regen:
+            ui.blank()
+            ui.step(f"Agent integrations regenerated: {', '.join(agents_regen)}")
+
+    if errors:
+        ui.blank()
+        ui.warn(f"Errors ({len(errors)}):")
+        for err in errors:
+            if isinstance(err, dict):
+                ui.substep(f"• {err.get('path', '?')}: {err.get('error', '?')}")
+            else:
+                ui.substep(f"• {err}")
+    if warnings:
+        ui.blank()
+        for w in warnings:
+            ui.warn(w)
+
+    if dry:
+        ui.success("Dry run complete — no files were written.")
+    elif status == "PASS":
+        ui.success("Update complete!")
+    else:
+        ui.warn("Update finished with warnings (see above).")
+    ui.blank()

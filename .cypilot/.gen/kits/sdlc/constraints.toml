@@ -18,6 +18,7 @@ id = "adr-context"
 level = 2
 required = true
 multiple = false
+numbered = false
 pattern = "Context and Problem Statement"
 description = "Problem context and motivating forces."
 
@@ -26,6 +27,7 @@ id = "adr-decision-drivers"
 level = 2
 required = true
 multiple = false
+numbered = false
 pattern = "Decision Drivers"
 description = "Key decision drivers and constraints."
 
@@ -34,6 +36,7 @@ id = "adr-considered-options"
 level = 2
 required = true
 multiple = false
+numbered = false
 pattern = "Considered Options"
 description = "Options that were considered."
 
@@ -42,6 +45,7 @@ id = "adr-decision-outcome"
 level = 2
 required = true
 multiple = false
+numbered = false
 pattern = "Decision Outcome"
 description = "Selected decision and outcome."
 
@@ -50,6 +54,7 @@ id = "adr-decision-outcome-consequences"
 level = 3
 required = true
 multiple = false
+numbered = false
 pattern = "Consequences"
 description = "Consequences of the decision."
 
@@ -58,6 +63,7 @@ id = "adr-decision-outcome-confirmation"
 level = 3
 required = true
 multiple = false
+numbered = false
 pattern = "Confirmation"
 description = "How/when the decision will be confirmed."
 
@@ -66,6 +72,7 @@ id = "adr-pros-cons"
 level = 2
 required = true
 multiple = false
+numbered = false
 pattern = "Pros and Cons of the Options"
 description = "Pros and cons analysis for the options."
 
@@ -81,6 +88,7 @@ id = "adr-more-info"
 level = 2
 required = false
 multiple = false
+numbered = false
 pattern = "More Information"
 description = "Optional additional information and links."
 
@@ -688,7 +696,7 @@ name = "Algorithm"
 description = "A reusable internal process described in CDSL (business logic not directly initiated by an actor)."
 required = false
 to_code = true
-template = "cpt-{system}-algo-{slug}"
+template = "cpt-{system}-algo-{feature-slug}-{slug}"
 headings = ["feature-processes"]
 
 [artifacts.FEATURE.identifiers.algo.references.PRD]
@@ -701,7 +709,7 @@ required = true
 task = true
 priority = true
 to_code = true
-template = "cpt-{system}-dod-{slug}"
+template = "cpt-{system}-dod-{feature-slug}-{slug}"
 headings = ["feature-dod-entry"]
 
 [artifacts.FEATURE.identifiers.dod.references.PRD]
@@ -713,7 +721,7 @@ description = "A feature-level status/anchor marker used in FEATURE context."
 required = true
 task = true
 to_code = false
-template = "cpt-{system}-featstatus-{slug}"
+template = "cpt-{system}-featstatus-{feature-slug}"
 headings = ["feature-h1-title"]
 
 [artifacts.FEATURE.identifiers.featstatus.references.DESIGN]
@@ -727,7 +735,7 @@ name = "Flow"
 description = "An actor-facing CDSL flow describing a user/system interaction end-to-end."
 required = false
 to_code = true
-template = "cpt-{system}-flow-{slug}"
+template = "cpt-{system}-flow-{feature-slug}-{slug}"
 headings = ["feature-actor-flow"]
 
 [artifacts.FEATURE.identifiers.flow.references.PRD]
@@ -738,7 +746,7 @@ name = "State Machine"
 description = "A lifecycle/state machine definition for an entity or subsystem, described in CDSL transitions."
 required = false
 to_code = true
-template = "cpt-{system}-state-{slug}"
+template = "cpt-{system}-state-{feature-slug}-{slug}"
 headings = ["feature-state"]
 
 [artifacts.FEATURE.identifiers.state.references.PRD]

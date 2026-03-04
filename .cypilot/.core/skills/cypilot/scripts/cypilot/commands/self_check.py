@@ -25,6 +25,7 @@ from ..utils.constraints import (
 from ..utils import error_codes as EC
 from ..utils.document import read_text_safe
 from ..utils.files import find_cypilot_directory, find_project_root
+from ..utils.ui import ui
 
 
 def run_self_check_from_meta(
@@ -549,25 +550,21 @@ def cmd_self_check(argv: List[str]) -> int:
     start_path = Path(args.root).resolve()
     project_root = find_project_root(start_path)
     if project_root is None:
-        print(json.dumps({"status": "ERROR", "message": "Project root not found"}, indent=2, ensure_ascii=False))
+        ui.result({"status": "ERROR", "message": "Project root not found"})
         return 1
 
     adapter_dir = find_cypilot_directory(project_root)
     if adapter_dir is None:
-        print(json.dumps({"status": "ERROR", "message": "Cypilot not initialized. Run 'cypilot init' first."}, indent=2, ensure_ascii=False))
+        ui.result({"status": "ERROR", "message": "Cypilot not initialized. Run 'cypilot init' first."})
         return 1
 
     artifacts_meta, meta_err = load_artifacts_meta(adapter_dir)
     if meta_err or artifacts_meta is None:
-        print(json.dumps({"status": "ERROR", "message": meta_err or "Missing artifacts registry"}, indent=2, ensure_ascii=False))
+        ui.result({"status": "ERROR", "message": meta_err or "Missing artifacts registry"})
         return 1
     slug_errors = artifacts_meta.validate_all_slugs()
     if slug_errors:
-        print(json.dumps({
-            "status": "ERROR",
-            "message": "Invalid slugs in artifacts.toml",
-            "slug_errors": slug_errors,
-        }, indent=2, ensure_ascii=False))
+        ui.result({"status": "ERROR", "message": "Invalid slugs in artifacts.toml", "slug_errors": slug_errors})
         return 1
     # @cpt-end:cpt-cypilot-flow-developer-experience-self-check:p1:inst-load-registry
 
@@ -579,6 +576,64 @@ def cmd_self_check(argv: List[str]) -> int:
         kit_filter=str(args.kit) if args.kit else None,
         verbose=bool(args.verbose),
     )
-    print(json.dumps(out, indent=2, ensure_ascii=False))
+    ui.result(out, human_fn=lambda d: _human_self_check(d))
     # @cpt-end:cpt-cypilot-flow-developer-experience-self-check:p1:inst-return-self-check
     return rc
+
+
+def _human_self_check(data: dict) -> None:
+    status = data.get("status", "")
+    n_kits = data.get("kits_checked", 0)
+    n_tpl = data.get("templates_checked", 0)
+    ui.header("Self-Check")
+    ui.detail("Project root", str(data.get("project_root", "?")))
+    ui.detail("Cypilot dir", str(data.get("cypilot_dir", "?")))
+    ui.detail("Kits checked", str(n_kits))
+    ui.detail("Templates checked", str(n_tpl))
+    ui.blank()
+
+    for r in data.get("results", []):
+        kit = r.get("kit", "?")
+        kind = r.get("kind", "?")
+        rs = r.get("status", "?")
+        n_err = r.get("error_count", 0)
+        n_warn = r.get("warning_count", 0)
+        example = r.get("example_path")
+
+        if rs == "PASS":
+            suffix = ""
+            if n_warn:
+                suffix = f" ({n_warn} warning(s))"
+            ui.step(f"{kit}/{kind}: PASS{suffix}")
+        else:
+            ui.warn(f"{kit}/{kind}: {rs} — {n_err} error(s), {n_warn} warning(s)")
+
+        if example:
+            ui.substep(f"  Example: {example}")
+
+        shown_errs = r.get("errors", [])
+        for e in shown_errs[:20]:
+            msg = e.get("message", "") if isinstance(e, dict) else str(e)
+            path = e.get("path", "") if isinstance(e, dict) else ""
+            line = e.get("line", "") if isinstance(e, dict) else ""
+            loc = f"{path}:{line}" if path and line else (path or "")
+            if loc:
+                ui.substep(f"  ✗ {loc}  {msg}")
+            else:
+                ui.substep(f"  ✗ {msg}")
+        if len(shown_errs) > 20:
+            ui.substep(f"  ... and {len(shown_errs) - 20} more error(s)")
+
+        shown_warns = r.get("warnings", [])
+        for w in shown_warns[:10]:
+            msg = w.get("message", "") if isinstance(w, dict) else str(w)
+            ui.substep(f"  ⚠ {msg}")
+        if len(shown_warns) > 10:
+            ui.substep(f"  ... and {len(shown_warns) - 10} more warning(s)")
+
+    ui.blank()
+    if status == "PASS":
+        ui.success("All templates and examples are consistent.")
+    else:
+        ui.error("Self-check failed.")
+    ui.blank()

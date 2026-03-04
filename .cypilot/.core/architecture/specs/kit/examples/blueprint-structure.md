@@ -21,7 +21,7 @@ codebase = false
 `@cpt:skill`
 ```markdown
 ### PRD Commands
-- `cypilot validate --artifact <PRD.md>` — validate PRD
+- `cpt validate --artifact <PRD.md>` — validate PRD
 ```
 `@/cpt:skill`
 
@@ -54,7 +54,7 @@ sections = ["structural", "semantic"]
 
 5. Individual rule entries (zero or more)
 
-`@cpt:rule`
+`@cpt:rule:prereq-load-dependencies`
 ```toml
 kind = "prerequisites"
 section = "load_dependencies"
@@ -63,7 +63,7 @@ section = "load_dependencies"
 - [ ] Load `template.md` for structure
 - [ ] Load `checklist.md` for semantic guidance
 ```
-`@/cpt:rule`
+`@/cpt:rule:prereq-load-dependencies`
 
 6. Checklist structure skeleton (optional)
 
@@ -80,7 +80,7 @@ standards = ["ISO/IEC/IEEE 29148:2018"]
 
 7. Individual check items (zero or more)
 
-`@cpt:check`
+`@cpt:check:biz-prd-001`
 ```toml
 id = "BIZ-PRD-001"
 domain = "BIZ"
@@ -92,11 +92,11 @@ kind = "must_have"
 - [ ] Purpose statement explains WHY the product exists
 - [ ] Target users clearly identified with specificity
 ```
-`@/cpt:check`
+`@/cpt:check:biz-prd-001`
 
 8. Template section — headings, prompts, examples
 
-`@cpt:heading`
+`@cpt:heading:prd-h1-title`
 ```toml
 id = "prd-h1-title"
 level = 1
@@ -105,17 +105,17 @@ pattern = "PRD\\s*[—–-]\\s*.+"
 template = "PRD — {Title of product}"
 examples = ["# PRD — TaskFlow"]
 ```
-`@/cpt:heading`
+`@/cpt:heading:prd-h1-title`
 
-`@cpt:prompt`
+`@cpt:prompt:prd-h1-title`
 ```markdown
 Write 1-2 paragraphs: what is this system and what problem does it solve.
 ```
-`@/cpt:prompt`
+`@/cpt:prompt:prd-h1-title`
 
-`@cpt:example`
+`@cpt:example:prd-h1-title`
 ```markdown
 Overwork Alert monitors employee work hours and sends automated alerts
 when thresholds are exceeded.
 ```
-`@/cpt:example`
+`@/cpt:example:prd-h1-title`
