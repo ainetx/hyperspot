@@ -462,7 +462,7 @@ The base error schema defines the common structure for all error categories.
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.not_found.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.not_found.v1~",
   "title": "Not Found",
   "status": 404,
   "detail": "Resource not found",
@@ -480,7 +480,7 @@ The base error schema defines the common structure for all error categories.
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.internal.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.internal.v1~",
   "title": "Internal",
   "status": 500,
   "detail": "An internal error occurred. Please retry later.",
@@ -620,8 +620,6 @@ pub fn gts_type(&self) -> &'static str {
     }
 }
 ```
-
-**Context type GTS identifiers** are defined via the `#[struct_to_gts_schema]` macro on each context struct (e.g., `schema_id = "gts://gts.cf.core.errors.resource_info.v1~"`).
 
 ### 3.6 Internal Details Logging
 

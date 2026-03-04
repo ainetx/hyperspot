@@ -11,16 +11,16 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.validation.v1~`
-
 **Variant: FieldViolations**
+
+Validation:
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `field_violations` | `Vec<FieldViolation>` | List of per-field validation errors |
 | `details` | `Option<Object>` | Reserved for derived GTS type extensions (p3+); absent in p1 |
 
-Each `FieldViolation` (GTS schema ID: `gts.cf.core.errors.field_violation.v1~`):
+Field violation:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -32,16 +32,9 @@ Each `FieldViolation` (GTS schema ID: `gts.cf.core.errors.field_violation.v1~`):
 
 **Variant: Constraint** — `{ "constraint": "<message>", "details": null }`
 
-## Rust Definitions and Constructor Example
+## Constructor Example
 
 ```rust
-CanonicalError::InvalidArgument {
-    ctx: Validation,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, Validation, FieldViolation};
 
 // Field violations:
@@ -70,7 +63,7 @@ let err = CanonicalError::invalid_argument(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.invalid_argument.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.invalid_argument.v1~"
         },
         "title": { "const": "Invalid Argument" },
         "status": { "const": 400 },
@@ -116,7 +109,6 @@ let err = CanonicalError::invalid_argument(
   ],
   "$defs": {
     "FieldViolation": {
-      "$id": "gts://gts.cf.core.errors.field_violation.v1~",
       "type": "object",
       "required": ["field", "description", "reason"],
       "properties": {
@@ -134,7 +126,7 @@ let err = CanonicalError::invalid_argument(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.invalid_argument.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.invalid_argument.v1~",
   "title": "Invalid Argument",
   "status": 400,
   "detail": "Request validation failed",

@@ -11,8 +11,6 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.retry_info.v1~`
-
 | Field | Type | Description |
 |-------|------|-------------|
 | `retry_after_seconds` | `u64` | Minimum seconds to wait before retrying |
@@ -21,13 +19,6 @@ GTS schema ID: `gts.cf.core.errors.retry_info.v1~`
 ## Rust Definitions and Constructor Example
 
 ```rust
-CanonicalError::ServiceUnavailable {
-    ctx: RetryInfo,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, RetryInfo};
 
 let err = CanonicalError::service_unavailable(
@@ -47,7 +38,7 @@ let err = CanonicalError::service_unavailable(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.service_unavailable.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.service_unavailable.v1~"
         },
         "title": { "const": "Unavailable" },
         "status": { "const": 503 },
@@ -77,7 +68,7 @@ let err = CanonicalError::service_unavailable(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.service_unavailable.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.service_unavailable.v1~",
   "title": "Unavailable",
   "status": 503,
   "detail": "Service temporarily unavailable",

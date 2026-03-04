@@ -11,23 +11,14 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.request_info.v1~`
-
 | Field | Type | Description |
 |-------|------|-------------|
 | `details` | `Option<Object>` | Reserved for derived GTS type extensions (p3+); absent in p1 |
 
 
-## Rust Definitions and Constructor Example
+## Constructor Example
 
 ```rust
-CanonicalError::Cancelled {
-    ctx: RequestInfo,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, RequestInfo};
 
 let err = CanonicalError::cancelled(
@@ -52,7 +43,7 @@ let err = CanonicalError::cancelled(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.cancelled.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.cancelled.v1~"
         },
         "title": { "const": "Cancelled" },
         "status": { "const": 499 },
@@ -85,7 +76,7 @@ let err = CanonicalError::cancelled(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.cancelled.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.cancelled.v1~",
   "title": "Cancelled",
   "status": 499,
   "detail": "Operation cancelled by the client",

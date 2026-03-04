@@ -11,8 +11,6 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.error_info.v1~`
-
 | Field | Type | Description |
 |-------|------|-------------|
 | `reason` | `String` | Machine-readable reason code (e.g., `OPTIMISTIC_LOCK_FAILURE`) |
@@ -23,13 +21,6 @@ GTS schema ID: `gts.cf.core.errors.error_info.v1~`
 ## Rust Definitions and Constructor Example
 
 ```rust
-CanonicalError::Aborted {
-    ctx: ErrorInfo,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, ErrorInfo};
 use std::collections::HashMap;
 
@@ -55,7 +46,7 @@ let err = CanonicalError::aborted(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.aborted.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.aborted.v1~"
         },
         "title": { "const": "Aborted" },
         "status": { "const": 409 },
@@ -97,7 +88,7 @@ let err = CanonicalError::aborted(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.aborted.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.aborted.v1~",
   "title": "Aborted",
   "status": 409,
   "detail": "Operation aborted due to concurrency conflict",

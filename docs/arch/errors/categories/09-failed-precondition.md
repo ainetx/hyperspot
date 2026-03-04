@@ -11,14 +11,14 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.precondition_failure.v1~`
+Precondition failure:
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `violations` | `Vec<PreconditionViolation>` | List of precondition violations |
 | `details` | `Option<Object>` | Reserved for derived GTS type extensions (p3+); absent in p1 |
 
-Each `PreconditionViolation` (GTS schema ID: `gts.cf.core.errors.precondition_violation.v1~`):
+Precondiion violation:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -26,16 +26,9 @@ Each `PreconditionViolation` (GTS schema ID: `gts.cf.core.errors.precondition_vi
 | `subject` | `String` | What failed the check |
 | `description` | `String` | How to resolve the failure |
 
-## Rust Definitions and Constructor Example
+## Constructor Example
 
 ```rust
-CanonicalError::FailedPrecondition {
-    ctx: PreconditionFailure,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, PreconditionFailure, PreconditionViolation};
 
 let err = CanonicalError::failed_precondition(
@@ -63,7 +56,7 @@ let err = CanonicalError::failed_precondition(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.failed_precondition.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.failed_precondition.v1~"
         },
         "title": { "const": "Failed Precondition" },
         "status": { "const": 400 },
@@ -91,7 +84,6 @@ let err = CanonicalError::failed_precondition(
   ],
   "$defs": {
     "PreconditionViolation": {
-      "$id": "gts://gts.cf.core.errors.precondition_violation.v1~",
       "type": "object",
       "required": ["type", "subject", "description"],
       "properties": {
@@ -109,7 +101,7 @@ let err = CanonicalError::failed_precondition(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.failed_precondition.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.failed_precondition.v1~",
   "title": "Failed Precondition",
   "status": 400,
   "detail": "Operation precondition not met",

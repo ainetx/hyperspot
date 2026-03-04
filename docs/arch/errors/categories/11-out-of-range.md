@@ -11,16 +11,16 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.validation.v1~`
-
 **Variant: FieldViolations**
+
+Violations:
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `field_violations` | `Vec<FieldViolation>` | List of per-field out-of-range errors |
 | `details` | `Option<Object>` | Reserved for derived GTS type extensions (p3+); absent in p1 |
 
-Each `FieldViolation` (GTS schema ID: `gts.cf.core.errors.field_violation.v1~`):
+Field violation:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -32,16 +32,9 @@ Each `FieldViolation` (GTS schema ID: `gts.cf.core.errors.field_violation.v1~`):
 
 **Variant: Constraint** — `{ "constraint": "<message>", "details": null }`
 
-## Rust Definitions and Constructor Example
+## Constructor Example
 
 ```rust
-CanonicalError::OutOfRange {
-    ctx: Validation,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, Validation};
 
 let err = CanonicalError::out_of_range(
@@ -61,7 +54,7 @@ let err = CanonicalError::out_of_range(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.out_of_range.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.out_of_range.v1~"
         },
         "title": { "const": "Out of Range" },
         "status": { "const": 400 },
@@ -107,7 +100,6 @@ let err = CanonicalError::out_of_range(
   ],
   "$defs": {
     "FieldViolation": {
-      "$id": "gts://gts.cf.core.errors.field_violation.v1~",
       "type": "object",
       "required": ["field", "description", "reason"],
       "properties": {
@@ -125,7 +117,7 @@ let err = CanonicalError::out_of_range(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.out_of_range.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.out_of_range.v1~",
   "title": "Out of Range",
   "status": 400,
   "detail": "Page 50 is beyond the last page (12)",

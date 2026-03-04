@@ -11,8 +11,6 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.resource_info.v1~`
-
 | Field | Type | Description |
 |-------|------|-------------|
 | `resource_type` | `String` | GTS type identifier of the resource |
@@ -20,16 +18,9 @@ GTS schema ID: `gts.cf.core.errors.resource_info.v1~`
 | `description` | `String` | Human-readable explanation |
 | `details` | `Option<Object>` | Reserved for derived GTS type extensions (p3+); absent in p1 |
 
-## Rust Definitions and Constructor Example
+## Constructor Example
 
 ```rust
-CanonicalError::NotFound {
-    ctx: ResourceInfo,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, ResourceInfo};
 
 // Direct construction:
@@ -57,7 +48,7 @@ let err = UserResourceError::not_found("user-123");
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.not_found.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.not_found.v1~"
         },
         "title": { "const": "Not Found" },
         "status": { "const": 404 },
@@ -94,7 +85,7 @@ let err = UserResourceError::not_found("user-123");
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.not_found.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.not_found.v1~",
   "title": "Not Found",
   "status": 404,
   "detail": "Resource not found",

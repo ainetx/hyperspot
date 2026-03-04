@@ -23,13 +23,6 @@ GTS schema ID: `gts.cf.core.errors.error_info.v1~`
 ## Rust Definitions and Constructor Example
 
 ```rust
-CanonicalError::Unauthenticated {
-    ctx: ErrorInfo,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, ErrorInfo};
 use std::collections::HashMap;
 
@@ -54,7 +47,7 @@ let err = CanonicalError::unauthenticated(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.unauthenticated.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.unauthenticated.v1~"
         },
         "title": { "const": "Unauthenticated" },
         "status": { "const": 401 },
@@ -96,7 +89,7 @@ let err = CanonicalError::unauthenticated(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.unauthenticated.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.unauthenticated.v1~",
   "title": "Unauthenticated",
   "status": 401,
   "detail": "Authentication required",

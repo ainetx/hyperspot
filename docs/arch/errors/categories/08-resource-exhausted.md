@@ -11,30 +11,23 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.quota_failure.v1~`
+Quota failure:
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `violations` | `Vec<QuotaViolation>` | List of quota violations |
 | `details` | `Option<Object>` | Reserved for derived GTS type extensions (p3+); absent in p1 |
 
-Each `QuotaViolation` (GTS schema ID: `gts.cf.core.errors.quota_violation.v1~`):
+Quota violation:
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `subject` | `String` | What the quota applies to (e.g., `"requests_per_minute"`) |
 | `description` | `String` | Human-readable explanation |
 
-## Rust Definitions and Constructor Example
+## Constructor Example
 
 ```rust
-CanonicalError::ResourceExhausted {
-    ctx: QuotaFailure,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, QuotaFailure, QuotaViolation};
 
 let err = CanonicalError::resource_exhausted(
@@ -61,7 +54,7 @@ let err = CanonicalError::resource_exhausted(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.resource_exhausted.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.resource_exhausted.v1~"
         },
         "title": { "const": "Resource Exhausted" },
         "status": { "const": 429 },
@@ -85,7 +78,6 @@ let err = CanonicalError::resource_exhausted(
   ],
   "$defs": {
     "QuotaViolation": {
-      "$id": "gts://gts.cf.core.errors.quota_violation.v1~",
       "type": "object",
       "required": ["subject", "description"],
       "properties": {
@@ -102,7 +94,7 @@ let err = CanonicalError::resource_exhausted(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.resource_exhausted.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.resource_exhausted.v1~",
   "title": "Resource Exhausted",
   "status": 429,
   "detail": "Quota exceeded",

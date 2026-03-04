@@ -11,23 +11,14 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.request_info.v1~`
-
 | Field | Type | Description |
 |-------|------|-------------|
 | `request_id` | `String` | Identifier of the timed-out request |
 | `details` | `Option<Object>` | Reserved for derived GTS type extensions (p3+); absent in p1 |
 
-## Rust Definitions and Constructor Example
+## Constructor Example
 
 ```rust
-CanonicalError::DeadlineExceeded {
-    ctx: RequestInfo,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, RequestInfo};
 
 let err = CanonicalError::deadline_exceeded(
@@ -47,7 +38,7 @@ let err = CanonicalError::deadline_exceeded(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.deadline_exceeded.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.deadline_exceeded.v1~"
         },
         "title": { "const": "Deadline Exceeded" },
         "status": { "const": 504 },
@@ -80,7 +71,7 @@ let err = CanonicalError::deadline_exceeded(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.deadline_exceeded.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.deadline_exceeded.v1~",
   "title": "Deadline Exceeded",
   "status": 504,
   "detail": "Operation did not complete within the allowed time",

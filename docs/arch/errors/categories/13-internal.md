@@ -11,26 +11,15 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.debug_info.v1~`
-
 | Field | Type | Description |
 |-------|------|-------------|
-| `detail` | `String` | Human-readable debug message (generic in production) |
+| `message` | `String` | Human-readable debug message (generic in production) |
 | `stack_entries` | `Vec<String>` | Stack trace entries (empty in production) |
 | `details` | `Option<Object>` | Reserved for derived GTS type extensions (p3+); absent in p1 |
-
-> Note: `resource_type` is not part of the `DebugInfo` GTS type (`gts.cf.core.errors.debug_info.v1~`). It is an optional envelope field on `CanonicalError::Internal` and is injected alongside `detail` and `stack_entries` into the wire `context` object during mapping to `Problem` via `Problem::from_error`.
 
 ## Rust Definitions and Constructor Example
 
 ```rust
-CanonicalError::Internal {
-    ctx: DebugInfo,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, DebugInfo};
 
 // From a database error via ? operator:
@@ -54,19 +43,19 @@ let err = CanonicalError::internal(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.internal.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.internal.v1~"
         },
         "title": { "const": "Internal" },
         "status": { "const": 500 },
         "context": {
           "type": "object",
-          "required": ["detail", "stack_entries"],
+          "required": ["message", "stack_entries"],
           "properties": {
             "resource_type": {
               "type": "string",
               "description": "GTS type identifier of the associated resource (injected when resource_type is set)"
             },
-            "detail": {
+            "message": {
               "type": "string",
               "description": "Human-readable debug message (generic in production)"
             },
@@ -92,13 +81,13 @@ let err = CanonicalError::internal(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.internal.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.internal.v1~",
   "title": "Internal",
   "status": 500,
   "detail": "An internal error occurred. Please retry later.",
   "context": {
     "resource_type": "gts.cf.core.tenants.tenant.v1~",
-    "detail": "An internal error occurred. Please retry later.",
+    "message": "An internal error occurred. Please retry later.",
     "stack_entries": []
   }
 }

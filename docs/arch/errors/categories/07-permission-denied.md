@@ -11,8 +11,6 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.error_info.v1~`
-
 | Field | Type | Description |
 |-------|------|-------------|
 | `resource_type` | `Option<String>` | Transport-injected resource GTS type identifier when provided by the canonical error wrapper |
@@ -23,16 +21,9 @@ GTS schema ID: `gts.cf.core.errors.error_info.v1~`
 
 > Note: In Rust, `resource_type` is carried on `CanonicalError::PermissionDenied` as an envelope field, not inside `ErrorInfo`. It is injected into the wire `context` object during mapping to `Problem` via `Problem::from_error`. It is not part of the `ErrorInfo` GTS type (`gts.cf.core.errors.error_info.v1~`).
 
-## Rust Definitions and Constructor Example
+## Constructor Example
 
 ```rust
-CanonicalError::PermissionDenied {
-    ctx: ErrorInfo,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, ErrorInfo};
 
 let err = CanonicalError::permission_denied(
@@ -52,7 +43,7 @@ let err = CanonicalError::permission_denied(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.permission_denied.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.permission_denied.v1~"
         },
         "title": { "const": "Permission Denied" },
         "status": { "const": 403 },
@@ -94,7 +85,7 @@ let err = CanonicalError::permission_denied(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.permission_denied.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.permission_denied.v1~",
   "title": "Permission Denied",
   "status": 403,
   "detail": "You do not have permission to perform this operation",

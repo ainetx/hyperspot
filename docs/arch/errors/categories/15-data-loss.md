@@ -11,8 +11,6 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.resource_info.v1~`
-
 | Field | Type | Description |
 |-------|------|-------------|
 | `resource_type` | `String` | GTS type identifier of the affected resource |
@@ -20,16 +18,9 @@ GTS schema ID: `gts.cf.core.errors.resource_info.v1~`
 | `description` | `String` | Human-readable explanation |
 | `details` | `Option<Object>` | Reserved for derived GTS type extensions (p3+); absent in p1 |
 
-## Rust Definitions and Constructor Example
+## Constructor Example
 
 ```rust
-CanonicalError::DataLoss {
-    ctx: ResourceInfo,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, ResourceInfo};
 
 let err = CanonicalError::data_loss(
@@ -53,7 +44,7 @@ let err = CanonicalError::data_loss(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.data_loss.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.data_loss.v1~"
         },
         "title": { "const": "Data Loss" },
         "status": { "const": 500 },
@@ -90,7 +81,7 @@ let err = CanonicalError::data_loss(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.data_loss.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.data_loss.v1~",
   "title": "Data Loss",
   "status": 500,
   "detail": "Data loss detected",

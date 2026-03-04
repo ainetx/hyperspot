@@ -11,8 +11,6 @@
 
 ## Context Schema
 
-GTS schema ID: `gts.cf.core.errors.error_info.v1~`
-
 | Field | Type | Description |
 |-------|------|-------------|
 | `reason` | `String` | Machine-readable reason code (e.g., `GRPC_ROUTING`) |
@@ -20,16 +18,9 @@ GTS schema ID: `gts.cf.core.errors.error_info.v1~`
 | `metadata` | `HashMap<String, String>` | Arbitrary key-value pairs for additional context |
 | `details` | `Option<Object>` | Reserved for derived GTS type extensions (p3+); absent in p1 |
 
-## Rust Definitions and Constructor Example
+## Constructor Example
 
 ```rust
-CanonicalError::Unimplemented {
-    ctx: ErrorInfo,
-    message: String,
-    resource_type: Option<String>,
-    debug_info: Option<DebugInfo>,
-}
-
 use cf_modkit_errors::{CanonicalError, ErrorInfo};
 
 let err = CanonicalError::unimplemented(
@@ -49,7 +40,7 @@ let err = CanonicalError::unimplemented(
     {
       "properties": {
         "type": {
-          "const": "gts.cf.core.errors.err.v1~cf.core.err.unimplemented.v1~"
+          "const": "gts://gts.cf.core.errors.err.v1~cf.core.err.unimplemented.v1~"
         },
         "title": { "const": "Unimplemented" },
         "status": { "const": 501 },
@@ -91,7 +82,7 @@ let err = CanonicalError::unimplemented(
 
 ```json
 {
-  "type": "gts.cf.core.errors.err.v1~cf.core.err.unimplemented.v1~",
+  "type": "gts://gts.cf.core.errors.err.v1~cf.core.err.unimplemented.v1~",
   "title": "Unimplemented",
   "status": 501,
   "detail": "This operation is not implemented",
