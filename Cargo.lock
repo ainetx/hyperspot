@@ -3464,9 +3464,9 @@ dependencies = [
 
 [[package]]
 name = "gts"
-version = "0.8.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd0a15e08f030e746de66a3636d9d70df408afeaf7233dfa4ac885a26a54072f"
+checksum = "3cf70de49935aad158ecc91b335a5e1361757a7048417a26e19bd72b2d5bb44d"
 dependencies = [
  "gts-id",
  "jsonschema",
@@ -3491,18 +3491,18 @@ dependencies = [
 
 [[package]]
 name = "gts-id"
-version = "0.8.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9ec93e3bdbb302735a7b163a353791eadece2059a8b2d326c94d4b62523b8e2"
+checksum = "b2d137decd946d1034f918cb972069ca22928fe8416348dbbb142b9d4a5eb922"
 dependencies = [
  "thiserror 2.0.18",
 ]
 
 [[package]]
 name = "gts-macros"
-version = "0.8.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0cbd92c6de37e030a107d7064ebb0611f6a85c5098be343496f79726e025b16"
+checksum = "d9140ff93e4f92f38ce91c47a3b7b27df6d581d05d94e435cb31ce91ee4fb391"
 dependencies = [
  "gts-id",
  "proc-macro2",
@@ -3513,11 +3513,12 @@ dependencies = [
 
 [[package]]
 name = "gts-validator"
-version = "0.8.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "804d00b8e69478d520e526514075ea76fea98e902ee667f64b68ebbb7ea576eb"
+checksum = "69aba10fcc6ce1d91152d4e86d177a017652ddfcc66b7461e6ad9b28b0b11122"
 dependencies = [
  "anyhow",
+ "clap",
  "glob",
  "gts",
  "regex",

@@ -194,10 +194,17 @@ impl SystemCapability for OutboundApiGatewayModule {
             .as_ref()
             .clone();
 
+        // -- Materialise upstreams, building a GTS-instance-UUID -> OAGW-UUID map --
+        // Routes registered via types-registry reference upstreams by the
+        // deterministic GTS instance UUID. OAGW assigns random UUIDs, so we
+        // need to rewrite route upstream_ids before creating them.
         let upstreams = provisioning.list_upstreams().await?;
+        let mut gts_to_oagw: std::collections::HashMap<uuid::Uuid, uuid::Uuid> =
+            std::collections::HashMap::new();
         for u in &upstreams {
             let ctx = SecurityContext::builder()
                 .subject_tenant_id(u.tenant_id)
+                .subject_id(modkit_security::constants::DEFAULT_SUBJECT_ID)
                 .build()?;
             let created = app_state
                 .cp
@@ -206,6 +213,9 @@ impl SystemCapability for OutboundApiGatewayModule {
                 .map_err(|e| {
                     anyhow::anyhow!("Failed to provision upstream (tenant={}): {e}", u.tenant_id)
                 })?;
+            if let Some(gts_id) = u.gts_instance_id {
+                gts_to_oagw.insert(gts_id, created.id);
+            }
             info!(
                 id = %created.id,
                 tenant_id = %u.tenant_id,
@@ -218,14 +228,16 @@ impl SystemCapability for OutboundApiGatewayModule {
         for r in &routes {
             let ctx = SecurityContext::builder()
                 .subject_tenant_id(r.tenant_id)
+                .subject_id(modkit_security::constants::DEFAULT_SUBJECT_ID)
                 .build()?;
-            let created = app_state
-                .cp
-                .create_route(&ctx, r.request.clone())
-                .await
-                .map_err(|e| {
-                    anyhow::anyhow!("Failed to provision route (tenant={}): {e}", r.tenant_id)
-                })?;
+            // Rewrite upstream_id if it references a GTS instance UUID.
+            let mut req = r.request.clone();
+            if let Some(&oagw_id) = gts_to_oagw.get(&req.upstream_id) {
+                req.upstream_id = oagw_id;
+            }
+            let created = app_state.cp.create_route(&ctx, req).await.map_err(|e| {
+                anyhow::anyhow!("Failed to provision route (tenant={}): {e}", r.tenant_id)
+            })?;
             info!(
                 id = %created.id,
                 tenant_id = %r.tenant_id,

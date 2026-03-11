@@ -49,14 +49,6 @@ pub struct MiniChatModule {
     service: OnceLock<Arc<AppServices>>,
     url_prefix: OnceLock<String>,
     outbox_handle: Mutex<Option<OutboxHandle>>,
-    /// OAGW gateway + provider config for deferred upstream registration in `start()`.
-    oagw_deferred: OnceLock<OagwDeferred>,
-}
-
-/// State needed to register OAGW upstreams in `start()` (after GTS is ready).
-struct OagwDeferred {
-    gateway: Arc<dyn ServiceGatewayClientV1>,
-    providers: std::collections::HashMap<String, crate::config::ProviderEntry>,
 }
 
 impl Default for MiniChatModule {
@@ -65,7 +57,6 @@ impl Default for MiniChatModule {
             service: OnceLock::new(),
             url_prefix: OnceLock::new(),
             outbox_handle: Mutex::new(None),
-            oagw_deferred: OnceLock::new(),
         }
     }
 }
@@ -122,6 +113,11 @@ impl Module for MiniChatModule {
             ],
         )
         .await?;
+
+        // Register provider upstream + route GTS entities in types-registry.
+        // OAGW will materialise these in post_init() via type provisioning.
+        crate::infra::oagw_provisioning::register_provider_entities(&*registry, &cfg.providers)
+            .await?;
 
         self.url_prefix
             .set(cfg.url_prefix)
@@ -188,9 +184,7 @@ impl Module for MiniChatModule {
             .map_err(|e| anyhow::anyhow!("failed to get OAGW gateway: {e}"))?;
 
         // Pre-fill upstream_alias with host as fallback so ProviderResolver
-        // works immediately. The actual OAGW registration is deferred to
-        // start() because GTS instances are not visible via list() until
-        // post_init (types-registry switches to ready mode there).
+        // works immediately. OAGW materialises the real upstreams in post_init().
         for entry in cfg.providers.values_mut() {
             if entry.upstream_alias.is_none() {
                 entry.upstream_alias = Some(entry.host.clone());
@@ -203,13 +197,6 @@ impl Module for MiniChatModule {
                 }
             }
         }
-
-        // Save a copy for deferred OAGW registration in start().
-        // Ignore the result: if already set, we keep the first value.
-        drop(self.oagw_deferred.set(OagwDeferred {
-            gateway: Arc::clone(&gateway),
-            providers: cfg.providers.clone(),
-        }));
 
         let provider_resolver = Arc::new(ProviderResolver::new(&gateway, cfg.providers));
 
@@ -291,18 +278,6 @@ impl RestApiCapability for MiniChatModule {
 #[async_trait]
 impl RunnableCapability for MiniChatModule {
     async fn start(&self, _cancel: CancellationToken) -> anyhow::Result<()> {
-        // Register OAGW upstreams now that GTS is in ready mode (post_init
-        // has completed). During init() this fails because types-registry
-        // list() only queries the persistent store which is empty until
-        // switch_to_ready().
-        if let Some(deferred) = self.oagw_deferred.get() {
-            let mut providers = deferred.providers.clone();
-            crate::infra::oagw_provisioning::register_oagw_upstreams(
-                &deferred.gateway,
-                &mut providers,
-            )
-            .await?;
-        }
         Ok(())
     }
 
